@@ -1,0 +1,26 @@
+.predictions
+  .back
+    %h1
+      %img{:src=>"/images/arrow_left_float.png", :alt=>"arrow"}
+        %a{:href => to('/predict')} New Prediction
+
+  .was
+    %h2= "Compound image: "
+    %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100px"}
+    %br
+    %h2= "Compound SMILES string: "
+    %p= @identifier     
+  
+  .results
+    %h2= "Selected Entpoints: "
+    - @models.each do |m|
+      %p= m.inspect
+    %br
+    %h2= "Prediction Uri: "
+    - @predictions.each do |p|
+      %p= p.uri
+    %br
+    %h2= "Prediction Results: "
+    - @prediction_results.each do |r|
+      %p= r
+

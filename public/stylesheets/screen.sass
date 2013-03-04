@@ -1,0 +1,124 @@
+//@import compass/reset, compass/css3, compass/utilities, compass/layout
+@import compass/css3
+
+//$bg-color: #C5C1A4
+$bg-color: #CCCCFF
+$bg-color-div: #C5C1E4
+//$border: 2px solid #C5C1A4
+$ist-blue: #B9DCFF
+
+body
+  background-image: url("/images/gray_jean.png")
+  background-color: $bg-color
+  overflow: scroll
+  font-family: sans-serif
+  margin: 1em
+  min-width: 800px
+  min-heigth: 600px
+  
+  a
+    text-decoration: none
+    font-weight: bold
+    color: black
+
+.logo
+  text-align: right
+  font-size: 1.5em
+  +text-shadow($ist-blue 2px 2px)
+
+.info
+  background-color: $ist-blue
+  margin: 1em 0
+  padding: 10px
+  text-align: center
+  +border-bottom-left-radius(25px)
+  +border-bottom-right-radius(25px)
+  +background-image(linear-gradient(#FFFFFF, $ist-blue 70%))
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+  
+.content
+
+  background-image: url("/images/gray_jean.png")
+      
+  h1
+    margin: 0.3em
+    text-shadow: #FFF 0 1px 0
+    font-size: x-large
+    font-family: monospace
+    
+  h2
+    text-shadow: #FFF 0 1px 0
+    font-size: x-large
+    font-family: monospace   
+    
+  .arrow
+    margin: 5px 0px 5px 20px
+    
+  .back
+    display: inline
+ 
+  .close
+    text-align: right
+    
+  fieldset#top
+    border: 0
+    margin-top: 5em
+    padding: 10px
+    background-color: $ist-blue
+    +border-top-left-radius(25px)
+    +border-top-right-radius(25px)
+    +background-clip(border-box)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+    draw
+      display: block
+    
+  fieldset#middle
+    border: 0
+    padding: 10px
+    background-color: $ist-blue
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+    
+  .model
+    display: inline
+    margin: 1em
+    
+  fieldset#bottom
+    border: 0
+    background-color: $ist-blue
+    padding: 10px
+    margin-bottom: 5em   
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+    +border-bottom-left-radius(25px)
+    +border-bottom-right-radius(25px)
+    +background-clip(border-box)
+      
+  .predictions
+    background-color: $ist-blue
+    padding: 10px
+    text-align: justify
+    margin: 0.3em
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+    +border-left-radius(25px)
+    +border-right-radius(25px)
+    +background-clip(border-box)
+          
+  .was
+    margin-top: 2em
+    padding: 1em
+    background-image: url("/images/gray_jean.png")
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+    +border-left-radius(25px)
+    +border-right-radius(25px)
+    +background-clip(border-box)
+    
+  .results
+    margin-top: 2em
+    padding: 1em
+    background-image: url("/images/gray_jean.png")
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
+    +border-left-radius(25px)
+    +border-right-radius(25px)
+    +background-clip(border-box)
+        
+.footer
+  margin: 20px 0 20px 0
