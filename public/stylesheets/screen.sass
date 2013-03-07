@@ -91,21 +91,12 @@ body
     +border-bottom-left-radius(25px)
     +border-bottom-right-radius(25px)
     +background-clip(border-box)
-      
+  
   .predictions
     background-color: $ist-blue
     padding: 10px
     text-align: justify
     margin: 0.3em
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
-    +border-left-radius(25px)
-    +border-right-radius(25px)
-    +background-clip(border-box)
-          
-  .was
-    margin-top: 2em
-    padding: 1em
-    background-image: url("/images/gray_jean.png")
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
     +border-left-radius(25px)
     +border-right-radius(25px)
@@ -116,9 +107,37 @@ body
     padding: 1em
     background-image: url("/images/gray_jean.png")
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
-    +border-left-radius(25px)
-    +border-right-radius(25px)
+    +border-bottom-left-radius(25px)
+    +border-bottom-right-radius(25px)
     +background-clip(border-box)
+    
+    .tablesorter
+      width: 100%
+      thead
+        background-color: $ist-blue
+        tr
+          th.header
+            background-image: url("/images/bg.gif")
+            background-repeat: no-repeat
+            background-position: center left
+            cursor: pointer
+            padding-left: 20px
+            border: 1px solid #dad9c7
+            margin-left: -1px
+          th.headerSortDown 
+            background-image: url("/imgages/small_desc.gif") 
+            background-color: #3399FF
+          th.headerSortUp 
+            background-image: url("/imgages/small_asc.gif") 
+            background-color: #3399FF
+      tbody
+        tr.odd
+          td
+            background-color: #F0F0F6
+        tr.even
+          td
+            background-color: #F0F0FF
+      
         
 .footer
   margin: 20px 0 20px 0

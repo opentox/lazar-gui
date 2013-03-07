@@ -13,40 +13,65 @@ get '/?' do
 end
 
 get '/predict/?' do
-  @models = []
-  models = OpenTox::Model.all $model[:uri]
-  models.each do |model|
-    model.get
-    @models << model
-  end
+  @models = OpenTox::Model.all $model[:uri]
+
   haml :predict
 end
 
 post '/predict/?' do
+  # transferred input
   @identifier = params[:identifier]
+  # get input as compound
   @compound = OpenTox::Compound.from_smiles $compound[:uri], @identifier.to_s
-  @models = []
+  # init
+  @prediction_models = []
   @predictions = []
+  # init lazar algorithm
   lazar = OpenTox::Algorithm.new File.join($algorithm[:uri],"lazar")
-
+  # gather models from service and compare if selected
   params[:selection].each do |model|
+    $logger.debug "selection: #{model[0]}"
     @mselected = model[0]
     @mall = OpenTox::Model.all $model[:uri]
     @mall.each do |m|
       m.get
-      @models << m if m.title.match("#{@mselected}")
+      $logger.debug "m.title: #{m.title}; m.uri: #{m.uri}\n"
+      @prediction_models << m if m.title =~ /#{@mselected}/
     end
+    $logger.debug "@prediction_models: #{@prediction_models.inspect}"
   end
-  @models.each do |m| 
+  # predict with selected models
+  # predictions in @predictions variable
+  $logger.debug "@models: #{@models.inspect}"
+  @prediction_models.each do |m| 
     @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
     prediction = OpenTox::Dataset.new @prediction_uri
     @predictions << prediction
   end
-
-  @prediction_results = []
-  @predictions.each{|p| @prediction_results << p.get}
-
   
+  @prediction_values = []
+  @prediction_compound = []
+  @prediction_neighbours_values = []
+  @prediction_neighbours_compounds = []
+  
+  @predictions.each do |p|
+    # get object
+    p.get
+    # first data_entries are prediction values
+    @prediction_values << p.data_entries[0]
+    # get prediction compound as object
+    $logger.debug "prediction.compound: #{p.compounds.inspect}"
+    $logger.debug "prediction.compound: #{p.compounds[0].inspect}"
+    @prediction_compound << p.compounds[0]
+    # delete first data_entries from array
+    p.data_entries.shift
+    # delete first compound from array
+    p.compounds.shift
+    # following data_entries are neighbours
+    @prediction_neighbours_values << p.data_entries
+    # get neighbour compounds as object
+    p.compounds.each{|c| @prediction_neighbours_compounds << c}
+  end 
   haml :prediction
 end
 

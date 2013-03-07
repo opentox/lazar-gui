@@ -53,9 +53,10 @@
       %p Description about these models.
       %br    
       - @models.each do |model|
-        %input{:type => 'checkbox', :name => "selection[#{model.title}]", :value => "#{model.metadata}", :uri => "#{model.uri}", :disabled => false}
-        %model= model.title
-        %p= model.metadata["#{RDF::DC.modified}"]
+        - model.get
+        %input{:type => 'checkbox', :name => "selection[#{model.title}]", :value => true, :disabled => false}
+        %p= model.title
+        %p= model.metadata[RDF::DC.modified]
         %br
           
       .close
