@@ -1,1 +1,10 @@
 IST Software&Services GUI
+
+installation:
+- bundle install
+- ~/.opentox/config/lazar-gui.rb (point to services)
+
+usage:
+-start services
+-run 'unicorn -D'
+-visit 'localhost:8080'
