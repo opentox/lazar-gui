@@ -7,10 +7,10 @@
 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data" }
   %fieldset#top
-    %a{:href => "#insert", :id => "linkInsert#{p.object_id}"}
+    %a{:href => "#insert", :id => "linkInsert"}
       %h1 1. Draw or insert your compound   
     :javascript
-      $("a#linkInsert#{p.object_id}").click(function () {
+      $("a#linkInsert").click(function () {
         $("#insert").toggle();
         document.location = document.location + "#" + "insert";
       });
@@ -40,24 +40,26 @@
 
    
   %fieldset#middle
-    %a{:href => "#models", :id => "linkModels#{p.object_id}"}
+    %a{:href => "#models", :id => "linkModels"}
       %h1 2. Select one or more toxic endpoints
     
     :javascript
-      $("a#linkModels#{p.object_id}").click(function () {
+      $("a#linkModels").click(function () {
         $("#models").toggle();
         document.location = document.location + "#" + "models";
       });
       
     #models{ :style => "display: none;"}
-      %p Description about these models.
+      %p Please observe validation report for details.
       %br    
       - @models.each do |model|
         - model.get
-        %input{:type => 'checkbox', :name => "selection[#{model.title}]", :value => true, :disabled => false}
-        %p= model.title
-        %p= model.metadata[RDF::DC.modified]
-        %br
+        #model
+          %input{:type => 'checkbox', :name => "selection[#{model.title}]", :value => true, :disabled => false}
+            %b= model.title
+          %a{:href=>"#", :alt=>"#{model.title} validation"}
+            %i Validation Link
+          %br
           
       .close
         = hide_link "#models"
@@ -67,11 +69,11 @@
   
 
   %fieldset#bottom
-    %a{:href => "#predict", :id => "linkPredict#{p.object_id}"}
+    %a{:href => "#predict", :id => "linkPredict"}
       %h1 3. Predict
     
     :javascript
-      $("a#linkPredict#{p.object_id}").click(function () {
+      $("a#linkPredict").click(function () {
         $("#predict").toggle();
         document.location = document.location + "#" + "predict";
       });

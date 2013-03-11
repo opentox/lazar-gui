@@ -1,10 +1,8 @@
 //@import compass/reset, compass/css3, compass/utilities, compass/layout
 @import compass/css3
 
-//$bg-color: #C5C1A4
 $bg-color: #CCCCFF
 $bg-color-div: #C5C1E4
-//$border: 2px solid #C5C1A4
 $ist-blue: #B9DCFF
 
 body
@@ -22,16 +20,19 @@ body
     color: black
 
 .logo
-  text-align: right
-  font-size: 1.5em
-  +text-shadow($ist-blue 2px 2px)
+  img
+    float: left
+
+  h1
+    text-align: right
+    font-size: 2.5em
+    +text-shadow($ist-blue 2px 2px)
 
 .info
   background-color: $ist-blue
-  margin: 1em 0
+  margin-left: 215px
   padding: 10px
   text-align: center
-  +border-bottom-left-radius(25px)
   +border-bottom-right-radius(25px)
   +background-image(linear-gradient(#FFFFFF, $ist-blue 70%))
   +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
@@ -44,7 +45,7 @@ body
     margin: 0.3em
     text-shadow: #FFF 0 1px 0
     font-size: x-large
-    font-family: monospace
+    font-family: Verdana
     
   h2
     text-shadow: #FFF 0 1px 0
@@ -78,9 +79,8 @@ body
     background-color: $ist-blue
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
     
-  .model
-    display: inline
-    margin: 1em
+    #model a
+      font-weight: normal
     
   fieldset#bottom
     border: 0
@@ -93,10 +93,10 @@ body
     +background-clip(border-box)
   
   .predictions
+    margin-top: 5em
     background-color: $ist-blue
     padding: 10px
     text-align: justify
-    margin: 0.3em
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 1px rgba(black, 0.3) inset)
     +border-left-radius(25px)
     +border-right-radius(25px)
@@ -110,6 +110,9 @@ body
     +border-bottom-left-radius(25px)
     +border-bottom-right-radius(25px)
     +background-clip(border-box)
+    
+    #tableinfo
+      text-align: right
     
     .tablesorter
       width: 100%
@@ -125,10 +128,10 @@ body
             border: 1px solid #dad9c7
             margin-left: -1px
           th.headerSortDown 
-            background-image: url("/imgages/small_desc.gif") 
+            background-image: url("/images/desc.gif") 
             background-color: #3399FF
           th.headerSortUp 
-            background-image: url("/imgages/small_asc.gif") 
+            background-image: url("/images/asc.gif") 
             background-color: #3399FF
       tbody
         tr.odd
@@ -137,6 +140,13 @@ body
         tr.even
           td
             background-color: #F0F0FF
+    .result
+      width: 100%
+      thead
+        padding-left: 20px
+        border: 1px solid #dad9c7
+        margin-left: -1px
+      
       
         
 .footer

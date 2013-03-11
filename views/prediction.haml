@@ -1,3 +1,8 @@
+:javascript
+  $(function() {
+    $("#tabs").tabs();
+  });
+
 .predictions
   .back
     %h1
@@ -5,72 +10,90 @@
         %a{:href => to('/predict')} New Prediction  
 
 
-  
+  %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
+   
   .results
     %h2= "Selected Entpoints: "
-    - @prediction_models.each do |m|
-      %a{:href => "#results_#{m.title}", :id => "link#{m.title}"}
-        = m.title
-      :javascript
-        $("a#link#{m.title}").click(function () {
-          $("#results_#{m.title}").toggle();
-        });
+    #tabs
+      %ul
+        - count_m = 0
+        - @prediction_models.each do |m|
+          - count_m += 1
+          %li
+            %a{:href => "#results_#{count_m}", :id => "link#{m.title}"}
+              = m.title
+      - count_rs = 0
+      - @predictions.each do |pa|
+        - count_rs += 1
+        #results{:id=>"#{count_rs}"}
+          - pa.each do |p|
+            / get prediction OpenTox::Dataset   
+            - p.get
+            - compound = p.compounds[0]
+            %table{:class=>"result", :cellspacing=>"1"}
+              %thead
+                %tr
+                  %th
+                    = "Compound"
+                  %th
+                    = "SMILES"
+                  %th
+                    = "Result"
+                  %th
+                    = "Confidence"
+              %tbody
+                %tr
+                  %td                   
+                    %img{:src=>"#{compound.uri}/image", :alt=>compound.uri, :width=>"100px"}
+                  %td
+                    %p= compound.smiles
+                  -#%td
+                    -#%h2= "Prediction Uri: "
+                    -#%p= p.uri
+                  %td
+                    %p= p.data_entries[0][1]
+                  %td
+                    %p= p.data_entries[0][2]
+            
+            / prepare dataset for neighbours table
+            - p.data_entries.shift
+            - p.compounds.shift
 
-      #results{:id=>"#{m.title}", :style=>"display: none"}
-        %h2= "Prediction Uri: "
-        - @predictions.each do |p|
-          %p= p.uri
-          
-
-        %h2= "Predicted Compound: "
-        - @prediction_compound.each do |compound|
-          %img{:src=>"#{compound.uri}/image", :alt=>compound.uri, :width=>"100px"}
-          %p= compound.smiles
-
-        %h2= "Prediction: "
-        - @prediction_values.each do |p|
-          %p= p[1]
-          %h2= "Confidence: "
-          %p= p[2]
-          
-        %script{:src=>"/javascripts/jquery-latest.js"}
-        %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
-        -#%script{:src=>"/javascripts/jquery.metadata.js"}
-         
-        :javascript
-          $(document).ready(function(){ 
-            // call the tablesorter plugin 
-            $("table").tablesorter({
-              widgets: ['zebra'],
-              // disable first column
-              headers: {
-                0: {sorter: false}
-              },
-            });
-          });    
-        
-        %h3= "Neighbours: "
-        %table{:class=>"tablesorter", :cellspacing=>"1"}
-          %thead
-            %tr
-              %th
-                = "compound"
-              %th
-                = "smiles"
-              %th
-                = "measured activity"
-              %th
-                = "similarity"
-          -#%tbody
-          - count = 0
-          - @prediction_neighbours_compounds.each do |neighbour_compound|
-            %tr
-              %td
-                %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
-              %td= neighbour_compound.smiles
-              -#%h2= "Measured Activity: "
-              %td= @prediction_neighbours_values[0][count][0].inspect
-              -#%h2= "Smilarity: "
-              %td= @prediction_neighbours_values[0][count][3].inspect
-              - count += 1
-
+            :javascript
+              $(document).ready(function(){ 
+                // call the tablesorter plugin 
+                $("table##{count_rs}").tablesorter({
+                  // debug for development
+                  debug: true,
+                  widgets: ['zebra'],
+                  // disable first column
+                  headers: {
+                    0: {sorter: false}
+                  },
+                });
+              });
+            / TODO catch table error if tbody is empty      
+            %h3= "Neighbours: "
+            #tableinfo
+              hold down shift for multi-sort
+            %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
+              %thead
+                %tr
+                  %th
+                    = "Compound"
+                  %th
+                    = "Smiles"
+                  %th
+                    = "Measured Activity"
+                  %th
+                    = "Similarity"
+              -#%tbody
+              - count = 0
+              - p.compounds.each do |neighbour_compound|
+                %tr
+                  %td
+                    %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
+                  %td= neighbour_compound.smiles
+                  %td= p.data_entries[count][0]
+                  %td= p.data_entries[count][3]
+                  - count += 1

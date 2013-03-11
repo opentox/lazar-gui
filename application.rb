@@ -19,9 +19,13 @@ get '/predict/?' do
 end
 
 post '/predict/?' do
+  # check for content
+  unless params[:selection] and params[:identifier] != ''
+    redirect to('/predict')
+  end
   # transferred input
   @identifier = params[:identifier]
-  # get input as compound
+  # get compound from SMILES
   @compound = OpenTox::Compound.from_smiles $compound[:uri], @identifier.to_s
   # init
   @prediction_models = []
@@ -30,48 +34,28 @@ post '/predict/?' do
   lazar = OpenTox::Algorithm.new File.join($algorithm[:uri],"lazar")
   # gather models from service and compare if selected
   params[:selection].each do |model|
-    $logger.debug "selection: #{model[0]}"
     @mselected = model[0]
     @mall = OpenTox::Model.all $model[:uri]
     @mall.each do |m|
       m.get
-      $logger.debug "m.title: #{m.title}; m.uri: #{m.uri}\n"
       @prediction_models << m if m.title =~ /#{@mselected}/
     end
     $logger.debug "@prediction_models: #{@prediction_models.inspect}"
   end
+
   # predict with selected models
-  # predictions in @predictions variable
+  # results in prediction variable
+  # store prediction in array for better handling
   $logger.debug "@models: #{@models.inspect}"
   @prediction_models.each do |m| 
     @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
     prediction = OpenTox::Dataset.new @prediction_uri
-    @predictions << prediction
+    pa = []
+    pa << prediction
+    @predictions << pa
+    $logger.debug "prediction class: #{prediction.class}"
   end
-  
-  @prediction_values = []
-  @prediction_compound = []
-  @prediction_neighbours_values = []
-  @prediction_neighbours_compounds = []
-  
-  @predictions.each do |p|
-    # get object
-    p.get
-    # first data_entries are prediction values
-    @prediction_values << p.data_entries[0]
-    # get prediction compound as object
-    $logger.debug "prediction.compound: #{p.compounds.inspect}"
-    $logger.debug "prediction.compound: #{p.compounds[0].inspect}"
-    @prediction_compound << p.compounds[0]
-    # delete first data_entries from array
-    p.data_entries.shift
-    # delete first compound from array
-    p.compounds.shift
-    # following data_entries are neighbours
-    @prediction_neighbours_values << p.data_entries
-    # get neighbour compounds as object
-    p.compounds.each{|c| @prediction_neighbours_compounds << c}
-  end 
+
   haml :prediction
 end
 
