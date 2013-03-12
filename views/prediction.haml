@@ -9,7 +9,29 @@
       %img{:src=>"/images/arrow_left_float.png", :alt=>"arrow"}
         %a{:href => to('/predict')} New Prediction  
 
-
+  .overview
+    %table{:width=>"100%", :cellspacing=>"1", :id=>"overview"}
+      %thead
+        %tr
+          %th= @identifier
+      %tbody
+        %tr
+          %td{:id=>"compound"}
+            %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100px"}
+          - count=0
+          - @predictions.each do |pa|
+            - pa.each do |p|
+              - p.get
+              %td
+                %b= @prediction_models[count].title
+                - count+=1
+                %br
+                  = "Result:\n"
+                  %b= p.data_entries[0][1]
+                %br
+                  = "Confidence:\n"
+                  = p.data_entries[0][2].round(3)
+    
   %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
    
   .results    
@@ -29,25 +51,6 @@
           - pa.each do |p|
             / get prediction OpenTox::Dataset   
             - p.get
-            - compound = p.compounds[0]
-            %table{:class=>"result", :cellspacing=>"1"}
-              %thead
-                %tr
-                  %th
-                    = "Compound"
-                  %th
-                    = "Result"
-                  %th
-                    = "Confidence"
-              %tbody
-                %tr
-                  %td                   
-                    %img{:src=>"#{compound.uri}/image", :alt=>compound.uri, :width=>"100px"}
-                  %td
-                    %p= p.data_entries[0][1]
-                  %td
-                    %p= p.data_entries[0][2].round(3)
-            
             / prepare dataset for neighbours table
             - p.data_entries.shift
             - p.compounds.shift
@@ -67,8 +70,6 @@
               });
             / TODO catch table error if tbody is empty      
             %h3= "Neighbours: "
-            #tableinfo
-              hold down shift for multi-sort
             %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
               %thead
                 %tr

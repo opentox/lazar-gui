@@ -3,7 +3,8 @@
 
 $bg-color: #CCCCFF
 $bg-color-div: #C5C1E4
-$ist-blue: #B9DCFF
+//$ist-blue: #B9DCFF
+$ist-blue: #C8AB37
 
 body
   background-image: url("/images/gray_jean.png")
@@ -23,7 +24,7 @@ body
   img
     float: left
   h1
-    margin-bottom: 5em
+    margin-bottom: 3em
 
   
 .content
@@ -90,6 +91,21 @@ body
     +border-left-radius(25px)
     +border-right-radius(25px)
     +background-clip(border-box)
+
+  .overview
+    background-image: url("/images/gray_jean.png")
+    padding: 12px
+    margin-top: 1em
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+    +border-top-left-radius(25px)
+    +border-top-right-radius(25px)
+    +background-clip(border-box)
+    
+    #overview tr td
+      background-color: white
+      border: 1px solid #dad9c7
+    #overview tr td#compound
+      width: 150px
     
   .results
     margin-top: 2em
@@ -98,15 +114,12 @@ body
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
     +border-bottom-left-radius(25px)
     +border-bottom-right-radius(25px)
-    +background-clip(border-box)
-    
-    #tableinfo
-      text-align: right
+    +background-clip(border-box)    
     
     .tablesorter
-      width: 100%
+      width: 60%
       thead
-        background-color: $ist-blue
+        background-color: adjust-lightness($ist-blue, 30%)
         tr
           th.header
             background-image: url("/images/bg.gif")
@@ -118,17 +131,17 @@ body
             margin-left: -1px
           th.headerSortDown 
             background-image: url("/images/desc.gif") 
-            background-color: #3399FF
+            background-color: adjust-lightness($ist-blue, 7%)
           th.headerSortUp 
             background-image: url("/images/asc.gif") 
-            background-color: #3399FF
+            background-color: adjust-lightness($ist-blue, 7%)
       tbody
         tr.odd
           td
-            background-color: #F0F0F6
+            background-color: #F0F0F0
         tr.even
           td
-            background-color: #F0F0FF
+            background-color: #FFFFF0
     .result
       width: 100%
       thead
