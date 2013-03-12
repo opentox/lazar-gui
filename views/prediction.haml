@@ -13,7 +13,9 @@
     %table{:width=>"100%", :cellspacing=>"1", :id=>"overview"}
       %thead
         %tr
-          %th= @identifier
+          %caption
+            %h2 Prediction Results:
+            %i= @identifier
       %tbody
         %tr
           %td{:id=>"compound"}
