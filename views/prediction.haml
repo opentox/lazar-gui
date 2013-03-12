@@ -12,8 +12,8 @@
 
   %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
    
-  .results
-    %h2= "Selected Entpoints: "
+  .results    
+
     #tabs
       %ul
         - count_m = 0
@@ -36,8 +36,6 @@
                   %th
                     = "Compound"
                   %th
-                    = "SMILES"
-                  %th
                     = "Result"
                   %th
                     = "Confidence"
@@ -46,14 +44,9 @@
                   %td                   
                     %img{:src=>"#{compound.uri}/image", :alt=>compound.uri, :width=>"100px"}
                   %td
-                    %p= compound.smiles
-                  -#%td
-                    -#%h2= "Prediction Uri: "
-                    -#%p= p.uri
-                  %td
                     %p= p.data_entries[0][1]
                   %td
-                    %p= p.data_entries[0][2]
+                    %p= p.data_entries[0][2].round(3)
             
             / prepare dataset for neighbours table
             - p.data_entries.shift
@@ -67,9 +60,9 @@
                   debug: true,
                   widgets: ['zebra'],
                   // disable first column
-                  headers: {
-                    0: {sorter: false}
-                  },
+                  headers: {0: {sorter: false}},
+                  // presort similarity asc
+                  sortList: [[2,0]]
                 });
               });
             / TODO catch table error if tbody is empty      
@@ -82,8 +75,6 @@
                   %th
                     = "Compound"
                   %th
-                    = "Smiles"
-                  %th
                     = "Measured Activity"
                   %th
                     = "Similarity"
@@ -93,7 +84,6 @@
                 %tr
                   %td
                     %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
-                  %td= neighbour_compound.smiles
                   %td= p.data_entries[count][0]
-                  %td= p.data_entries[count][3]
+                  %td= p.data_entries[count][3].round(3)
                   - count += 1
