@@ -36,8 +36,7 @@
     
   %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
    
-  .results    
-
+  .results
     #tabs
       %ul
         - count_m = 0
@@ -65,7 +64,7 @@
                   debug: true,
                   widgets: ['zebra'],
                   // disable first column
-                  headers: {0: {sorter: false}},
+                  headers: {0: {sorter: false},3: {sorter: false}},
                   // presort similarity asc
                   sortList: [[2,0]]
                 });
@@ -76,11 +75,13 @@
               %thead
                 %tr
                   %th
-                    = "Compound"
+                    Compound
                   %th
-                    = "Measured Activity"
+                    Measured Activity
                   %th
-                    = "Similarity"
+                    Similarity
+                  %th
+                    Details
               -#%tbody
               - count = 0
               - p.compounds.each do |neighbour_compound|
@@ -88,5 +89,21 @@
                   %td
                     %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
                   %td= p.data_entries[count][0]
-                  %td= p.data_entries[count][3].round(3)
+                  %td
+                    = p.data_entries[count][3].round(3)
+                    
+                  %td
+                    %a{:href => "#info_#{count}", :id=>"linkNeighbour#{count}"}
+                      %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
+                    #info{:id=>"#{count}", :style => "display: none;"}
+                      info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken
+                      
+                    :javascript
+                      $("a#linkNeighbour#{count}").click(function () {
+                        $("#info_#{count}").toggle();
+                        document.location = document.location + "#" + "linkNeighbour#{count}";
+                      });
+                      
                   - count += 1
+                  
+            
