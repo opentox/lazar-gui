@@ -1,0 +1,71 @@
+%link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
+%link{:rel=>"stylesheet", :href=>"http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css"}
+%script{:src=>"http://code.jquery.com/jquery-1.9.1.js"}
+%script{ :src=>"http://code.jquery.com/ui/1.10.0/jquery-ui.js"}
+%script{:src=>"/javascripts/jquery.tablesorter.min.js"}
+ 
+.results
+  - count_m = 0
+  :javascript
+    $(function() {
+      $("#tabs").tabs();
+    });
+  #tabs
+    %ul
+      - @@prediction_models.each do |m|
+        - count_m += 1
+        %li
+          %a{:href => "#results_#{count_m}", :id => "link#{m.title}"}
+            = m.title
+    - count_rs = 0
+    - @@predictions.each do |pa|
+      - count_rs += 1
+      #results{:id=>"#{count_m}"}
+        - pa.each do |p|
+          / get prediction OpenTox::Dataset   
+          - p.get
+          / prepare dataset for neighbours table
+          - p.data_entries.shift
+          - p.compounds.shift
+          
+          :javascript
+            $(document).ready(function(){
+              // call the tablesorter plugin 
+              $("table##{count_rs}").tablesorter({
+                // debug for development
+                debug: true,
+                widgets: ['zebra'],
+                // disable first column
+                headers: {0: {sorter: false},3: {sorter: false}},
+                // presort similarity asc
+                sortList: [[2,0]]
+              });
+            });
+          / TODO catch table error if tbody is empty      
+          %h3= "Neighbours: "
+          %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
+            %thead
+              %tr
+                %th
+                  Compound
+                %th
+                  Measured Activity
+                %th
+                  Similarity
+                %th
+                  Details
+            -#%tbody
+            - count = 0
+            - p.compounds.each do |neighbour_compound|
+              %tr
+                %td
+                  %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
+                %td= p.data_entries[count][0]
+                %td
+                  = p.data_entries[count][3].round(3)
+                  
+                %td
+                  %a{:href => to('/prediction/neighbours/details'), :id=>"link#{neighbour_compound.uri}/#{count}", :target=>"details"}
+                    %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
+                - count += 1
+          

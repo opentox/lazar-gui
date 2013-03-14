@@ -3,8 +3,8 @@
 
 $bg-color: #CCCCFF
 $bg-color-div: #C5C1E4
-//$ist-blue: #B9DCFF
-$ist-blue: #C8AB37
+//$ist-color: #B9DCFF
+$ist-color: #C8AB37
 
 body
   background-image: url("/images/gray_jean.png")
@@ -55,7 +55,7 @@ body
     border: 0
     margin-top: 5em
     padding: 10px
-    background-color: $ist-blue
+    background-color: $ist-color
     +border-top-left-radius(25px)
     +border-top-right-radius(25px)
     +background-clip(border-box)
@@ -66,7 +66,7 @@ body
   fieldset#middle
     border: 0
     padding: 10px
-    background-color: $ist-blue
+    background-color: $ist-color
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
     
     #model a
@@ -74,7 +74,7 @@ body
     
   fieldset#bottom
     border: 0
-    background-color: $ist-blue
+    background-color: $ist-color
     padding: 10px
     margin-bottom: 5em   
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
@@ -84,7 +84,7 @@ body
   
   .predictions
     margin-top: 5em
-    background-color: $ist-blue
+    background-color: $ist-color
     padding: 10px
     text-align: justify
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
@@ -111,52 +111,45 @@ body
     #overview tr td#compound
       width: 150px
     
-  .results
-    margin-top: 2em
-    padding: 1em
-    background-image: url("/images/gray_jean.png")
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    +border-bottom-left-radius(25px)
-    +border-bottom-right-radius(25px)
-    +background-clip(border-box)
-    
-    #info
-      color: green
-      position: relative
-      margin-left: 60%
+
+.results
+  margin-top: 2em
+  //padding: 1em
+  background-image: url("/images/gray_jean.png")
+  //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+  //+border-bottom-left-radius(25px)
+  //+border-bottom-right-radius(25px)
+  //+background-clip(border-box)
+        
+  .tablesorter
+    //width: 100%
+    thead
+      background-color: adjust-lightness($ist-color, 30%)
+      tr
+        th.header
+          background-image: url("/images/bg.gif")
+          background-repeat: no-repeat
+          background-position: center left
+          cursor: pointer
+          padding-left: 20px
+          border: 1px solid #dad9c7
+          margin-left: -1px
+        th.headerSortDown 
+          background-image: url("/images/desc.gif") 
+          background-color: adjust-lightness($ist-color, 7%)
+        th.headerSortUp 
+          background-image: url("/images/asc.gif") 
+          background-color: adjust-lightness($ist-color, 7%)
+    tbody
+      tr.odd
+        td
+          background-color: #F0F0F0
+      tr.even
+        td
+          background-color: #FFFFF0
           
-    .tablesorter
-      width: 100%
-      thead
-        background-color: adjust-lightness($ist-blue, 30%)
-        tr
-          th.header
-            background-image: url("/images/bg.gif")
-            background-repeat: no-repeat
-            background-position: center left
-            cursor: pointer
-            padding-left: 20px
-            border: 1px solid #dad9c7
-            margin-left: -1px
-          th.headerSortDown 
-            background-image: url("/images/desc.gif") 
-            background-color: adjust-lightness($ist-blue, 7%)
-          th.headerSortUp 
-            background-image: url("/images/asc.gif") 
-            background-color: adjust-lightness($ist-blue, 7%)
-      tbody
-        tr.odd
-          td
-            background-color: #F0F0F0
-        tr.even
-          td
-            background-color: #FFFFF0
-    .result
-      width: 100%
-      thead
-        padding-left: 20px
-        border: 1px solid #dad9c7
-        margin-left: -1px
+.details
+  color: green
       
         
 .footer

@@ -1,8 +1,3 @@
-:javascript
-  $(function() {
-    $("#tabs").tabs();
-  });
-
 .predictions
   .back
     %h1
@@ -21,11 +16,11 @@
           %td{:id=>"compound"}
             %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100px"}
           - count=0
-          - @predictions.each do |pa|
+          - @@predictions.each do |pa|
             - pa.each do |p|
               - p.get
               %td
-                %b= @prediction_models[count].title
+                %b= @@prediction_models[count].title
                 - count+=1
                 %br
                   = "Result:\n"
@@ -33,77 +28,12 @@
                 %br
                   = "Confidence:\n"
                   = p.data_entries[0][2].round(3)
-    
-  %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
-   
-  .results
-    #tabs
-      %ul
-        - count_m = 0
-        - @prediction_models.each do |m|
-          - count_m += 1
-          %li
-            %a{:href => "#results_#{count_m}", :id => "link#{m.title}"}
-              = m.title
-      - count_rs = 0
-      - @predictions.each do |pa|
-        - count_rs += 1
-        #results{:id=>"#{count_rs}"}
-          - pa.each do |p|
-            / get prediction OpenTox::Dataset   
-            - p.get
-            / prepare dataset for neighbours table
-            - p.data_entries.shift
-            - p.compounds.shift
-
-            :javascript
-              $(document).ready(function(){ 
-                // call the tablesorter plugin 
-                $("table##{count_rs}").tablesorter({
-                  // debug for development
-                  debug: true,
-                  widgets: ['zebra'],
-                  // disable first column
-                  headers: {0: {sorter: false},3: {sorter: false}},
-                  // presort similarity asc
-                  sortList: [[2,0]]
-                });
-              });
-            / TODO catch table error if tbody is empty      
-            %h3= "Neighbours: "
-            %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
-              %thead
-                %tr
-                  %th
-                    Compound
-                  %th
-                    Measured Activity
-                  %th
-                    Similarity
-                  %th
-                    Details
-              -#%tbody
-              - count = 0
-              - p.compounds.each do |neighbour_compound|
-                %tr
-                  %td
-                    %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
-                  %td= p.data_entries[count][0]
-                  %td
-                    = p.data_entries[count][3].round(3)
-                    
-                  %td
-                    %a{:href => "#info_#{count}", :id=>"linkNeighbour#{count}"}
-                      %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
-                    #info{:id=>"#{count}", :style => "display: none;"}
-                      info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken
-                      
-                    :javascript
-                      $("a#linkNeighbour#{count}").click(function () {
-                        $("#info_#{count}").toggle();
-                        document.location = document.location + "#" + "linkNeighbour#{count}";
-                      });
-                      
-                  - count += 1
+                %br
+                %a{:href=> to("/prediction/neighbours"), :target=> "neighbours"}
+                  %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow"}
+                  
+                  
+  %iframe{:name=>"neighbours", :width=>"50%", :height=>"400px", :style=>"float:left; border:0px"}
+  %iframe{:name=>"details", :width=>"50%", :height=>"400px", :style=>"border:0px"}
                   
             

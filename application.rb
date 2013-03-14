@@ -28,8 +28,8 @@ post '/predict/?' do
   # get compound from SMILES
   @compound = OpenTox::Compound.from_smiles $compound[:uri], @identifier.to_s
   # init
-  @prediction_models = []
-  @predictions = []
+  @@prediction_models = []
+  @@predictions = []
   # init lazar algorithm
   lazar = OpenTox::Algorithm.new File.join($algorithm[:uri],"lazar")
   # gather models from service and compare if selected
@@ -38,25 +38,33 @@ post '/predict/?' do
     @mall = OpenTox::Model.all $model[:uri]
     @mall.each do |m|
       m.get
-      @prediction_models << m if m.title =~ /#{@mselected}/
+      @@prediction_models << m if m.title =~ /#{@mselected}/
     end
-    $logger.debug "@prediction_models: #{@prediction_models.inspect}"
+    $logger.debug "@prediction_models: #{@@prediction_models.inspect}"
   end
 
   # predict with selected models
   # results in prediction variable
   # store prediction in array for better handling
   $logger.debug "@models: #{@models.inspect}"
-  @prediction_models.each do |m| 
+  @@prediction_models.each do |m| 
     @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
     prediction = OpenTox::Dataset.new @prediction_uri
     pa = []
     pa << prediction
-    @predictions << pa
+    @@predictions << pa
     $logger.debug "prediction class: #{prediction.class}"
   end
 
   haml :prediction
+end
+
+get '/prediction/neighbours/?' do
+  haml :neighbours, :layout => false
+end
+
+get '/prediction/neighbours/details/?' do
+  haml :details, :layout => false
 end
 
 get '/stylesheets/:name.css' do

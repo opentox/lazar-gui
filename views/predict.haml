@@ -69,19 +69,4 @@
   
 
   %fieldset#bottom
-    %a{:href => "#predict", :id => "linkPredict"}
-      %h1 3. Predict
-    
-    :javascript
-      $("a#linkPredict").click(function () {
-        $("#predict").toggle();
-        document.location = document.location + "#" + "predict";
-      });
-      
-    #predict{ :style => "display: none;"}
-      %p Display the prediction including neighbours and sort mechanism
-      %br 
-      %input{ :type => "submit", :value => "Predict", :onclick => "getsmiles();"}
-      
-      .close
-        = hide_link "#predict"
+    %input{ :type => "submit", :value=>"3. Predict", :onclick => "getsmiles();"}
