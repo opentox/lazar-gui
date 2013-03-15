@@ -1,4 +1,15 @@
 %link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
 
 .details
-  info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken info names smiles inchies Eigenschaften physic chem Verwandte links zu anderen Datenbanken
+  %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100px"}
+  %p
+    SMILES:
+    = @compound.smiles
+
+  %p
+    // TODO handle OpenTox::ResourceNotFoundError
+    Names:
+    = @compound.names
+
+  %p
+    = @compound.inchi.gsub("InChI=", "InChI: ")

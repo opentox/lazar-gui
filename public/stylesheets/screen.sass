@@ -11,7 +11,7 @@ body
   background-color: $bg-color
   overflow: scroll
   font-family: sans-serif
-  margin: 1em
+  //margin: 0.3em
   min-width: 800px
   min-heigth: 600px
   
@@ -24,7 +24,10 @@ body
   img
     float: left
   h1
-    margin-bottom: 3em
+    margin-top: -2px
+    position: relative
+    top: -4px
+    left: 20px
 
   
 .content
@@ -36,6 +39,7 @@ body
     text-shadow: #FFF 0 1px 0
     font-size: x-large
     font-family: Verdana
+    display: inline
     
   h2
     text-shadow: #FFF 0 1px 0
@@ -81,6 +85,9 @@ body
     +border-bottom-left-radius(25px)
     +border-bottom-right-radius(25px)
     +background-clip(border-box)
+    
+    input#predict
+      margin-left: 1em
   
   .predictions
     margin-top: 5em
@@ -111,18 +118,21 @@ body
     #overview tr td#compound
       width: 150px
     
+iframe#neighbours
+  background-image: url("/images/gray_jean.png")
+  +border-bottom-left-radius(25px)
+  +background-clip(border-box)
+  
+iframe#details
+  background-image: url("/images/gray_jean.png")
+  +border-bottom-right-radius(25px)
+  +background-clip(border-box)
 
 .results
-  margin-top: 2em
-  //padding: 1em
   background-image: url("/images/gray_jean.png")
-  //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-  //+border-bottom-left-radius(25px)
-  //+border-bottom-right-radius(25px)
-  //+background-clip(border-box)
-        
+
   .tablesorter
-    //width: 100%
+    width: 80%
     thead
       background-color: adjust-lightness($ist-color, 30%)
       tr
@@ -148,8 +158,11 @@ body
         td
           background-color: #FFFFF0
           
-.details
-  color: green
+input#predict
+  border: 0px
+  background-color: $ist-color
+  margin: 0
+  padding: 0
       
         
 .footer

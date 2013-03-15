@@ -8,7 +8,7 @@
   - count_m = 0
   :javascript
     $(function() {
-      $("#tabs").tabs();
+      $("#tabs").tabs({ active: '#{params[:id]}' });
     });
   #tabs
     %ul
@@ -20,7 +20,7 @@
     - count_rs = 0
     - @@predictions.each do |pa|
       - count_rs += 1
-      #results{:id=>"#{count_m}"}
+      #results{:id=>"#{count_rs}"}
         - pa.each do |p|
           / get prediction OpenTox::Dataset   
           - p.get
@@ -65,7 +65,7 @@
                   = p.data_entries[count][3].round(3)
                   
                 %td
-                  %a{:href => to('/prediction/neighbours/details'), :id=>"link#{neighbour_compound.uri}/#{count}", :target=>"details"}
+                  %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{neighbour_compound.uri}/#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                 - count += 1
           

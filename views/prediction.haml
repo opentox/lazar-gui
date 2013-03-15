@@ -21,7 +21,7 @@
               - p.get
               %td
                 %b= @@prediction_models[count].title
-                - count+=1
+                
                 %br
                   = "Result:\n"
                   %b= p.data_entries[0][1]
@@ -29,11 +29,11 @@
                   = "Confidence:\n"
                   = p.data_entries[0][2].round(3)
                 %br
-                %a{:href=> to("/prediction/neighbours"), :target=> "neighbours"}
+                %a{:href=> to("/prediction/neighbours/#{count}"), :target=> "neighbours"}
                   %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow"}
+              - count+=1
                   
-                  
-  %iframe{:name=>"neighbours", :width=>"50%", :height=>"400px", :style=>"float:left; border:0px"}
-  %iframe{:name=>"details", :width=>"50%", :height=>"400px", :style=>"border:0px"}
+  %iframe{:id=>"neighbours", :name=>"neighbours", :width=>"50%", :height=>"400px", :style=>"float:left; border:0px"}
+  %iframe{:id=>"details", :name=>"details", :width=>"50%", :height=>"400px", :style=>"border:0px"}
                   
             

@@ -40,30 +40,32 @@ post '/predict/?' do
       m.get
       @@prediction_models << m if m.title =~ /#{@mselected}/
     end
-    $logger.debug "@prediction_models: #{@@prediction_models.inspect}"
+    #$logger.debug "@prediction_models: #{@@prediction_models.inspect}"
   end
 
   # predict with selected models
   # results in prediction variable
   # store prediction in array for better handling
-  $logger.debug "@models: #{@models.inspect}"
+  #$logger.debug "@models: #{@models.inspect}"
   @@prediction_models.each do |m| 
     @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
     prediction = OpenTox::Dataset.new @prediction_uri
     pa = []
     pa << prediction
     @@predictions << pa
-    $logger.debug "prediction class: #{prediction.class}"
+    #$logger.debug "prediction class: #{prediction.class}"
   end
 
   haml :prediction
 end
 
-get '/prediction/neighbours/?' do
+get '/prediction/neighbours/:id?' do
+
   haml :neighbours, :layout => false
 end
 
-get '/prediction/neighbours/details/?' do
+get '/prediction/:neighbour/details/?' do
+  @compound = OpenTox::Compound.new params[:neighbour]
   haml :details, :layout => false
 end
 
