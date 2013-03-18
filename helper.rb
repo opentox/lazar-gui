@@ -16,7 +16,7 @@ helpers do
   def hide_link(destination)
     @link_id = 0 unless @link_id
     @link_id += 1
-    haml :js_link, :locals => {:name => "close", :destination => destination, :method => "hide"}, :layout => false
+    haml :js_link, :locals => {:name => "hide", :destination => destination, :method => "hide"}, :layout => false
   end
 
   def toggle_link(destination,name)
