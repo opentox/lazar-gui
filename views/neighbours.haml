@@ -1,43 +1,52 @@
+/ @@prediction_models and @@predictions defined in POST request '/predict'
+/ unpacks multi prediction array ;
+/ prepare it for neighbours ;
+/ align single prediction to endpoint ;
+/ display preordered in table view ;
+/ loaded in iframe, necessary to load js/css here ;
 %link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
 %link{:rel=>"stylesheet", :href=>"http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css"}
 %script{:src=>"http://code.jquery.com/jquery-1.9.1.js"}
 %script{ :src=>"http://code.jquery.com/ui/1.10.0/jquery-ui.js"}
 %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
- 
+/ main class in stylesheet ;
 .results
   - count_m = 0
+  / js function for tabs div with preseleted tab by link id ;
   :javascript
     $(function() {
       $("#tabs").tabs({ active: '#{params[:id]}' });
     });
+  / tabs div ;
   #tabs
     %ul
+      / each endpoint becomes a tab head ;
       - @@prediction_models.each do |m|
         - count_m += 1
         %li
           %a{:href => "#results_#{count_m}", :id => "link#{m.title}"}
             = m.title
     - count_rs = 0
+    / unpack to single arrays
     - @@predictions.each do |pa|
       - count_rs += 1
       #results{:id=>"#{count_rs}"}
         - pa.each do |p|
           / get prediction OpenTox::Dataset   
           - p.get
-          / prepare dataset for neighbours table
+          / prepare dataset for neighbours table ;
+          / delete first array which contains input compound prediction ;
+          / keep the following arrays they are the neighbour predictions ;
           - p.data_entries.shift
           - p.compounds.shift
-          
+          / call the tablesorter plugin ;
+          / presort by similarity ;
           :javascript
             $(document).ready(function(){
-              // call the tablesorter plugin 
               $("table##{count_rs}").tablesorter({
-                // debug for development
                 debug: true,
                 widgets: ['zebra'],
-                // disable first column
                 headers: {0: {sorter: false},3: {sorter: false}},
-                // presort similarity asc
                 sortList: [[2,0]]
               });
             });
@@ -65,6 +74,7 @@
                   = p.data_entries[count][3].round(3)
                   
                 %td
+                  / target is iframe "details", defined in prediction.haml
                   %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{neighbour_compound.uri}/#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                 - count += 1

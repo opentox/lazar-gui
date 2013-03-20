@@ -19,11 +19,7 @@ get '/predict/?' do
 end
 
 post '/predict/?' do
-  # check for content
-  unless params[:selection] and params[:identifier] != ''
-    redirect to('/predict')
-  end
-  # transferred input
+  # transfered input
   @identifier = params[:identifier]
   # get compound from SMILES
   @compound = OpenTox::Compound.from_smiles $compound[:uri], @identifier.to_s
