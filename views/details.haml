@@ -1,15 +1,17 @@
 %link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
+.content
+  .details
+    %h2
+      Details:
+    %img{:src=>"#{@compound_uri.uri}/image", :alt=>@compound_uri.uri, :width=>"100px"}
+    %p
+      SMILES:
+      = @compound_uri.smiles
 
-.details
-  %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100px"}
-  %p
-    SMILES:
-    = @compound.smiles
+    %p
+      // TODO handle OpenTox::ResourceNotFoundError
+      Names:
+      = @compound_uri.names
 
-  %p
-    // TODO handle OpenTox::ResourceNotFoundError
-    Names:
-    = @compound.names
-
-  %p
-    = @compound.inchi.gsub("InChI=", "InChI: ")
+    %p
+      = @compound_uri.inchi.gsub("InChI=", "InChI: ")

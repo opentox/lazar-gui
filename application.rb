@@ -7,6 +7,12 @@ require 'opentox-server'
 require File.join(File.dirname(__FILE__),'helper.rb')
 require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb")
 
+helpers do
+  def compound_uri(uri)
+    $logger.debug "\ncompound_uri: #{uri}\n"
+    @compound_uri = OpenTox::Compound.new uri
+  end
+end
 
 get '/?' do
   redirect to('/predict') 
@@ -36,32 +42,27 @@ post '/predict/?' do
       m.get
       @@prediction_models << m if m.title =~ /#{@mselected}/
     end
-    #$logger.debug "@prediction_models: #{@@prediction_models.inspect}"
+    $logger.debug "@prediction_models: #{@@prediction_models.inspect}"
   end
 
   # predict with selected models
   # results in prediction variable
   # store prediction in array for better handling
-  #$logger.debug "@models: #{@models.inspect}"
   @@prediction_models.each do |m| 
     @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
     prediction = OpenTox::Dataset.new @prediction_uri
     pa = []
     pa << prediction
     @@predictions << pa
-    #$logger.debug "prediction class: #{prediction.class}"
   end
 
   haml :prediction
 end
 
-get '/prediction/neighbours/:id?' do
-
-  haml :neighbours, :layout => false
-end
 
 get '/prediction/:neighbour/details/?' do
-  @compound = OpenTox::Compound.new params[:neighbour]
+  @compound_uri = OpenTox::Compound.new params[:neighbour]
+  
   haml :details, :layout => false
 end
 

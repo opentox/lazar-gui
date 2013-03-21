@@ -9,14 +9,9 @@
 %script{:src=>"http://code.jquery.com/jquery-1.9.1.js"}
 %script{ :src=>"http://code.jquery.com/ui/1.10.0/jquery-ui.js"}
 %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
-/ main class in stylesheet ;
-.results
+
+.results{:style=>"display:none"}
   - count_m = 0
-  / js function for tabs div with preseleted tab by link id ;
-  :javascript
-    $(function() {
-      $("#tabs").tabs({ active: '#{params[:id]}' });
-    });
   / tabs div ;
   #tabs
     %ul
@@ -44,14 +39,14 @@
           :javascript
             $(document).ready(function(){
               $("table##{count_rs}").tablesorter({
-                debug: true,
+                //debug: true,
                 widgets: ['zebra'],
                 headers: {0: {sorter: false},3: {sorter: false}},
                 sortList: [[2,0]]
               });
             });
           / TODO catch table error if tbody is empty      
-          %h3= "Neighbours: "
+          %h2= "Neighbours: "
           %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
             %thead
               %tr
@@ -69,13 +64,20 @@
               %tr
                 %td
                   %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
-                %td= p.data_entries[count][0]
+                %td
+                  = p.data_entries[count][0]
                 %td
                   = p.data_entries[count][3].round(3)
                   
                 %td
-                  / target is iframe "details", defined in prediction.haml
-                  %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{neighbour_compound.uri}/#{count}", :target=>"details"}
+                  %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
+                  :javascript
+                    $("a#link#{count_rs}#{count}").click(function () {
+                      $(".details").toggle();
+                      document.getElementById('details').focus();
+                    });
+                    
                 - count += 1
-          
+-#= haml :details, :layout => false
+%iframe{:id=>"details", :name=>"details", :height=>"400px", :width=>"100%", :style=>"border:0px"}

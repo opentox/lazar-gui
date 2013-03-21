@@ -4,7 +4,8 @@
 $bg-color: #CCCCFF
 $bg-color-div: #C5C1E4
 //$ist-color: #B9DCFF
-$ist-color: #C8AB37
+$i-color: #C8AB37
+$ist-color: adjust-lightness($i-color, 17%)
 
 body
   background-image: url("/images/gray_jean.png")
@@ -42,9 +43,10 @@ body
     display: inline
     
   h2
-    text-shadow: #FFF 0 1px 0
+    text-shadow: #FFF 1px 1px 0
     font-size: x-large
-    font-family: monospace   
+    //font-family: monospace
+    color: #FF5555 
     
   .arrow
     margin: 5px 0px 5px 20px
@@ -119,22 +121,25 @@ body
       padding-left: 1em
     #overview tr td#compound
       width: 150px
-    
-iframe#neighbours
+  
+.details
+  margin-bottom: 2em
+  height: 400px
+  scroll: auto
   background-image: url("/images/gray_jean.png")
   +border-bottom-left-radius(25px)
-  +background-clip(border-box)
-  
-iframe#details
-  background-image: url("/images/gray_jean.png")
   +border-bottom-right-radius(25px)
   +background-clip(border-box)
 
 .results
-  background-image: url("/images/gray_jean.png")
-
+  height: 400px
+  overflow: auto
+  margin-top: 2em
+  margin-bottom: 2em
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+  
   .tablesorter
-    width: 80%
+    width: 100%
     thead
       background-color: adjust-lightness($ist-color, 30%)
       tr
@@ -165,9 +170,7 @@ input#predict
   background-color: $ist-color
   margin: 0
   padding: 0
-      
-.halt
-  margin: 5em
-          
+
+  
 .footer
   margin: 20px 0 20px 0

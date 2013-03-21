@@ -29,11 +29,15 @@
                   = "Confidence:\n"
                   = p.data_entries[0][2].round(3)
                 %br
-                %a{:href=> to("/prediction/neighbours/#{count}"), :target=> "neighbours"}
+                %a{:href=> "#tabs", :id=>"link#{count}"}
                   %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow"}
+                  :javascript
+                    $("a#link#{count}").click(function () {
+                      $(".results").toggle();
+                      document.getElementById('tabs').focus();
+                      $("#tabs").tabs({ active: "#{count}" });
+                    });
               - count+=1
-                  
-  %iframe{:id=>"neighbours", :name=>"neighbours", :width=>"50%", :height=>"400px", :style=>"float:left; border:0px"}
-  %iframe{:id=>"details", :name=>"details", :width=>"50%", :height=>"400px", :style=>"border:0px"}
-                  
+  
+  = haml :neighbours, :layout => false                
             
