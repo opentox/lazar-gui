@@ -3,13 +3,14 @@
 / prepare it for neighbours ;
 / align single prediction to endpoint ;
 / display preordered in table view ;
-/ loaded in iframe, necessary to load js/css here ;
-%link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
-%link{:rel=>"stylesheet", :href=>"http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css"}
-%script{:src=>"http://code.jquery.com/jquery-1.9.1.js"}
-%script{ :src=>"http://code.jquery.com/ui/1.10.0/jquery-ui.js"}
-%script{:src=>"/javascripts/jquery.tablesorter.min.js"}
 
+:javascript
+  $(function() {
+    $( ".results" ).resizable({
+      containment: ".content"
+    });
+  });
+  
 .results{:style=>"display:none"}
   - count_m = 0
   / tabs div ;
@@ -74,10 +75,10 @@
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                   :javascript
                     $("a#link#{count_rs}#{count}").click(function () {
-                      $(".details").toggle();
-                      document.getElementById('details').focus();
+                      $("#iframe").show();
+                      document.getElementById('iframe').focus();
                     });
                     
                 - count += 1
--#= haml :details, :layout => false
-%iframe{:id=>"details", :name=>"details", :height=>"400px", :width=>"100%", :style=>"border:0px"}
+
+%iframe{:id=>"iframe", :name=>"details", :height=>"400px", :width=>"100%", :style=>"display:none;border:0px"}

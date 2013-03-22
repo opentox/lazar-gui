@@ -33,7 +33,7 @@
                   %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow"}
                   :javascript
                     $("a#link#{count}").click(function () {
-                      $(".results").toggle();
+                      $(".results").show();
                       document.getElementById('tabs').focus();
                       $("#tabs").tabs({ active: "#{count}" });
                     });
