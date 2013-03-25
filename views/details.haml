@@ -7,12 +7,12 @@
     %img{:src=>"#{@compound_uri.uri}/image", :alt=>@compound_uri.uri, :width=>"100px"}
     %p
       SMILES:
-      = @compound_uri.smiles
+      = @compound_uri.smiles if @compound_uri.smiles
 
     %p
       // TODO handle OpenTox::ResourceNotFoundError
       Names:
-      = @compound_uri.names
+      = @compound_uri.names if @compound_uri.names
 
     %p
-      = @compound_uri.inchi.gsub("InChI=", "InChI: ")
+      = @compound_uri.inchi.gsub("InChI=", "InChI: ") if @compound_uri.inchi

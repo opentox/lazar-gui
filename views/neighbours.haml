@@ -74,11 +74,12 @@
                   %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                   :javascript
-                    $("a#link#{count_rs}#{count}").click(function () {
-                      $("#iframe").show();
-                      document.getElementById('iframe').focus();
+                    $(function() {
+                        $("a#link#{count_rs}#{count}").on('click', function(e) {
+                            $('#iframe').bPopup();
+                        });
                     });
                     
                 - count += 1
 
-%iframe{:id=>"iframe", :name=>"details", :height=>"400px", :width=>"100%", :style=>"display:none;border:0px"}
+%iframe{:id=>"iframe", :name=>"details", :height=>"80%", :width=>"80%", :style=>"display:none;border:0px"}
