@@ -6,7 +6,7 @@
   };
   function checksmiles () {
     if (document.form.identifier.value == "") {
-      alert("Please insert a compound.")
+      alert("Please insert a compound.");
       document.form.identifier.focus();
       return false;
     };
@@ -20,7 +20,8 @@
     };
     return true;
   };
-  
+
+/ whole site content needs to be in one form. Input and checkboxes are checked by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
   %fieldset#top
     %a{:href => "#insert", :id => "linkInsert"}

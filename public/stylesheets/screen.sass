@@ -121,6 +121,21 @@ body
       padding-left: 1em
     #overview tr td#compound
       width: 150px
+      
+  .error
+    margin-top: 5em
+    background-color: $ist-color
+    padding: 10px
+    text-align: justify
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+    +border-left-radius(25px)
+    +border-right-radius(25px)
+    +background-clip(border-box)
+    
+    error
+      border: 2px solid #FF5555
+      background-color: #FFFFFF
+      color: #FF5555
   
 .details
   margin-bottom: 2em
