@@ -1,10 +1,4 @@
 - color image in details view
 - catch tablesorter error if tbody is empty
-- display notice if no input data
-- validate smiles input
-- color results
-- catch error if compound names unavailable
-- external links
 - add info hovers
-- display notice 'sth went wrong'
-- check checkbox with model title 
+- add wait snake for java plugin  

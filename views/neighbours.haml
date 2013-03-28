@@ -41,7 +41,7 @@
             $(document).ready(function(){
               $("table##{count_rs}").tablesorter({
                 //debug: true,
-                widgets: ['zebra'],
+                //widgets: ['zebra'],
                 headers: {0: {sorter: false},3: {sorter: false}},
                 sortList: [[2,0]]
               });
@@ -65,12 +65,11 @@
               %tr
                 %td
                   %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
-                %td
+                %td{:class => p.data_entries[count][0]}
                   = p.data_entries[count][0]
-                %td
-                  = p.data_entries[count][3].round(3)
-                  
-                %td
+                %td{:class => p.data_entries[count][0]}
+                  = p.data_entries[count][3].round(3)                  
+                %td{:class => p.data_entries[count][0]}
                   %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                   :javascript

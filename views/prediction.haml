@@ -14,15 +14,16 @@
       %tbody
         %tr
           %td{:id=>"compound"}
-            %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100px"}
+            %img{:src=>"#{@compound.uri}/image", :alt=>@compound.uri, :width=>"100"}
           - count=0
           - @@predictions.each do |pa|
             - pa.each do |p|
               - p.get
-              %td
-                %b= @@prediction_models[count].title
-                
+              %td{:class => p.data_entries[0][1]}
+                %b{:class => "title"}
+                  = @@prediction_models[count].title
                 %br
+                %br            
                   = "Result:\n"
                   %b= p.data_entries[0][1]
                 %br

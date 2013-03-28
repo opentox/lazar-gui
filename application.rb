@@ -36,9 +36,9 @@ get '/prediction/:neighbour/details/?' do
   when "Error"
     @names = "There are no names for this compound available."
   when "Completed"
-    @names = @compound_uri.names
+    @names = @compound_uri.names.join(",")
   end
-  @inchi = @compound_uri.inchi.gsub("InChI=", "InChI: ")
+  @inchi = @compound_uri.inchi.gsub("InChI=", "")
   haml :details, :layout => false
 end
 
