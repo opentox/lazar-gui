@@ -27,14 +27,14 @@ end
 get '/prediction/:neighbour/details/?' do
   @compound_uri = OpenTox::Compound.new params[:neighbour]
   @smiles = @compound_uri.smiles
-  task = OpenTox::Task.create($task[:uri], @subjectid, RDF::DC.description => "look for names.") do
+  task = OpenTox::Task.run("look for names.") do
     names = @compound_uri.names
   end
-  sleep 1
-  task.get
+  task.wait
+  $logger.debug "names task uri: #{task.uri}"
   case task[RDF::OT.hasStatus]
   when "Error"
-    @names = "There are no names for this compound available."
+    @names = ""
   when "Completed"
     @names = @compound_uri.names.join(",")
   end
@@ -44,19 +44,16 @@ end
 
 post '/predict/?' do
   # validate identifier input
-  task = OpenTox::Task.create($task[:uri], @subjectid, RDF::DC.description => "#{params[:identifier] ? params[:identifier] : "no valid SMILES string."}: Validate SMILES string.") do
+  task = OpenTox::Task.run("Validate SMILES string.") do
     # transfered input
     @identifier = params[:identifier]
     # get compound from SMILES
-    @compound = OpenTox::Compound.from_smiles $compound[:uri], @identifier.to_s
+    @compound = OpenTox::Compound.from_smiles @identifier.to_s
     # validate SMILES by converting to INCHI
     inchi = @compound.inchi
   end
   # necessary to wait for task
-  sleep 1
-  task.get
-  $logger.debug "task uri: #{task.uri}"
-  $logger.debug "task status: #{task[RDF::OT.hasStatus]}"
+  task.wait
   # case task fails return message smiles invalid  
   # case task completed go ahead
   case task[RDF::OT.hasStatus]
@@ -65,7 +62,7 @@ post '/predict/?' do
     haml :error
   when "Completed"
     @identifier = params[:identifier]
-    @compound = OpenTox::Compound.from_smiles $compound[:uri], @identifier.to_s
+    @compound = OpenTox::Compound.from_smiles @identifier.to_s
     # init
     @@prediction_models = []
     @@predictions = []
@@ -76,7 +73,7 @@ post '/predict/?' do
       @mselected = model[0]
       @mall = OpenTox::Model.all $model[:uri]
       @mall.each do |m|
-        m.get
+        #m.get
         @@prediction_models << m if m.title =~ /#{@mselected}/
       end
       $logger.debug "@prediction_models: #{@@prediction_models.inspect}"

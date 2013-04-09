@@ -4,14 +4,13 @@
   .details
     %h2
       Details:
-    %img{:src=>"#{@compound_uri.uri}/image", :alt=>@compound_uri.uri, :width=>"100px"}
+    %img{:src=>"#{@compound_uri.uri}/image", :alt=>"", :width=>"100px"}
     %br
     %b
       SMILES:
     %p= @smiles
     %br
     %b
-      // TODO handle OpenTox::ResourceNotFoundError
       Names:
     %p= @names
     %br

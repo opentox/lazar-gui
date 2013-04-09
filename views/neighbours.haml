@@ -29,7 +29,7 @@
       #results{:id=>"#{count_rs}"}
         - pa.each do |p|
           / get prediction OpenTox::Dataset   
-          - p.get
+          -# p.get
           / prepare dataset for neighbours table ;
           / delete first array which contains input compound prediction ;
           / keep the following arrays they are the neighbour predictions ;
@@ -64,12 +64,12 @@
             - p.compounds.each do |neighbour_compound|
               %tr
                 %td
-                  %img{:src=>"#{neighbour_compound.uri}/image", :alt=>neighbour_compound.uri, :width=>"100px"}
-                %td{:class => p.data_entries[count][0]}
-                  = p.data_entries[count][0]
-                %td{:class => p.data_entries[count][0]}
+                  %img{:src=>"#{neighbour_compound.uri}/image", :alt=>"", :width=>"100px"}
+                %td{:class => p.data_entries[count][2]}
+                  = p.data_entries[count][2]
+                %td{:class => p.data_entries[count][2]}
                   = p.data_entries[count][3].round(3)                  
-                %td{:class => p.data_entries[count][0]}
+                %td{:class => p.data_entries[count][2]}
                   %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                   :javascript

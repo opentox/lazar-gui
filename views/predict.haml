@@ -1,4 +1,5 @@
 :javascript
+
   function getsmiles() {
     if (document.JME.smiles() != '') {
       document.form.identifier.value = document.JME.smiles() ;
@@ -71,7 +72,6 @@
       %p Please observe validation report for details.
       %br    
       - @models.each do |model|
-        - model.get
         #model
           %input{:type => "checkbox", :name => "selection[#{model.title}]", :id => "selection[#{model.title}]", :value => true, :disabled => false}
           %label{:for => "selection[#{model.title}]"}
