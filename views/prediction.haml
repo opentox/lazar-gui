@@ -3,7 +3,7 @@
     %h1
       %img{:src=>"/images/arrow_left_float.png", :alt=>"arrow"}
         %a{:href => to('/predict')} New Prediction  
-
+  / displays all prediction results
   .overview
     %table{:width=>"100%", :cellspacing=>"1", :id=>"overview"}
       %thead
@@ -16,17 +16,21 @@
           %td{:id=>"compound"}
             %img{:src=>"#{@compound.uri}/image", :alt=>"image not available", :width=>"100"}
           - count=0
+          / var for rule to load neighbours page.
+          - @@neighbours_available = 1
           - @@predictions.each do |pa|
+            / prediction of one model
             - pa.each do |p|
-              -# p.get
+              / p.data_entries > 1 = neighbours available
+              - $logger.debug "count data_entries: #{p.data_entries.length}"
+              - p.data_entries.length > 1 ? @@neighbours_available = p.data_entries.length : @@neighbours_available
               %td{:class => p.data_entries[0][0]}
                 %b{:class => "title"}
                   = @@prediction_models[count].title
                 %br
-                  - $logger.debug "p.data_entries: #{p.data_entries}"
                 %br            
                   = "Result:\n"
-                  %b= p.data_entries[0][0]
+                  %b= p.data_entries[0][0] != nil ? p.data_entries[0][0] : "No prediction result"
                 %br
                   = "Confidence:\n"
                   = p.data_entries[0][1].round(3)
@@ -41,5 +45,9 @@
                     });
               - count+=1
   
-  = haml :neighbours, :layout => false                
+- if @@neighbours_available > 1
+  = haml :neighbours, :layout => false
+- else
+  %h2
+    no neighbours available             
             

@@ -73,7 +73,6 @@ post '/predict/?' do
       @mselected = model[0]
       @mall = OpenTox::Model.all $model[:uri]
       @mall.each do |m|
-        #m.get
         @@prediction_models << m if m.title =~ /#{@mselected}/
       end
       $logger.debug "@prediction_models: #{@@prediction_models.inspect}"
@@ -96,7 +95,7 @@ post '/predict/?' do
   
 end
 
-get '/stylesheets/:name.css' do
+get '/predict/stylesheets/:name.css' do
   content_type 'text/css', :charset => 'utf-8'
   sass(:"stylesheets/#{params[:name]}", Compass.sass_engine_options )
 end
