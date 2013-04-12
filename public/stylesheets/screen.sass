@@ -74,8 +74,6 @@ body
     +border-top-right-radius(25px)
     +background-clip(border-box)
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    draw
-      display: block
     
   fieldset#middle
     border: 0
@@ -130,11 +128,13 @@ body
       width: 150px
 
     #overview tr td.true
+      padding-top: 0.5em
       text-align: center
       background-color: adjust-lightness(#D40000, 7%)
       +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
 
     #overview tr td.false
+      padding-top: 0.5em
       text-align: center
       background-color: adjust-lightness(#44AA00, 7%)
       +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
