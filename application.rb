@@ -4,8 +4,8 @@ require 'sinatra'
 require 'haml' #must be loaded after sinatra
 require 'opentox-client'
 require 'opentox-server'
-require File.join(File.dirname(__FILE__),'helper.rb')
-require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb")
+require_relative 'helper.rb'
+require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
 helpers do
 end
@@ -16,6 +16,7 @@ end
 
 get '/predict/?' do
   @models = OpenTox::Model.all $model[:uri]
+  $logger.debug "Models:\n#{@models.inspect}"
   haml :predict
 end
 
@@ -34,7 +35,7 @@ get '/prediction/:neighbour/details/?' do
   $logger.debug "names task uri: #{task.uri}"
   case task[RDF::OT.hasStatus]
   when "Error"
-    @names = ""
+    @names = "There are no names for #{} available."
   when "Completed"
     @names = @compound_uri.names.join(",")
   end
@@ -58,7 +59,7 @@ post '/predict/?' do
   # case task completed go ahead
   case task[RDF::OT.hasStatus]
   when "Error"
-    @error_report = "Not a valid SMILES string."
+    @error_report = "Attention, #{@identifier} is not a valid SMILES string."
     haml :error
   when "Completed"
     @identifier = params[:identifier]
@@ -69,7 +70,9 @@ post '/predict/?' do
     # init lazar algorithm
     lazar = OpenTox::Algorithm.new File.join($algorithm[:uri],"lazar")
     # gather models from service and compare if selected
+    #TODO compare selected by uri
     params[:selection].each do |model|
+      $logger.debug "Model inspect in POST:\n#{model.inspect}"
       @mselected = model[0]
       @mall = OpenTox::Model.all $model[:uri]
       @mall.each do |m|
