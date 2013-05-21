@@ -25,14 +25,14 @@
 / whole site content needs to be in one form. Input and checkboxes are checked by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
   %fieldset#top
-    %a{:href => "#insert", :id => "linkInsert"}
+    %a{:href => "#", :id => "linkInsert"}
       %h1 1. Draw or insert your compound   
     :javascript
       $("a#linkInsert").click(function () {
         $("#insert").toggle();
         document.location = document.location + "#" + "insert";
       });
-    #insert{:style=>"display:none"}   
+    #insert{:style=>"display: none"}
       %p
       %label &nbsp;
       .jme
@@ -49,8 +49,9 @@
       %label{:for => 'identifier'}
         or enter the
         %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
-        string 
+        string:
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
+        
       
       .close
         = hide_link "#insert"
