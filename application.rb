@@ -35,7 +35,7 @@ get '/prediction/:neighbour/details/?' do
   $logger.debug "names task uri: #{task.uri}"
   case task[RDF::OT.hasStatus]
   when "Error"
-    @names = "There are no names for #{} available."
+    @names = "There are no names for this compound available."
   when "Completed"
     @names = @compound_uri.names.join(",")
   end
