@@ -45,10 +45,13 @@
                 %br
                   %a{:href=>"#", :title=>"", :id=>"confidence"} Confidence
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
-                    Indicates the applicability domain of a model.
-                    Predictions with a high confidence can be expected to be more reliable than predictions with low confidence.
-                    Confidence values may take any value between 0 and 1.
-                    For most models confidence > 0.025 is a sensible (hard) cutoff to distiguish between reliable and unreliable predictions.
+                    %dt
+                      Confidence
+                    %dd
+                      Indicates the applicability domain of a model.
+                      Predictions with a high confidence can be expected to be more reliable than predictions with low confidence.
+                      Confidence values may take any value between 0 and 1.
+                      For most models confidence > 0.025 is a sensible (hard) cutoff to distiguish between reliable and unreliable predictions.
                   = p.data_entries[0][1].round(3)
                 %br
                 %a{:href=> "#tabs", :id=>"link#{count}"}

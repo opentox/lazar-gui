@@ -1,10 +1,4 @@
 :javascript
-
-  function getsmiles() {
-    if (document.JME.smiles() != '') {
-      document.form.identifier.value = document.JME.smiles() ;
-    };
-  };
   function checksmiles () {
     if (document.form.identifier.value == "") {
       alert("Please insert a compound.");
@@ -21,6 +15,19 @@
     };
     return true;
   };
+  function jsmeOnLoad() {
+    jsmeApplet = new JSApplet.JSME("appletContainer", "380px", "340px", {
+      //optional parameters
+      "options" : "polarnitro"
+    });
+  document.JME = jsmeApplet;
+  };
+  function getsmiles() {
+    if (document.JME.smiles() != '') {
+      document.form.identifier.value = document.JME.smiles() ;
+    };
+  };
+
 
 / whole site content needs to be in one form. Input and checkboxes are checked by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
@@ -32,19 +39,10 @@
         $("#insert").toggle();
         document.location = document.location + "#" + "insert";
       });
-    #insert{:style=>"display: none"}
+    #insert
       %p
       %label &nbsp;
-      .jme
-        %applet{:code => "JME.class", :name => "JME", :archive => "JME.jar", :width => "500", :height => "360"}
-          %param{ :name => "progressbar", :value => "true"}
-          %param{ :name => "options", :value => "polarnitro"}
-          Please enable Java and JavaScript in your browser to use the JME editor.
-        %a{:href => "jme_help", :rel => "external"} (help)
-        %span{:style=>"font-size:75%"}
-          &copy;
-          %a{:href => 'http://www.molinspiration.com/jme/index.html', :rel => "external"} JME Editor
-          courtesy of Peter Ertl, Novartis
+      #appletContainer
       %br
       %label{:for => 'identifier'}
         or enter the
