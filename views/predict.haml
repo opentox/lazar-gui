@@ -69,8 +69,11 @@
       });
       
     #models{ :style => "display: none;"}
-      %p Please observe validation report for details.
-      %br    
+      %i Please observe validation report for model details.
+
+      // TODO order models by echa endpoint currently manually added and to find in model.type[0].split("#").last
+      #endpoint
+        %b= "Carcinogenicity:"
       - @models.each do |model|
         #model
           %input{:type => "checkbox", :name => "selection[#{model.title}]", :id => "selection[#{model.title}]", :value => true, :disabled => false}

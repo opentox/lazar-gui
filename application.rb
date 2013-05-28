@@ -16,7 +16,6 @@ end
 
 get '/predict/?' do
   @models = OpenTox::Model.all $model[:uri]
-  $logger.debug "Models:\n#{@models.inspect}"
   haml :predict
 end
 
