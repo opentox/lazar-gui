@@ -84,9 +84,9 @@
                   Details
             -#%tbody
             - count = 0
-            / prevent conversion of nil
-            - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : ''
             - p.compounds.each do |neighbor_compound|
+              / prevent conversion of nil
+              - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : ''
               %tr
                 %td.compound
                   %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"", :width=>"100px"}
