@@ -59,8 +59,8 @@ body
   #back-top
     z-index: 100
     position: fixed
-    bottom: 6%
-    margin-left: 150px
+    bottom: 3%
+    margin-left: 91%
     
     a:hover
       color: #bbb
@@ -142,17 +142,29 @@ body
       border: 1px solid #dad9c7
       padding-left: 1em
     #overview tr td#compound
-      width: 150px
+      width: 200px
 
-    #overview tr td.true
+    #overview tr td.ctrue
       padding-top: 0.5em
-      background-color: adjust-lightness(#D40000, 15%)
+      background-color: adjust-lightness(#D42200, 20%)
       +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
 
-    #overview tr td.false
+    #overview tr td.cfalse
       padding-top: 0.5em
       background-color: adjust-lightness(#5C8533, 15%)
       +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+
+    #overview tr td.c1
+      padding-top: 0.5em
+      background-color: adjust-lightness(#D42200, 20%)
+      +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+
+    #overview tr td.c0
+      padding-top: 0.5em
+      background-color: adjust-lightness(#5C8533, 15%)
+      +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)      
+      .confidence
+        display: inline
     
       
   .error
@@ -184,7 +196,7 @@ body
   overflow-y: hidden
   margin-top: 2em
   margin-bottom: 2em
-  +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
   
   .tablesorter
     width: 100%
@@ -201,23 +213,29 @@ body
           margin-left: -1px
         th.headerSortDown 
           background-image: url("/images/desc.gif") 
-          background-color: adjust-lightness($ist-color, 10%)
+          background-color: $ist-color
         th.headerSortUp 
           background-image: url("/images/asc.gif") 
-          background-color: adjust-lightness($ist-color, 10%)
+          background-color: $ist-color
 
 
     tbody
-          
-      tr td.false
+      tr td
+        +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
+      tr td.compound
+        width: 200px  
+      tr td.cfalse
         text-align: center
-        background-color: adjust-lightness(#5C8533, 15%)
-        +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-      tr td.true
+        color: #5C8533
+      tr td.ctrue
         text-align: center
-        background-color: adjust-lightness(#D40000, 15%)
-        +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-
+        color: #D42200
+      tr td.c0
+        text-align: center
+        color: #5C8533
+      tr td.c1
+        text-align: center
+        color: #D42200
           
           
 input#predict
@@ -229,11 +247,10 @@ input#predict
 .tooltip
   background-color: #fff
   border: 2px solid #ccc
+  font-size: 0.5em
   padding: 1em
   display: none
   z-index: 50
-  
-
   
 .footer
   margin: 20px 0 20px 0

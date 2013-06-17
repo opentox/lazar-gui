@@ -49,19 +49,24 @@
             });
           });
           $('a#confidence').tooltip({
-            predelay: 800,
+            predelay: 300,
+            position: 'bottom center',
+            offset: [-100, 0],
+          });
+          $('a#result').tooltip({
+            predelay: 300,
             position: 'bottom center',
             offset: [-100, 0],
           });
           $('a#similarity').tooltip({
-            predelay: 800,
+            predelay: 300,
             position: 'bottom center',
             offset: [-600, 0],
           });
           $('a#measured_activity').tooltip({
-            predelay: 800,
+            predelay: 300,
             position: 'bottom center',
-            offset: [-450, 0],
+            offset: [-500, 0],
           });
         });
       #back-top

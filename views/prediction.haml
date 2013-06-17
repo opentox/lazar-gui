@@ -27,33 +27,62 @@
                 });
               });
           - count=0
-          / var for rule to load neighbours page.
-          - @@neighbours_available = 1
+          / var for rule to load neighbors page.
+          - @@neighbors_available = 1
           - @@predictions.each do |pa|
             / prediction of one model
             - pa.each do |p|
-              / p.data_entries > 1 = neighbours available
-              - $logger.debug "count data_entries: #{p.data_entries.length}"
-              - p.data_entries.length > 1 ? @@neighbours_available = p.data_entries.length : @@neighbours_available
-              %td{:class => p.data_entries[0][0]}
+              / p.data_entries > 1 = neighbors available
+              - p.data_entries.length > 1 ? @@neighbors_available = p.data_entries.length : @@neighbors_available
+              / prevent conversion of nil
+              - c = p.data_entries[0][0] != nil ? p.data_entries[0][0] : ''
+              / define color by class; number first is not allowed for css
+              %td{:class => "c"+c}
                 %b{:class => "title"}
                   = @@prediction_models[count].title
                 %br
                 %br            
-                  = "Result:\n"
+                  = "Result:"
                   %b= p.data_entries[0][0] != nil ? p.data_entries[0][0] : "No prediction result"
-                %br
-                  %a{:href=>"#", :title=>"", :id=>"confidence"} Confidence
+                  %a{:href=>"#result", :title=>"", :id=>"result"}
+                    %img{:src=>"/images/info_white.png"}
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
                     %dt
-                      Confidence
+                      Result
                     %dd
-                      Indicates the applicability domain of a model.
-                      Predictions with a high confidence can be expected to be more reliable than predictions with low confidence.
-                      Confidence values may take any value between 0 and 1.
-                      For most models confidence > 0.025 is a sensible (hard) cutoff to distiguish between reliable and unreliable predictions.
-                  = p.data_entries[0][1].round(3)
+                      %code lazar 
+                      calculates searches the training dataset for similar compounds (neighbors) 
+                      and calculates the prediction from their measured activities. lazar 
+                      calculates predictions using
+                      %ul
+                        %li a majority vote (weighted by compound similarity) for 
+                        %em classification 
+                        (
+                        %a{:href=>"http://www.in-silico.de/articles/modi020905.pdf"} original publication
+                        )
+                        %li a local QSAR model based on neighbors for
+                        %em regression
+                        (
+                        %a{:href=>"http://www.in-silico.de/articles/mh_tf.pdf"} original publication
+                        )
+                      Please keep in mind that predictions are based on the measured activities of neighbors.
                 %br
+                  .confidence
+                    %b Confidence:
+                    = p.data_entries[0][1] != nil ? p.data_entries[0][1].round(3) : "No prediction result"
+                    %a{:href=>"#confidence", :title=>"", :id=>"confidence"}
+                      %img{:src=>"/images/info_white.png"}
+                    .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
+                      %dt
+                        Confidence
+                      %dd
+                        Indicates the applicability domain of a model.
+                        Predictions with a high confidence can be expected to be more reliable than predictions 
+                        with low confidence.
+                        Confidence values may take any value between 0 and 1.
+                        For most models confidence > 0.025 is a sensible (hard) cutoff to distiguish between 
+                        reliable and unreliable predictions.
+                  %br
                 %a{:href=> "#tabs", :id=>"link#{count}"}
                   %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow"}
                   :javascript
@@ -64,9 +93,9 @@
                     });
               - count+=1
   
-  - if @@neighbours_available > 1
-    = haml :neighbours, :layout => false
+  - if @@neighbors_available > 1
+    = haml :neighbors, :layout => false
   - else
     %h2
-      no neighbours available             
-%iframe{:id=>"iframe_overview", :name=>"details_overview", :height=>"80%", :width=>"80%", :style=>"display:none;border:0px"}            
+      no neighbors available             
+%iframe{:id=>"iframe_overview", :name=>"details_overview", :height=>"90%", :width=>"90%", :style=>"display:none;border:0px"}            

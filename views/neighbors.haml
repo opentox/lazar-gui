@@ -1,6 +1,6 @@
 / @@prediction_models and @@predictions defined in POST request '/predict'
 / unpacks multi prediction array ;
-/ prepare it for neighbours ;
+/ prepare it for neighbors ;
 / align single prediction to endpoint ;
 / display preordered in table view ;
 
@@ -28,9 +28,9 @@
       - count_rs += 1
       #results{:id=>"#{count_rs}"}
         - pa.each do |p|
-          / prepare dataset for neighbours table ;
+          / prepare dataset for neighbors table ;
           / delete first array which contains input compound prediction ;
-          / keep the following arrays they are the neighbour predictions ;
+          / keep the following arrays they are the neighbor predictions ;
           - p.data_entries.shift
           - p.compounds.shift
           / call the tablesorter plugin ;
@@ -45,21 +45,25 @@
               });
             });
           / TODO catch table error if tbody is empty      
-          %h2= "Neighbours: "
+          %h2= "Neighbors: "
           %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
             %thead
               %tr
                 %th
                   Compound
                 %th
-                  %a{:href=>"#", :title=>"", :id=>"measured_activity"} Measured Activity
+                  %b Measured Activity
+                  %a{:href=>"#", :title=>"", :id=>"measured_activity"}
+                    %img{:src=>"/images/info_white.png"}
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
                     %dt
                       Measured Activity
                     %dd
                       Experimental result(s) from the training dataset.
                 %th
-                  %a{:href=>"#", :title=>"", :id=>"similarity"} Similarity
+                  %b Similarity
+                  %a{:href=>"#", :title=>"", :id=>"similarity"}
+                    %img{:src=>"/images/info_white.png"}
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
                     %dt
                       Similarity
@@ -71,24 +75,26 @@
                       similarities based on the presence of statistically significant fragments.
                       This procedure will
                       %ul
-                        %li consider only those parts of a chemical structure that are relevant for a particular endpoint
+                        %li consider only those parts of a chemical structure that are relevant 
+                        for a particular endpoint
                         %li ignore inert parts of the structure
                         %li lead to different similarities, depending on the toxic endpoint
-                        Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.
+                        Similarities of 1 may be encountered even for structurally dissimilar 
+                        compounds, because inert parts are ignored.
                 %th
                   Details
             -#%tbody
             - count = 0
-            - p.compounds.each do |neighbour_compound|
+            - p.compounds.each do |neighbor_compound|
               %tr
-                %td
-                  %img{:src=>"#{neighbour_compound.uri}/image", :alt=>"", :width=>"100px"}
-                %td{:class => p.data_entries[count][2]}
+                %td.compound
+                  %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"", :width=>"100px"}
+                %td{:class => "c"+p.data_entries[count][2]}
                   = p.data_entries[count][2]
-                %td{:class => p.data_entries[count][2]}
-                  = p.data_entries[count][3].round(3)                  
-                %td{:class => p.data_entries[count][2]}
-                  %a{:href => to("/prediction/#{CGI.escape(neighbour_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
+                %td{:class => "c"+p.data_entries[count][2]}
+                  = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "No prediction result"            
+                %td{:class => "c"+p.data_entries[count][2]}
+                  %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                   :javascript
                     $(function() {
@@ -99,4 +105,4 @@
                     
                 - count += 1
 
-%iframe{:id=>"iframe", :name=>"details", :height=>"80%", :width=>"80%", :style=>"display:none;border:0px"}
+%iframe{:id=>"iframe", :name=>"details", :height=>"90%", :width=>"90%", :style=>"display:none;border:0px"}

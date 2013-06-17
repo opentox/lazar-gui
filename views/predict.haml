@@ -78,9 +78,9 @@
         #model
           %input{:type => "checkbox", :name => "selection[#{model.title}]", :id => "selection[#{model.title}]", :value => true, :disabled => false}
           %label{:for => "selection[#{model.title}]"}
-            %b= model.title
+            = "DSSTox Carcinogenic Potency DBS "+model.title.split(" ").first
           %a{:href=>"#", :alt=>"#{model.title} validation"}
-            %i Validation Link
+            %i ( Validation Link )
           %br
           
       .close

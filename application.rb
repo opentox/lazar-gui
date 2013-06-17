@@ -24,14 +24,13 @@ get '/jme_help/?' do
 end
 
 # best way to get individual compound uri for details
-get '/prediction/:neighbour/details/?' do
-  @compound_uri = OpenTox::Compound.new params[:neighbour]
+get '/prediction/:neighbor/details/?' do
+  @compound_uri = OpenTox::Compound.new params[:neighbor]
   @smiles = @compound_uri.smiles
   task = OpenTox::Task.run("look for names.") do
     names = @compound_uri.names
   end
   task.wait
-  $logger.debug "names task uri: #{task.uri}"
   case task[RDF::OT.hasStatus]
   when "Error"
     @names = "There are no names for this compound available."
@@ -71,13 +70,11 @@ post '/predict/?' do
     # gather models from service and compare if selected
     #TODO compare selected by uri
     params[:selection].each do |model|
-      $logger.debug "Model inspect in POST:\n#{model.inspect}"
       @mselected = model[0]
       @mall = OpenTox::Model.all $model[:uri]
       @mall.each do |m|
         @@prediction_models << m if m.title =~ /#{@mselected}/
       end
-      $logger.debug "@prediction_models: #{@@prediction_models.inspect}"
     end
 
     # predict with selected models
