@@ -1,10 +1,14 @@
 %link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
 
 .content
+  %button{:id=>"closebutton", :onclick=>"parent.$('#iframe').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
+    X
+    
   .details
-    %h2
+    %h2{:style=>"margin-top:0px"}
       Details:
-    %img{:src=>"#{@compound_uri.uri}/image", :alt=>"", :width=>"100px"}
+    %img{:src=>"#{@compound_uri.uri}/image", :alt=>"", :width=>"300px", :heigth=>"300px"}
+    %br
     %br
     %b
       SMILES:

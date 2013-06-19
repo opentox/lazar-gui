@@ -1,7 +1,7 @@
 :javascript
   function checksmiles () {
     if (document.form.identifier.value == "") {
-      alert("Please insert a compound.");
+      alert("Please draw or insert a chemical structure.");
       document.form.identifier.focus();
       return false;
     };
@@ -29,11 +29,11 @@
   };
 
 
-/ whole site content needs to be in one form. Input and checkboxes are checked by js functions. 
+/ whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
   %fieldset#top
     %a{:href => "#", :id => "linkInsert"}
-      %h1 1. Draw or insert your compound   
+      %h1 1. Draw a chemical structure
     :javascript
       $("a#linkInsert").click(function () {
         $("#insert").toggle();
@@ -52,7 +52,7 @@
         
       
       .close
-        = hide_link "#insert"
+        -#= hide_link "#insert"
     
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow", :class=> "arrow"}
@@ -68,7 +68,7 @@
         document.location = document.location + "#" + "models";
       });
       
-    #models{ :style => "display: none;"}
+    #models
       %i Please observe validation report for model details.
 
       // TODO order models by echa endpoint currently manually added and to find in model.type[0].split("#").last
@@ -80,11 +80,11 @@
           %label{:for => "selection[#{model.title}]"}
             = "DSSTox Carcinogenic Potency DBS "+model.title.split(" ").first
           %a{:href=>"#", :alt=>"#{model.title} validation"}
-            %i ( Validation Link )
+            %i ( Validation report )
           %br
           
       .close
-        = hide_link "#models"
+        -#= hide_link "#models"
 
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow", :class=> "arrow"}

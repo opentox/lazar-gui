@@ -16,7 +16,7 @@
         %tr
           %td{:id=>"compound"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
-              %img{:src=>"#{@compound.uri}/image", :alt=>"image not available", :width=>"100"}
+              %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"100"}
             %br
             %br
             %img{:src=>"/images/arrow_up_float.png", :alt=>"arrow"}
@@ -41,31 +41,38 @@
                 %b{:class => "title"}
                   = @@prediction_models[count].title
                 %br
-                %br            
-                  = "Result:"
-                  %b= p.data_entries[0][0] != nil ? p.data_entries[0][0] : "No prediction result"
-                  %a{:href=>"#result", :title=>"", :id=>"result"}
-                    %img{:src=>"/images/info_white.png"}
-                  .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
-                    %dt
-                      Result
-                    %dd
-                      %code lazar 
-                      calculates searches the training dataset for similar compounds (neighbors) 
-                      and calculates the prediction from their measured activities. lazar 
-                      calculates predictions using
-                      %ul
-                        %li a majority vote (weighted by compound similarity) for 
-                        %em classification 
-                        (
-                        %a{:href=>"http://www.in-silico.de/articles/modi020905.pdf"} original publication
-                        )
-                        %li a local QSAR model based on neighbors for
-                        %em regression
-                        (
-                        %a{:href=>"http://www.in-silico.de/articles/mh_tf.pdf"} original publication
-                        )
-                      Please keep in mind that predictions are based on the measured activities of neighbors.
+                %br
+                  .result
+                    - if c != ''
+                      - if c == 0||"false"
+                        %image{:src=>"/images/greendot.png"}
+                      - elsif c == 1||"true"
+                        %image{:src=>"/images/reddot.png"}
+
+                    %b Result:
+                    %b= p.data_entries[0][0] != nil ? p.data_entries[0][0] : "No prediction result"
+                    %a{:href=>"#result", :title=>"", :id=>"result"}
+                      %img{:src=>"/images/info_white.png"}
+                    .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
+                      %dt
+                        Result
+                      %dd
+                        %code lazar 
+                        calculates searches the training dataset for similar compounds (neighbors) 
+                        and calculates the prediction from their measured activities. lazar 
+                        calculates predictions using
+                        %ul
+                          %li a majority vote (weighted by compound similarity) for 
+                          %em classification 
+                          (
+                          %a{:href=>"http://www.in-silico.de/articles/modi020905.pdf"} original publication
+                          )
+                          %li a local QSAR model based on neighbors for
+                          %em regression
+                          (
+                          %a{:href=>"http://www.in-silico.de/articles/mh_tf.pdf"} original publication
+                          )
+                        Please keep in mind that predictions are based on the measured activities of neighbors.
                 %br
                   .confidence
                     %b Confidence:
@@ -97,5 +104,5 @@
     = haml :neighbors, :layout => false
   - else
     %h2
-      no neighbors available             
-%iframe{:id=>"iframe_overview", :name=>"details_overview", :height=>"90%", :width=>"90%", :style=>"display:none;border:0px"}            
+      no neighbors available
+%iframe{:id=>"iframe_overview", :name=>"details_overview", :height=>"90%", :width=>"90%", :style=>"display:none;border:0px"}

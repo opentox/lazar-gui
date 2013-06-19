@@ -5,7 +5,8 @@ $bg-color: #CCCCFF
 $bg-color-div: #C5C1E4
 //$ist-color: #B9DCFF
 $i-color: #C8AB37
-$ist-color: adjust-lightness($i-color, 17%)
+//$ist-color: adjust-lightness($i-color, 17%)
+$ist-color: #C5C1E4
 
 body
   background-image: url("/images/gray_jean.png")
@@ -128,6 +129,7 @@ body
     background-image: url("/images/gray_jean.png")
     padding: 12px
     margin-top: 1em
+    margin-bottom: 1em
     text-align: center
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
     +border-top-left-radius(25px)
@@ -137,6 +139,9 @@ body
     caption
       text-align: left
     
+    .result
+      display: inline
+        
     #overview tr td
       background-color: white
       border: 1px solid #dad9c7
@@ -146,23 +151,23 @@ body
 
     #overview tr td.ctrue
       padding-top: 0.5em
-      background-color: adjust-lightness(#D42200, 20%)
-      +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+      //background-color: adjust-lightness(#D42200, 20%)
+      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
 
     #overview tr td.cfalse
       padding-top: 0.5em
-      background-color: adjust-lightness(#5C8533, 15%)
-      +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+      //background-color: adjust-lightness(#5C8533, 15%)
+      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
 
     #overview tr td.c1
       padding-top: 0.5em
-      background-color: adjust-lightness(#D42200, 20%)
-      +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+      //background-color: adjust-lightness(#D42200, 20%)
+      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
 
     #overview tr td.c0
       padding-top: 0.5em
-      background-color: adjust-lightness(#5C8533, 15%)
-      +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)      
+      //background-color: adjust-lightness(#5C8533, 15%)
+      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)      
       .confidence
         display: inline
     
@@ -181,10 +186,18 @@ body
       border: 2px solid #FF5555
       background-color: #FFFFFF
       color: #FF5555
+      
+  #closebutton
+    margin-left: 95%
+    padding: 0
+    background-color: $ist-color
+    //display: inline
+    +border-bottom-left-radius(5px)
+    +border-bottom-right-radius(5px)
   
 .details
   margin-bottom: 2em
-  height: 400px
+  //height: 400px
   background-image: url("/images/gray_jean.png")
   +border-bottom-left-radius(25px)
   +border-bottom-right-radius(25px)
