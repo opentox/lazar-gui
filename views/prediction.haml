@@ -36,47 +36,45 @@
               - p.data_entries.length > 1 ? @@neighbors_available = p.data_entries.length : @@neighbors_available
               / prevent conversion of nil
               - c = p.data_entries[0][0] != nil ? p.data_entries[0][0] : ''
-              / define color by class; number first is not allowed for css
-              %td{:class => "c"+c}
+              - case c
+              - when /(0|false)/
+                - c = "non-carcinogen"
+              - when /(1|true)/
+                - c = "carcinogen"
+              %td
                 %b{:class => "title"}
                   = @@prediction_models[count].title
                 %br
                 %br
-                  .result
-                    - if c != ''
-                      - if c == 0||"false"
-                        %image{:src=>"/images/greendot.png"}
-                      - elsif c == 1||"true"
-                        %image{:src=>"/images/reddot.png"}
-
-                    %b Result:
-                    %b= p.data_entries[0][0] != nil ? p.data_entries[0][0] : "No prediction result"
-                    %a{:href=>"#result", :title=>"", :id=>"result"}
-                      %img{:src=>"/images/info_white.png"}
-                    .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
-                      %dt
-                        Result
-                      %dd
-                        %code lazar 
-                        calculates searches the training dataset for similar compounds (neighbors) 
-                        and calculates the prediction from their measured activities. lazar 
-                        calculates predictions using
-                        %ul
-                          %li a majority vote (weighted by compound similarity) for 
-                          %em classification 
-                          (
-                          %a{:href=>"http://www.in-silico.de/articles/modi020905.pdf"} original publication
-                          )
-                          %li a local QSAR model based on neighbors for
-                          %em regression
-                          (
-                          %a{:href=>"http://www.in-silico.de/articles/mh_tf.pdf"} original publication
-                          )
-                        Please keep in mind that predictions are based on the measured activities of neighbors.
+                  %b Result:
+                  %b{:class => c[0]}
+                    = (c != '' ? c : "No prediction result.")
+                  %a{:href=>"#result", :title=>"", :id=>"result"}
+                    %img{:src=>"/images/info_white.png"}
+                  .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
+                    %dt
+                      Result
+                    %dd
+                      %code lazar 
+                      calculates searches the training dataset for similar compounds (neighbors) 
+                      and calculates the prediction from their measured activities. lazar 
+                      calculates predictions using
+                      %ul
+                        %li a majority vote (weighted by compound similarity) for 
+                        %em classification 
+                        (
+                        %a{:href=>"http://www.in-silico.de/articles/modi020905.pdf"} original publication
+                        )
+                        %li a local QSAR model based on neighbors for
+                        %em regression
+                        (
+                        %a{:href=>"http://www.in-silico.de/articles/mh_tf.pdf"} original publication
+                        )
+                      Please keep in mind that predictions are based on the measured activities of neighbors.
                 %br
                   .confidence
                     %b Confidence:
-                    = p.data_entries[0][1] != nil ? p.data_entries[0][1].round(3) : "No prediction result"
+                    = p.data_entries[0][1] != nil ? p.data_entries[0][1].round(3) : ""
                     %a{:href=>"#confidence", :title=>"", :id=>"confidence"}
                       %img{:src=>"/images/info_white.png"}
                     .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}

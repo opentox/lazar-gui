@@ -87,14 +87,19 @@
             - p.compounds.each do |neighbor_compound|
               / prevent conversion of nil
               - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : ''
+              - case c
+              - when /(0|false)/
+                - c = "non-carcinogen"
+              - when /(1|true)/
+                - c = "carcinogen"
               %tr
                 %td.compound
                   %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"", :width=>"100px"}
-                %td{:class => "c"+c}
-                  = p.data_entries[count][2]
-                %td{:class => "c"+c}
-                  = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "No prediction result"            
-                %td{:class => "c"+c}
+                %td{:class => c[0]}
+                  = c #p.data_entries[count][2]
+                %td{:class => c[0]}
+                  = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset."            
+                %td
                   %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
                     %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
                   :javascript

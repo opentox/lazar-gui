@@ -2,10 +2,6 @@
 @import compass/css3
 
 $bg-color: #CCCCFF
-$bg-color-div: #C5C1E4
-//$ist-color: #B9DCFF
-$i-color: #C8AB37
-//$ist-color: adjust-lightness($i-color, 17%)
 $ist-color: #C5C1E4
 
 body
@@ -15,7 +11,6 @@ body
   font-family: sans-serif
   min-width: 800px
   min-heigth: 600px
-  
   a
     text-decoration: none
     font-weight: bold
@@ -26,46 +21,32 @@ body
     float: left
     display: inline
     margin-right: 1em
-  h1
-    //position: relative
-    //top: 6px
-    //left: 20px
-
   
 .content
-
   background-image: url("/images/gray_jean.png")
-      
   h1
     margin: 0.3em
     text-shadow: #FFF 1px 1px 0
     font-size: x-large
     font-family: Verdana
     display: inline
-    
   h2
     text-shadow: #FFF 1px 1px 0
     font-size: x-large
     color: #FF5555 
-    
   .arrow
     margin: 5px 0px 5px 20px
-    
   .back
     display: inline
- 
-  .close
-    text-align: right
-    
+  //.close
+    //text-align: right
   #back-top
     z-index: 100
     position: fixed
     bottom: 3%
     margin-left: 91%
-    
     a:hover
       color: #bbb
-    
   fieldset#top
     a#linkInsert
       display: block
@@ -78,12 +59,8 @@ body
     +border-top-right-radius(25px)
     +background-clip(border-box)
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    
     #appletContainer
       padding: 10px
-    
-      
-    
   fieldset#middle
     a#linkModels
       display: block
@@ -93,14 +70,11 @@ body
     padding: 10px
     background-color: $ist-color
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    
     #endpoint
       padding-top: 2em
-    
     #model a
       display: inline
       font-weight: normal
-    
   fieldset#bottom
     border: 0
     background-color: $ist-color
@@ -110,12 +84,8 @@ body
     +border-bottom-left-radius(25px)
     +border-bottom-right-radius(25px)
     +background-clip(border-box)
-    label
-      //cursor: pointer
-    
     input#predict
       margin-left: 1em
-  
   .predictions
     background-color: $ist-color
     padding: 10px
@@ -124,7 +94,6 @@ body
     +border-left-radius(25px)
     +border-right-radius(25px)
     +background-clip(border-box)
-
   .overview
     background-image: url("/images/gray_jean.png")
     padding: 12px
@@ -135,45 +104,22 @@ body
     +border-top-left-radius(25px)
     +border-top-right-radius(25px)
     +background-clip(border-box)
-    
     caption
       text-align: left
-    
-    .result
-      display: inline
-        
     #overview tr td
       background-color: white
       border: 1px solid #dad9c7
       padding-left: 1em
-    #overview tr td#compound
-      width: 200px
-
-    #overview tr td.ctrue
       padding-top: 0.5em
-      //background-color: adjust-lightness(#D42200, 20%)
-      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-
-    #overview tr td.cfalse
-      padding-top: 0.5em
-      //background-color: adjust-lightness(#5C8533, 15%)
-      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-
-    #overview tr td.c1
-      padding-top: 0.5em
-      //background-color: adjust-lightness(#D42200, 20%)
-      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-
-    #overview tr td.c0
-      padding-top: 0.5em
-      //background-color: adjust-lightness(#5C8533, 15%)
-      //+box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)      
+      #compound
+        width: 200px
+      b.c
+        color: #D42200
+      b.n
+        color: #5C8533
       .confidence
         display: inline
-    
-      
   .error
-    //height: 200px
     background-color: $ist-color
     padding: 10px
     text-align: justify
@@ -181,23 +127,20 @@ body
     +border-left-radius(25px)
     +border-right-radius(25px)
     +background-clip(border-box)
-    
     error
       border: 2px solid #FF5555
       background-color: #FFFFFF
       color: #FF5555
-      
+  // close button for iframe also in content class
   #closebutton
     margin-left: 95%
     padding: 0
     background-color: $ist-color
-    //display: inline
     +border-bottom-left-radius(5px)
     +border-bottom-right-radius(5px)
-  
+    
 .details
   margin-bottom: 2em
-  //height: 400px
   background-image: url("/images/gray_jean.png")
   +border-bottom-left-radius(25px)
   +border-bottom-right-radius(25px)
@@ -210,7 +153,6 @@ body
   margin-top: 2em
   margin-bottom: 2em
   +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
-  
   .tablesorter
     width: 100%
     thead
@@ -230,27 +172,18 @@ body
         th.headerSortUp 
           background-image: url("/images/asc.gif") 
           background-color: $ist-color
-
-
     tbody
       tr td
         +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
-      tr td.compound
+      .compound
         width: 200px  
-      tr td.cfalse
+      .n
         text-align: center
         color: #5C8533
-      tr td.ctrue
+      .c
         text-align: center
         color: #D42200
-      tr td.c0
-        text-align: center
-        color: #5C8533
-      tr td.c1
-        text-align: center
-        color: #D42200
-          
-          
+        
 input#predict
   border: 0px
   background-color: $ist-color
@@ -267,4 +200,3 @@ input#predict
   
 .footer
   margin: 20px 0 20px 0
-  
