@@ -7,8 +7,9 @@
     };
     return true;
   };
+  //TODO change function for IE; true instead length does not work !
   function checkboxes () {
-    if ($("#model input[type=checkbox]:checked") == true ){
+    if ($("#model input[type=checkbox]:checked").length < 1 ){
       alert("Please select an endpoint.")
       document.getElementById('model').focus();
       return false;
@@ -28,8 +29,7 @@
     };
   };
 
-
-/ whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
+// whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
   %fieldset#top
     %a{:href => "#", :id => "linkInsert"}
