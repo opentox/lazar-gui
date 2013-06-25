@@ -124,13 +124,14 @@ body
         display: inline
   .error
     background-color: $ist-color
-    padding: 10px
-    text-align: justify
+    padding: 15px
     +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
     +border-left-radius(25px)
     +border-right-radius(25px)
     +background-clip(border-box)
-    error
+    .message
+      margin-top: 1em
+      padding: 0.2em
       border: 2px solid #FF5555
       background-color: #FFFFFF
       color: #FF5555

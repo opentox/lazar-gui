@@ -57,7 +57,7 @@ post '/predict/?' do
   # case task completed go ahead
   case task[RDF::OT.hasStatus]
   when "Error"
-    @error_report = "Attention, #{@identifier} is not a valid SMILES string."
+    @error_report = "Attention, '#{params[:identifier]}' is not a valid SMILES string."
     haml :error
   when "Completed"
     @identifier = params[:identifier]
@@ -69,12 +69,10 @@ post '/predict/?' do
     lazar = OpenTox::Algorithm.new File.join($algorithm[:uri],"lazar")
     # gather models from service and compare if selected
     #TODO compare selected by uri
-    $logger.debug params[:selection]
     params[:selection].each do |model|
       @mselected = model[0]
       @mall = OpenTox::Model.all $model[:uri]
       @mall.each do |m|
-        $logger.debug m.inspect
         @@prediction_models << m if m.title =~ /#{@mselected}/
       end
     end
@@ -83,7 +81,6 @@ post '/predict/?' do
     # results in prediction variable
     # store prediction in array for better handling
     @@prediction_models.each do |m|
-      $logger.debug m.inspect
       @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
       prediction = OpenTox::Dataset.new @prediction_uri
       pa = []
