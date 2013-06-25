@@ -8,7 +8,7 @@
     return true;
   };
   function checkboxes () {
-    if ($("#model input[type=checkbox]:checked").length < 1 ){
+    if ($("#model input[type=checkbox]:checked") == true ){
       alert("Please select an endpoint.")
       document.getElementById('model').focus();
       return false;
@@ -49,14 +49,9 @@
         %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
         string:
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
-        
-      
-      .close
-        -#= hide_link "#insert"
     
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow", :class=> "arrow"}
-
    
   %fieldset#middle
     %a{:href => "#models", :id => "linkModels"}
@@ -82,18 +77,12 @@
           %a{:href=>"#", :alt=>"#{model.title} validation"}
             %i ( Validation report )
           %br
-          
-      .close
-        -#= hide_link "#models"
 
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow", :class=> "arrow"}
-  
 
   %fieldset#bottom
     %a{:href => "#predict", :id => "linkPredict"}
       %label{:for => "submit"}
         %h1 3. Predict
       %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
-
-    
