@@ -51,7 +51,7 @@
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
     
   .arrow
-    %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow", :class=> "arrow"}
+    %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
    
   %fieldset#middle
     %a{:href => "#models", :id => "linkModels"}
@@ -71,18 +71,18 @@
         %b= "Carcinogenicity:"
       - @models.each do |model|
         #model
-          %input{:type => "checkbox", :name => "selection[#{model.title}]", :id => "selection[#{model.title}]", :value => true, :disabled => false}
-          %label{:for => "selection[#{model.title}]"}
-            = "DSSTox Carcinogenic Potency DBS "+model.title.split(" ").first
-          %a{:href=>"#", :alt=>"#{model.title} validation"}
+          - model_title = model.title.split(" ").first
+          %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+          %label{:for => "selection[#{model_title}]"}
+            = "DSSTox Carcinogenic Potency DBS "+model_title
+          %a{:href=>"#", :title=>"#{model_title} validation"}
             %i ( Validation report )
           %br
 
   .arrow
-    %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow", :class=> "arrow"}
+    %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
 
   %fieldset#bottom
-    %a{:href => "#predict", :id => "linkPredict"}
-      %label{:for => "submit"}
-        %h1 3. Predict
-      %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
+    %h1 
+      3. Predict
+    %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}

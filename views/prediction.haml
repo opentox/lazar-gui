@@ -1,7 +1,7 @@
 .predictions
   .back
     %h1
-      %img{:src=>"/images/arrow_left_float.png", :alt=>"arrow"}
+      %img{:src=>"/images/arrow_left_float.png", :alt=>"<"}
         %a{:href => to('/predict')} New Prediction
 
   / displays all prediction results
@@ -16,10 +16,10 @@
         %tr
           %td{:id=>"compound"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
-              %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"100"}
+              %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"150", :height=>"150"}
             %br
             %br
-            %img{:src=>"/images/arrow_up_float.png", :alt=>"arrow"}
+            %img{:src=>"/images/arrow_up_float.png", :alt=>"^"}
             :javascript
               $(function() {
                 $("a#linkCompound").on('click', function(e) {
@@ -49,6 +49,7 @@
                   %b Result:
                   %b{:class => c[0]}
                     = (c != '' ? c : "No prediction result.")
+                  / title must be empty for tooltip
                   %a{:href=>"#result", :title=>"", :id=>"result"}
                     %img{:src=>"/images/info_white.png"}
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
@@ -75,6 +76,7 @@
                   .confidence
                     %b Confidence:
                     = p.data_entries[0][1] != nil ? p.data_entries[0][1].round(3) : ""
+                    / title must be empty for tooltip
                     %a{:href=>"#confidence", :title=>"", :id=>"confidence"}
                       %img{:src=>"/images/info_white.png"}
                     .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
@@ -89,7 +91,7 @@
                         reliable and unreliable predictions.
                   %br
                 %a{:href=> "#tabs", :id=>"link#{count}"}
-                  %img{:src=>"/images/arrow_down_float.png", :alt=>"arrow"}
+                  %img{:src=>"/images/arrow_down_float.png", :alt=>"v"}
                   :javascript
                     $("a#link#{count}").click(function () {
                       $(".results").show();

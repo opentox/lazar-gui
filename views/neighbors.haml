@@ -12,9 +12,10 @@
       / each endpoint becomes a tab head ;
       - @@prediction_models.each do |m|
         - count_m += 1
+        - m_title = m.title.split(" ").first
         %li
-          %a{:href => "#results_#{count_m}", :id => "link#{m.title}"}
-            = m.title
+          %a{:href => "#results_#{count_m}", :id => "link#{m_title}"}
+            = m_title
     - count_rs = 0
     / unpack to single arrays
     - @@predictions.each do |pa|
@@ -46,6 +47,7 @@
                   Compound
                 %th
                   %b Measured Activity
+                  / title must be empty for tooltip
                   %a{:href=>"#", :title=>"", :id=>"measured_activity"}
                     %img{:src=>"/images/info_white.png"}
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
@@ -55,6 +57,7 @@
                       Experimental result(s) from the training dataset.
                 %th
                   %b Similarity
+                  / title must be empty for tooltip
                   %a{:href=>"#", :title=>"", :id=>"similarity"}
                     %img{:src=>"/images/info_white.png"}
                   .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
@@ -88,14 +91,14 @@
                 - c = "carcinogen"
               %tr
                 %td.compound
-                  %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"", :width=>"100px"}
+                  %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :width=>"150px"}
                 %td{:class => c[0]}
                   = c #p.data_entries[count][2]
                 %td{:class => c[0]}
                   = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset."            
                 %td
                   %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
-                    %img{:src=>"/images/arrow_right_float.png", :alt=>"arrow"}
+                    %img{:src=>"/images/arrow_right_float.png", :alt=>">"}
                   :javascript
                     $(function() {
                         $("a#link#{count_rs}#{count}").on('click', function(e) {
