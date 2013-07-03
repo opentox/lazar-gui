@@ -43,7 +43,7 @@
                 - c = "carcinogen"
               %td
                 %b{:class => "title"}
-                  = @@prediction_models[count].title
+                  = @@prediction_models[count].title.split(" ").first
                 %br
                 %br
                   %b Result:

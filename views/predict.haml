@@ -7,11 +7,15 @@
     };
     return true;
   };
-  //TODO change function for IE; true instead length does not work !
   function checkboxes () {
-    if ($("#model input[type=checkbox]:checked").length < 1 ){
+    var checked = false;
+    $('input[type="checkbox"]').each(function() {
+      if ($(this).is(":checked")) {
+        checked = true;
+      };
+    });
+    if (checked == false){
       alert("Please select an endpoint.")
-      document.getElementById('model').focus();
       return false;
     };
     return true;
@@ -70,8 +74,8 @@
       #endpoint
         %b= "Carcinogenicity:"
       - @models.each do |model|
-        #model
-          - model_title = model.title.split(" ").first
+        - model_title = model.title.split(" ").first
+        %div{:id => model_title}
           %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
           %label{:for => "selection[#{model_title}]"}
             = "DSSTox Carcinogenic Potency DBS "+model_title
