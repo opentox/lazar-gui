@@ -8,6 +8,10 @@ require_relative 'helper.rb'
 require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
 helpers do
+  # fetch models from uri-list
+  @@models = []
+  uris = `curl -Lk -X GET -H accept:text/uri-list #{$model[:uri]} `.chomp.split("\n")
+  uris.each{|u| m = OpenTox::Model::Lazar.find u; @@models << m}
 end
 
 get '/?' do
@@ -15,7 +19,7 @@ get '/?' do
 end
 
 get '/predict/?' do
-  @models = OpenTox::Model.all $model[:uri]
+  @models = @@models
   haml :predict
 end
 
@@ -66,12 +70,12 @@ post '/predict/?' do
     @@prediction_models = []
     @@predictions = []
     # init lazar algorithm
-    lazar = OpenTox::Algorithm.new File.join($algorithm[:uri],"lazar")
+    lazar = OpenTox::Algorithm::Fminer.new File.join($algorithm[:uri],"lazar")
     # gather models from service and compare if selected
     #TODO compare selected by uri
     params[:selection].each do |model|
       @mselected = model[0]
-      @mall = OpenTox::Model.all $model[:uri]
+      @mall = @@models
       @mall.each do |m|
         @@prediction_models << m if m.title =~ /#{@mselected}/
       end
