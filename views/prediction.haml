@@ -44,14 +44,23 @@
                 - c = "non-carcinogen"
               - when /(1|true)/
                 - c = "carcinogen"
+              - else
+                - c = Array.new
+                - c[0] = p.data_entries[0][0].round(3)
               %td
                 %b{:class => "title"}
                   = @@prediction_models[count].title.split(" ").first
                 %br
                 %br
+                  / classification, regression
+                  %b Type:
+                %br
                   %b Result:
                   %b{:class => c[0]}
-                    = (c != '' ? c : "No prediction result.")
+                    - if c.class == String
+                      = (c != '' ? c : "No prediction result.")
+                    - else
+                      = (c[0] != '' ? c[0] : "No prediction result.")
                   / title must be empty for tooltip
                   %a{:href=>"#result", :title=>"", :id=>"result"}
                     %img{:src=>"/images/info_white.png"}
