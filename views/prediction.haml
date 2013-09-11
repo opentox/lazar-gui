@@ -32,10 +32,13 @@
           - @@predictions.each do |pa|
             / prediction of one model
             - pa.each do |p|
+              - $logger.debug "inspect p: #{p.inspect}\n"
+              - $logger.debug "inspect data_entries: #{p.data_entries}\n"
               / p.data_entries > 1 = neighbors available
               - p.data_entries.length > 1 ? @@neighbors_available = p.data_entries.length : @@neighbors_available
               / prevent conversion of nil
               - c = p.data_entries[0][0] != nil ? p.data_entries[0][0] : ''
+              - $logger.debug "inspect c: #{c.inspect}\n"
               - case c
               - when /(0|false)/
                 - c = "non-carcinogen"

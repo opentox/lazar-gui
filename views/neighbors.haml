@@ -83,17 +83,21 @@
             - count = 0
             - p.compounds.each do |neighbor_compound|
               / prevent conversion of nil
-              - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : ''
+              - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : '' 
+              - $logger.debug "inspect c :#{c}\n"
               - case c
               - when /(0|false)/
                 - c = "non-carcinogen"
               - when /(1|true)/
                 - c = "carcinogen"
+              - else
+                - c = Array.new
+                - c[0] = p.data_entries[count][2]
               %tr
                 %td.compound
                   %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :width=>"150px"}
                 %td{:class => c[0]}
-                  = c #p.data_entries[count][2]
+                  = c[0] #p.data_entries[count][2]
                 %td{:class => c[0]}
                   = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset."            
                 %td
