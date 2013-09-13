@@ -46,7 +46,7 @@
                 - c = "carcinogen"
               - else
                 - c = Array.new
-                - c[0] = p.data_entries[0][0].round(3)
+                - c[0] = (p.data_entries[0][0].class == Float) ? p.data_entries[0][0].round(3) : (p.data_entries[0][0] != nil ? p.data_entries[0][0] : "no value")
               %td
                 %b{:class => "title"}
                   = @@prediction_models[count].title.split(" ").first

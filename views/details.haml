@@ -10,14 +10,11 @@
     %img{:src=>"#{@compound_uri.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px"}
     %br
     %br
-    %b
-      SMILES:
+    %b="SMILES:"
     %p= @smiles
     %br
-    %b
-      Names:
-    %p= @names.gsub(",", ";\t")
-    %br
-    %b
-      InChI:
+    %b="InChI:"
     %p= @inchi
+    %br
+    %b="Names:"
+    %p= @names.gsub(",", ";\t")
