@@ -1,0 +1,63 @@
+%link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
+/TODO put smiles in div if compound image is not available, prevent overlay to table
+.content
+  %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
+    X
+- if @type =~ /classification/i
+  .significant_fragments{:style=>"padding:0.5em;min-height:400px"}
+    %h2{:style=>"margin:0px;margin-left:8px;"}
+      Significant fragments:
+
+    %img{:src=>"#{@compound.uri}/image", :alt=>"#{@compound.smiles}", :title=>"#{@compound.smiles}", :width=>"300px", :heigth=>"300px"}
+    - if !@significant_fragments.empty?
+      %table{:id => "sf1"}
+        %tr
+          %th{:style=>"border:1px solid;"}
+            Predominantly in compounds with activity "non-carcinogen"
+          %th{:style=>"border:1px solid;"}
+            p value
+          - @significant_fragments.each do |fragments|
+            / fragments == [1||2, smarts, pValue]
+            - if fragments[0] == 1
+              %tr
+                %td
+                  = fragments[1]
+                %td
+                  = fragments[2]
+        %tr
+          %td
+            %br
+        %tr
+          %th{:style=>"border:1px solid;"}
+            Predominantly in compounds with activity "carcinogen"   
+          %th{:style=>"border:1px solid;"}
+            p value
+          - @significant_fragments.each do |fragments|
+            / fragments == [1||2, smarts, pValue]
+            - if fragments[0] == 2
+              %tr
+                %td
+                  = fragments[1]
+                %td
+                  = fragments[2]
+
+- if @type =~ /regression/i
+  .descriptors{:style=>"padding:0.5em;min-height:400px"}
+    %h2{:style=>"margin:0px;margin-left:8px;"}
+      Descriptors:
+
+    %img{:src=>"#{@compound.uri}/image", :alt=>"#{@compound.smiles}", :title=>"#{@compound.smiles}", :width=>"300px", :heigth=>"300px"}
+    - if !@significant_fragments.empty?
+      %table{:id => "sf2"}
+        %tr
+          %th{:style=>"border:1px solid;"}
+            Descriptor
+          %th{:style=>"border:1px solid;"}
+            value
+          - @significant_fragments.each do |fragments|
+            %tr
+              %td
+                = fragments[0]
+              %td
+                = fragments[1][0].round(3)
+

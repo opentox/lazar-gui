@@ -10,7 +10,7 @@
   #tabs
     %ul
       / each endpoint becomes a tab head ;
-      - @@prediction_models.each do |m|
+      - @prediction_models.each do |m|
         - count_m += 1
         - m_title = m.title.split(" ").first
         %li
@@ -18,15 +18,19 @@
             = m_title
     - count_rs = 0
     / unpack to single arrays
-    - @@predictions.each do |pa|
+    - @predictions.each do |pa|
+      / pass model type for significant fragments view
+      - @type = @model_type[count_rs]
       - count_rs += 1
       #results{:id=>"#{count_rs}"}
         - pa.each do |p|
           / prepare dataset for neighbors table ;
-          / delete first array which contains input compound prediction ;
-          / keep the following arrays they are the neighbor predictions ;
+          / delete first array which contains prediction ;
+          / following arrays are the neighbor predictions ;
+          - @model_uri = p.metadata[RDF::OT.hasSource][0]
           - p.data_entries.shift
           - p.compounds.shift
+          
           / call the tablesorter plugin ;
           / presort by similarity ;
           :javascript
@@ -38,81 +42,95 @@
                 sortList: [[2,1]]
               });
             });
-          / TODO catch table error if tbody is empty      
           %h2= "Neighbors: "
-          %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
-            %thead
-              %tr
-                %th
-                  Compound
-                %th
-                  %b Measured Activity
-                  / title must be empty for tooltip
-                  %a{:href=>"#", :title=>"", :id=>"measured_activity"}
-                    %img{:src=>"/images/info_white.png"}
-                  .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
-                    %dt
-                      Measured Activity
-                    %dd
-                      Experimental result(s) from the training dataset.
-                %th
-                  %b Similarity
-                  / title must be empty for tooltip
-                  %a{:href=>"#", :title=>"", :id=>"similarity"}
-                    %img{:src=>"/images/info_white.png"}
-                  .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
-                    %dt
-                      Similarity
-                    %dd
-                      %code lazar 
-                      calculates 
-                      %em
-                        activity specific 
-                      similarities based on the presence of statistically significant fragments.
-                      This procedure will
-                      %ul
-                        %li consider only those parts of a chemical structure that are relevant 
-                        for a particular endpoint
-                        %li ignore inert parts of the structure
-                        %li lead to different similarities, depending on the toxic endpoint
-                        Similarities of 1 may be encountered even for structurally dissimilar 
-                        compounds, because inert parts are ignored.
-                %th
-                  Details
-            -#%tbody
-            - count = 0
-            - p.compounds.each do |neighbor_compound|
-              / prevent conversion of nil
-              - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : '' 
-              - $logger.debug "inspect c :#{c}\n"
-              - case c
-              - when /(0|false)/
-                - c = "non-carcinogen"
-              - when /(1|true)/
-                - c = "carcinogen"
-              - else
-                - c = Array.new
-                - c[0] = p.data_entries[count][2]
-              %tr
-                %td.compound
-                  %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :width=>"150px"}
-                %td{:class => c[0]}
-                  - if c.class == String
-                    = c
-                  - else
-                    = c[0]
-                %td{:class => c[0]}
-                  = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset."            
-                %td
-                  %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
-                    %img{:src=>"/images/arrow_right_float.png", :alt=>">"}
-                  :javascript
-                    $(function() {
-                        $("a#link#{count_rs}#{count}").on('click', function(e) {
-                            $('#iframe').bPopup();
-                        });
-                    });
-                    
-                - count += 1
+          - $logger.debug "neighbors compounds:\t#{p.data_entries[0]}\n"
+          - if p.data_entries[0][2] != nil && p.data_entries[0].size != 3
+            %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
+              %thead
+                %tr
+                  %th
+                    Compound
+                  %th
+                    %b Measured Activity
+                    / title must be empty for tooltip
+                    %a{:href=>"#", :title=>"", :id=>"measured_activity"}
+                      %img{:src=>"/images/info_white.png"}
+                    .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
+                      %dt
+                        Measured Activity
+                      %dd
+                        Experimental result(s) from the training dataset.
+                  %th
+                    %b Similarity
+                    / title must be empty for tooltip
+                    %a{:href=>"#", :title=>"", :id=>"similarity"}
+                      %img{:src=>"/images/info_white.png"}
+                    .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
+                      %dt
+                        Similarity
+                      %dd
+                        %code lazar 
+                        calculates 
+                        %em
+                          activity specific 
+                        similarities based on the presence of statistically significant fragments.
+                        This procedure will
+                        %ul
+                          %li consider only those parts of a chemical structure that are relevant 
+                          for a particular endpoint
+                          %li ignore inert parts of the structure
+                          %li lead to different similarities, depending on the toxic endpoint
+                          Similarities of 1 may be encountered even for structurally dissimilar 
+                          compounds, because inert parts are ignored.
+                  %th
+                    Supporting information
+              -#%tbody
+              - count = 0
+              - p.compounds.each do |neighbor_compound|
+                / prevent conversion of nil
+                - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : '' 
+                - case c
+                - when /(0|false)/
+                  - c = "non-carcinogen"
+                - when /(1|true)/
+                  - c = "carcinogen"
+                - else
+                  - c = Array.new
+                  - c[0] = p.data_entries[count][2]
+                %tr
+                  %td.compound
+                    %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
+                  %td{:class => c[0]}
+                    - if c.class == String
+                      = c
+                    - else
+                      = c[0]
+                  %td{:class => c[0]}
+                    = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset." 
+                  %td
+                    -#- if p.data_entries[count][3] != nil
+                    %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"} Names and synonymes
+                    %br
+                    - if @type =~ /classification/i
+                      - if p.data_entries[count][3] != nil 
+                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Significant fragments
+                    - if @type =~ /regression/i
+                      - if p.data_entries[count][3] != nil
+                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Descriptors
+                    :javascript
+                      $(function() {
+                          $("a#link#{count_rs}#{count}").on('click', function(e) {
+                              $('#iframe_details').bPopup();
+                          });
+                      });
+                      $(function() {
+                          $("a#link#{count_rs}#{count}sf").on('click', function(e) {
+                              $('#iframe_details').bPopup();
+                          });
+                      });
+                  - count += 1
+          - else
+            %h3
+              Not enough similar compounds in training dataset
 
-%iframe{:id=>"iframe", :name=>"details", :height=>"90%", :width=>"90%", :style=>"display:none;border:0px"}
+%iframe{:id=>"iframe_details", :name=>"details", :height=>"95%", :width=>"95%", :style=>"display:none;border:0px"}

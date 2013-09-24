@@ -59,7 +59,7 @@
    
   %fieldset#middle
     %a{:href => "#models", :id => "linkModels"}
-      %h1 2. Select one or more toxic endpoints
+      %h1 2. Select one or more endpoints
     
     :javascript
       $("a#linkModels").click(function () {
@@ -68,20 +68,74 @@
       });
       
     #models
-      %i Please observe validation report for model details.
-
-      // TODO order models by echa endpoint currently manually added and to find in model.type
+      // TODO order models by echa endpoint
       #endpoint
-        %b= "Carcinogenicity:"
+        %b Acute toxicity to fish (lethality):
       - @models.each do |model|
         - model_title = model.title.split(" ").first
-        %div{:id => model_title}
-          %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
-          %label{:for => "selection[#{model_title}]"}
-            = "DSSTox Carcinogenic Potency DBS "+model_title
-          %a{:href=>"#", :title=>"#{model_title} validation"}
-            %i ( Validation report )
-          %br
+        - if model_title =~ /LC50/
+          %div{:id => model_title}
+            %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+            %label{:for => "selection[#{model_title}]"}
+              = " EPA v4b Fathead Minnow Acute Toxicity "+model_title
+            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details"}
+              [Details]
+        
+            :javascript
+              $("a#linkDetails#{model_title}").click(function () {
+                $("#details_#{model_title}").toggle();
+                //document.location = document.location + "#" + "details";
+              });
+
+          #details{:id => "#{model_title}", :style=> "display:none;"}
+            %h3 Model Details:
+            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
+            %p Algorithm: Lazar
+            %p Type: regression
+            %p Training compounds: integer
+            %p Descriptors: Fminer
+            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
+            //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
+            %h3 Validation: 
+            %a{:href => "#"} 
+              Detailed report link
+            %p Number of predictions: integer
+            %p Correct predictions: %
+      %br
+      %b Carcinogenicity:
+      - @models.each do |model|
+        - model_title = model.title.split(" ").first
+        - if model_title =~ /hamster|rodent/i
+          %div{:id => model_title}
+            %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+            %label{:for => "selection[#{model_title}]"}
+              = " DSSTox Carcinogenic Potency DBS "+model_title
+            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details"}
+              [Details]
+
+            :javascript
+              $("a#linkDetails#{model_title}").click(function () {
+                $("#details_#{model_title}").toggle();
+                //document.location = document.location + "#" + "details";
+              });
+
+          #details{:id=>"#{model_title}", :style=> "display:none;"}
+            %h3 Model Details:
+            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
+            %p Algorithm: Lazar
+            %p Type: classification
+            %p Training compounds: integer
+            %p Descriptors: Fminer
+            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
+            //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
+            %h3 Validation: 
+            %a{:href => "#"} 
+              Detailed report link
+            %p Number of predictions: integer
+            %p Correct predictions: %
+            %br
+
+      %br
 
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
