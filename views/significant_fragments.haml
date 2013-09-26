@@ -12,9 +12,9 @@
     - if !@significant_fragments.empty?
       %table{:id => "sf1"}
         %tr
-          %th{:style=>"border:1px solid;"}
+          %th{:style=>"border:2px solid #C0C0C0;"}
             Predominantly in compounds with activity "non-carcinogen"
-          %th{:style=>"border:1px solid;"}
+          %th{:style=>"border:2px solid #C0C0C0;"}
             p value
           - @significant_fragments.each do |fragments|
             / fragments == [1||2, smarts, pValue]
@@ -28,9 +28,9 @@
           %td
             %br
         %tr
-          %th{:style=>"border:1px solid;"}
+          %th{:style=>"border:2px solid #C0C0C0;"}
             Predominantly in compounds with activity "carcinogen"   
-          %th{:style=>"border:1px solid;"}
+          %th{:style=>"border:2px solid #C0C0C0;"}
             p value
           - @significant_fragments.each do |fragments|
             / fragments == [1||2, smarts, pValue]
@@ -50,9 +50,9 @@
     - if !@significant_fragments.empty?
       %table{:id => "sf2"}
         %tr
-          %th{:style=>"border:1px solid;"}
+          %th{:style=>"border:2px solid #C0C0C0;"}
             Descriptor
-          %th{:style=>"border:1px solid;"}
+          %th{:style=>"border:2px solid #C0C0C0;"}
             value
           - @significant_fragments.each do |fragments|
             %tr

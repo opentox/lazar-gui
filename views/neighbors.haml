@@ -12,7 +12,7 @@
       / each endpoint becomes a tab head ;
       - @prediction_models.each do |m|
         - count_m += 1
-        - m_title = m.title.split(" ").first
+        - m_title = m.title.split("_").last(2)[0]
         %li
           %a{:href => "#results_#{count_m}", :id => "link#{m_title}"}
             = m_title
@@ -90,9 +90,9 @@
                 / prevent conversion of nil
                 - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : '' 
                 - case c
-                - when /(0|false)/
+                - when /(0|false|inactive)/
                   - c = "non-carcinogen"
-                - when /(1|true)/
+                - when /(1|true|active)/
                   - c = "carcinogen"
                 - else
                   - c = Array.new

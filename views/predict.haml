@@ -68,26 +68,28 @@
       });
       
     #models
+      - @detail_count = 0
       // TODO order models by echa endpoint
       #endpoint
-        %b Acute toxicity to fish (lethality):
+      %b Acute toxicity to fish (lethality):
       - @models.each do |model|
-        - model_title = model.title.split(" ").first
-        - if model_title =~ /LC50/
+        - model_title = model.title.split("_").last(2)[0]
+        - if model_title =~ /LC50/i
+          - @detail_count +=1
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
-              = " EPA v4b Fathead Minnow Acute Toxicity "+model_title
-            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details"}
+              = model.title
+            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
         
             :javascript
-              $("a#linkDetails#{model_title}").click(function () {
-                $("#details_#{model_title}").toggle();
+              $("a#linkDetails#{@detail_count}").click(function () {
+                $("#details_#{@detail_count}").toggle();
                 //document.location = document.location + "#" + "details";
               });
 
-          #details{:id => "#{model_title}", :style=> "display:none;"}
+          #details{:id => "#{@detail_count}", :style=> "display:none;"}
             %h3 Model Details:
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             %p Algorithm: Lazar
@@ -104,22 +106,23 @@
       %br
       %b Carcinogenicity:
       - @models.each do |model|
-        - model_title = model.title.split(" ").first
+        - model_title = model.title.split("_").last(2)[0]
         - if model_title =~ /hamster|rodent/i
+          - @detail_count +=1
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
-              = " DSSTox Carcinogenic Potency DBS "+model_title
-            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details"}
+              = model.title
+            %a{:href=>"#details", :id => "linkDetails#{@detail_count}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
 
             :javascript
-              $("a#linkDetails#{model_title}").click(function () {
-                $("#details_#{model_title}").toggle();
+              $("a#linkDetails#{@detail_count}").click(function () {
+                $("#details_#{@detail_count}").toggle();
                 //document.location = document.location + "#" + "details";
               });
 
-          #details{:id=>"#{model_title}", :style=> "display:none;"}
+          #details{:id=>"#{@detail_count}", :style=> "display:none;"}
             %h3 Model Details:
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             %p Algorithm: Lazar
@@ -134,6 +137,40 @@
             %p Number of predictions: integer
             %p Correct predictions: %
             %br
+      %br
+      %b Mutagenicity:
+      - @models.each do |model|
+        - model_title = model.title.split("_").last(2)[0]
+        - if model_title =~ /Mutagenicity/i
+          - @detail_count +=1
+          %div{:id => model_title}
+            %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+            %label{:for => "selection[#{model_title}]"}
+              = model.title
+            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
+              [Details]
+        
+            :javascript
+              $("a#linkDetails#{@detail_count}").click(function () {
+                $("#details_#{@detail_count}").toggle();
+                //document.location = document.location + "#" + "details";
+              });
+
+          #details{:id => "#{@detail_count}", :style=> "display:none;"}
+            %h3 Model Details:
+            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
+            %p Algorithm: Lazar
+            %p Type: classification
+            %p Training compounds: integer
+            %p Descriptors: Fminer
+            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
+            //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
+            %h3 Validation: 
+            %a{:href => "#"} 
+              Detailed report link
+            %p Number of predictions: integer
+            %p Correct predictions: %
+
 
       %br
 

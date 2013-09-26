@@ -12,7 +12,7 @@ helpers do
   # model uris must be manually added
   @@models = []
   CSV.foreach("./prediction_models.csv"){|uri| m = OpenTox::Model::Lazar.find uri[0]; @@models << m}
-  #$logger.debug "model uris from csv file:\t#{@@models}\n"
+  $logger.debug "model uris from csv file:\t#{@@models}\n"
 end
 
 get '/?' do
@@ -55,7 +55,7 @@ get '/prediction/:model_uri/:type/:compound_uri/fingerprints/?' do
   model = OpenTox::Model::Lazar.find params[:model_uri]
   feature_dataset = OpenTox::Dataset.find model[RDF::OT.featureDataset]
   @compound = OpenTox::Compound.new params[:compound_uri]
-
+  @significant_fragments = []
   if @type =~ /classification/i
     # collect all feature values with fingerprint
     fingerprints = OpenTox::Algorithm::Descriptor.send("smarts_match", [@compound], feature_dataset.features.collect{ |f| f[RDF::DC.title]})[@compound.uri]
@@ -69,10 +69,16 @@ get '/prediction/:model_uri/:type/:compound_uri/fingerprints/?' do
     @features = feature_dataset.features.collect{|f| f }
     
     # search for each fingerprint in all features and collect feature values(smarts, pValue, effect)
-    @significant_fragments = []
     @fingerprint_values.each{ |fi, v| @features.each{ |f| @significant_fragments << [f[RDF::OT.effect].to_i, f[RDF::OT.smarts], f[RDF::OT.pValue]] if fi == f[RDF::OT.smarts] } }
   else #regression
-    @significant_fragments = []
+    feature_calc_algo = ""
+    model.parameters.each {|p|
+      if p[RDF::DC.title].to_s == "feature_calculation_algorithm"
+        feature_calc_algo = p[RDF::OT.paramValue].object
+      end
+    }
+    fingerprints = OpenTox::Algorithm::Descriptor.send( feature_calc_algo, [ @compound ], feature_dataset.features.collect{ |f| f[RDF::DC.title] } )
+    fingerprints.each{|x, h| h.each{|descriptor, value| @significant_fragments << [descriptor, [value]]}}
   end
 
   haml :significant_fragments, :layout => false
@@ -169,7 +175,7 @@ post '/predict/?' do
       # selected model = model[0]
       # compare selected with all models
       @@models.each do |m|
-        @prediction_models << m if m.title =~ /#{model[0]}/
+        @prediction_models << m if m.title =~ /#{model[0]}/i
       end
     end
 
@@ -204,5 +210,4 @@ get '/predict/stylesheets/:name.css' do
   content_type 'text/css', :charset => 'utf-8'
   sass(:"stylesheets/#{params[:name]}", Compass.sass_engine_options )
 end
-
 

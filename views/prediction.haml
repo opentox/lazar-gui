@@ -14,7 +14,7 @@
 
       %tbody
         %tr
-          %td{:id=>"compound"}
+          %td{:id=>"compound", :style=>"align:center;"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
               %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"150", :height=>"150"}
             %p
@@ -40,16 +40,16 @@
                 - database_hit = 1
               - c = p.data_entries[0][0] != nil ? p.data_entries[0][0] : ''
               - case c
-              - when /(0|false)/
+              - when /(0|false|inactive)/
                 - c = "non-carcinogen"
-              - when /(1|true)/
+              - when /(1|true|active)/
                 - c = "carcinogen"
               - else
                 - c = Array.new
                 - c[0] = (p.data_entries[0][0].class == Float) ? p.data_entries[0][0].round(3) : (p.data_entries[0][0] != nil ? p.data_entries[0][0] : "no prediction")
-              %td
+              %td{:style=>"valign:top;"}
                 %b{:class => "title"}
-                  = @prediction_models[count].title.split(" ").first
+                  = @prediction_models[count].title.gsub("_", " ")
                 - @model_uri = @prediction_models[count].uri
                 %p
                 / model type (classification|regression)
@@ -101,7 +101,7 @@
                         Predictions with a high confidence can be expected to be more reliable than predictions 
                         with low confidence.
                         Confidence values may take any value between 0 and 1.
-                        For most models confidence > 0.025 is a sensible (hard) cutoff to distiguish between 
+                        For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between 
                         reliable and unreliable predictions.
                   %p
                   /TODO add tooltip for significant ftagments and descriptors
@@ -150,15 +150,6 @@
                   %b Measured activity:
                   = p.data_entries[0][2]
                   %p
-                  %b Neighbors:
-                  %a{:href=> "#tabs", :id=>"link#{count}"}
-                    %img{:src=>"/images/arrow_down_float.png", :alt=>"v"}
-                    :javascript
-                      $("a#link#{count}").click(function () {
-                        $(".results").show();
-                        document.getElementById('tabs').focus();
-                        $("#tabs").tabs({ active: "#{count}" });
-                      });
                     
                   - count+=1
 
