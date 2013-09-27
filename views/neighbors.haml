@@ -42,9 +42,10 @@
                 sortList: [[2,1]]
               });
             });
-          %h2= "Neighbors: "
+          /%h2= "Neighbors: "
           - $logger.debug "neighbors compounds:\t#{p.data_entries[0]}\n"
           - if p.data_entries[0][2] != nil && p.data_entries[0].size != 3
+            %h2= "Neighbors: "
             %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
               %thead
                 %tr
@@ -90,22 +91,24 @@
                 / prevent conversion of nil
                 - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : '' 
                 - case c
-                - when /(0|false|inactive)/
+                - when /(false|true|inactive|active)/i
+                  - c = c
+                -#- when /(0|false|inactive)/
                   - c = "non-carcinogen"
-                - when /(1|true|active)/
+                -#- when /(1|true|active)/
                   - c = "carcinogen"
                 - else
-                  - c = Array.new
-                  - c[0] = p.data_entries[count][2]
+                  /- c = Array.new
+                  - c = p.data_entries[count][2].round(3)
                 %tr
                   %td.compound
                     %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
-                  %td{:class => c[0]}
+                  %td
                     - if c.class == String
                       = c
                     - else
-                      = c[0]
-                  %td{:class => c[0]}
+                      = c
+                  %td
                     = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset." 
                   %td
                     -#- if p.data_entries[count][3] != nil
@@ -129,7 +132,7 @@
                           });
                       });
                   - count += 1
-          - else
+          -#- else
             %h3
               Not enough similar compounds in training dataset
 

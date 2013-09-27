@@ -77,8 +77,17 @@ get '/prediction/:model_uri/:type/:compound_uri/fingerprints/?' do
         feature_calc_algo = p[RDF::OT.paramValue].object
       end
     }
+
+    @desc = []
     fingerprints = OpenTox::Algorithm::Descriptor.send( feature_calc_algo, [ @compound ], feature_dataset.features.collect{ |f| f[RDF::DC.title] } )
-    fingerprints.each{|x, h| h.each{|descriptor, value| @significant_fragments << [descriptor, [value]]}}
+    fingerprints.each{|x, h| h.each{|descriptor, value| @desc << [descriptor, [value]]}}
+    
+    pc_descriptor_titles_descriptions = {}
+    feature_dataset.features.collect{ |f|
+      pc_descriptor_titles_descriptions[f[RDF::DC.title]]= f[RDF::DC.description]
+    }
+
+    @desc.each{|d, v| @significant_fragments << [pc_descriptor_titles_descriptions[d], v] }
   end
 
   haml :significant_fragments, :layout => false

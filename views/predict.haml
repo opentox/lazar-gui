@@ -79,7 +79,7 @@
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
-              = model.title
+              = model.title.gsub("_", " ")
             %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
         
@@ -112,7 +112,7 @@
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
-              = model.title
+              = model.title.gsub("_", " ")
             %a{:href=>"#details", :id => "linkDetails#{@detail_count}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
 
@@ -146,7 +146,7 @@
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
-              = model.title
+              = model.title.gsub("_", " ")
             %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
         

@@ -17,7 +17,10 @@
     %br
     %b="Names:"
     %p{:style=>"padding-left:0.5em;"}
+    - if @names !~ /^no names/i
       = @names.join("; ")
+    - else
+      = @names
     %p{:style=>"padding-left:0.5em;"}
       / pubchem link
       %a{:href=>"http://aop.in-silico.ch/", :title=>"link opens in new tab", :alt=>"pubchem link", :target=>"_blank"} PubChem read across 

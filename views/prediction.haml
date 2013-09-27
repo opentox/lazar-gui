@@ -16,7 +16,7 @@
         %tr
           %td{:id=>"compound", :style=>"align:center;"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
-              %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"150", :height=>"150"}
+              %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
             %p
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"} Names and synonyms
             %p
@@ -40,14 +40,16 @@
                 - database_hit = 1
               - c = p.data_entries[0][0] != nil ? p.data_entries[0][0] : ''
               - case c
-              - when /(0|false|inactive)/
+              - when /(false|true|inactive|active)/i
+                - c = c
+              -#- when /(0|false|inactive)/
                 - c = "non-carcinogen"
-              - when /(1|true|active)/
+              -#- when /(1|true|active)/
                 - c = "carcinogen"
               - else
-                - c = Array.new
-                - c[0] = (p.data_entries[0][0].class == Float) ? p.data_entries[0][0].round(3) : (p.data_entries[0][0] != nil ? p.data_entries[0][0] : "no prediction")
-              %td{:style=>"valign:top;"}
+                /- c = Array.new
+                - c = (p.data_entries[0][0].class == Float) ? p.data_entries[0][0].round(3) : (p.data_entries[0][0] != nil ? p.data_entries[0][0] : "no prediction")
+              %td{:style=>"vertical-align:top;"}
                 %b{:class => "title"}
                   = @prediction_models[count].title.gsub("_", " ")
                 - @model_uri = @prediction_models[count].uri
@@ -58,11 +60,11 @@
                 %p
                 - unless database_hit > 0
                   %b Result:
-                  %b{:class => c[0]}
+                  %b
                     - if c.class == String
                       = (c != '' ? c : "No prediction result.")
                     - else
-                      = (c[0] != '' ? c[0] : "No prediction result.")
+                      = (c != '' ? c.round(3) : "No prediction result.")
                   / title must be empty for tooltip
                   %a{:href=>"#result", :title=>"", :id=>"result"}
                     %img{:src=>"/images/info_white.png"}
@@ -89,7 +91,7 @@
                   %p
                   .confidence
                     %b Confidence:
-                    = p.data_entries[0][1] != nil ? p.data_entries[0][1].round(3) : "-"
+                    = (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0) ? p.data_entries[0][1].round(3) : "--"
                     / title must be empty for tooltip
                     %a{:href=>"#confidence", :title=>"", :id=>"confidence"}
                       %img{:src=>"/images/info_white.png"}
@@ -105,7 +107,7 @@
                         reliable and unreliable predictions.
                   %p
                   /TODO add tooltip for significant ftagments and descriptors
-                  - if @model_type[count] =~ /classification/i
+                  - if @model_type[count] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Significant fragments:
                     %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :target=>"details_overview"}Significant fragments
                     :javascript
@@ -114,7 +116,7 @@
                           $('#iframe_overview').bPopup();
                         });
                       });
-                  - if @model_type[count] =~ /regression/i
+                  - if @model_type[count] =~ /regression/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Descriptors
                     %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :target=>"details_overview"} Descriptors
                     :javascript
@@ -132,15 +134,16 @@
                     %dd
                       Significant fragments are solely used to determine activity specific similarities of neighbors.
                   %p
-                  %b Neighbors:
-                  %a{:href=> "#tabs", :id=>"link#{count}"}
-                    %img{:src=>"/images/arrow_down_float.png", :alt=>"v"}
-                    :javascript
-                      $("a#link#{count}").click(function () {
-                        $(".results").show();
-                        document.getElementById('tabs').focus();
-                        $("#tabs").tabs({ active: "#{count}" });
-                      });
+                  - if c != ''
+                    %b Neighbors:
+                    %a{:href=> "#tabs", :id=>"link#{count}"}
+                      %img{:src=>"/images/arrow_down_float.png", :alt=>"v"}
+                      :javascript
+                        $("a#link#{count}").click(function () {
+                          $(".results").show();
+                          document.getElementById('tabs').focus();
+                          $("#tabs").tabs({ active: "#{count}" });
+                        });
                   %p
                   - count+=1
                 - else # database hit
