@@ -12,17 +12,22 @@
     - if !@significant_fragments.empty?
       %table{:id => "sf1"}
         %tr
+          / @value_map => hash; interpret the effect
           %th{:style=>"border:2px solid #E6E6E6;"}
-            Predominantly in compounds with activity "non-active"
+            Predominantly in compounds with activity "inactive"
           %th{:style=>"border:2px solid #E6E6E6;"}
             p value
           - @significant_fragments.each do |fragments|
-            / fragments == [1||2, smarts, pValue]
-            - if fragments[0] == 1
+            / fragments == [effect, smarts, pValue]
+            / fragments[0] = effect
+            /- $logger.debug "effect:\t#{fragments[0]}\n"
+            - if fragments[0] == @value_map.index("inactive")
               %tr
                 %td
+                  / fragments[1] = smarts 
                   = fragments[1]
                 %td
+                  /fragments[2] = pValue
                   = fragments[2]
         %tr
           %td
@@ -33,8 +38,8 @@
           %th{:style=>"border:2px solid #E6E6E6;"}
             p value
           - @significant_fragments.each do |fragments|
-            / fragments == [1||2, smarts, pValue]
-            - if fragments[0] == 2
+            / fragments == [effect, smarts, pValue]
+            - if fragments[0] == @value_map.index("active")
               %tr
                 %td
                   = fragments[1]

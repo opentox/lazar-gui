@@ -68,8 +68,19 @@ get '/prediction/:model_uri/:type/:compound_uri/fingerprints/?' do
     # collect all features from feature_dataset
     @features = feature_dataset.features.collect{|f| f }
     
-    # search for each fingerprint in all features and collect feature values(smarts, pValue, effect)
+    # search for each fingerprint in all features and collect feature values( effect, smarts, pValue )
     @fingerprint_values.each{ |fi, v| @features.each{ |f| @significant_fragments << [f[RDF::OT.effect].to_i, f[RDF::OT.smarts], f[RDF::OT.pValue]] if fi == f[RDF::OT.smarts] } }
+    
+    # pass value_map, important to interprete effect value
+    prediction_feature_uri = ""
+    model.parameters.each {|p|
+      if p[RDF::DC.title].to_s == "prediction_feature_uri"
+        prediction_feature_uri = p[RDF::OT.paramValue].object
+      end
+    }
+    prediction_feature = OpenTox::Feature.find prediction_feature_uri
+    @value_map = prediction_feature.value_map
+
   else #regression
     feature_calc_algo = ""
     model.parameters.each {|p|
@@ -128,11 +139,23 @@ get '/prediction/:model_uri/:type/:neighbor/significant_fragments/?' do
 
     # pass feature uris if value > 0
     @feat.each do |f|
+      # search relevant features
       if f[0] > 0
         f = OpenTox::Feature.find f[1]
+        # pass relevant features with [ effect, smarts, pValue ] 
         @significant_fragments << [f[RDF::OT.effect].to_i, f[RDF::OT.smarts], f[RDF::OT.pValue].to_f.round(3)]
       end
     end
+    # pass value_map, important to interprete effect value
+    prediction_feature_uri = ""
+    model.parameters.each {|p|
+      if p[RDF::DC.title].to_s == "prediction_feature_uri"
+        prediction_feature_uri = p[RDF::OT.paramValue].object
+      end
+    }
+    prediction_feature = OpenTox::Feature.find prediction_feature_uri
+    @value_map = prediction_feature.value_map
+
   else # regression
     # find a value in feature dataset by compound and feature
     @values = []

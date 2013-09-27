@@ -71,20 +71,22 @@
       - @detail_count = 0
       // TODO order models by echa endpoint
       #endpoint
-      %b Acute toxicity to fish (lethality):
       - @models.each do |model|
         - model_title = model.title.split("_").last(2)[0]
-        - if model_title =~ /LC50/i
+        - model_t = model.title.gsub("_", " ")
+        - case model_title
+        - when /LC50/i
+          %b Acute toxicity to fish (lethality):
           - @detail_count +=1
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
-              = model.title.gsub("_", " ")
+              = model_t
             %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
         
             :javascript
-              $("a#linkDetails#{@detail_count}").click(function () {
+              $("a#linkDetails#{model_title}").click(function () {
                 $("#details_#{@detail_count}").toggle();
                 //document.location = document.location + "#" + "details";
               });
@@ -94,30 +96,29 @@
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             %p Algorithm: Lazar
             %p Type: regression
-            %p Training compounds: integer
-            %p Descriptors: Fminer
+            %p Training compounds: 580
+            %p{:style=>"display:inline;"} Descriptors:
+            %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC)properties
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
-            %h3 Validation: 
-            %a{:href => "#"} 
+            /%h3 Validation: 
+            -#%a{:href => "#"} 
               Detailed report link
-            %p Number of predictions: integer
-            %p Correct predictions: %
-      %br
-      %b Carcinogenicity:
-      - @models.each do |model|
-        - model_title = model.title.split("_").last(2)[0]
-        - if model_title =~ /hamster|rodent/i
+            /%p Number of predictions: integer
+            /%p Correct predictions: %
+        - when /hamster/i
+          %br
+          %b Carcinogenicity:
           - @detail_count +=1
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
             %label{:for => "selection[#{model_title}]"}
               = model.title.gsub("_", " ")
-            %a{:href=>"#details", :id => "linkDetails#{@detail_count}", :title=>"#{model_title} details", :style=>"font-size:small;"}
+            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
               [Details]
 
             :javascript
-              $("a#linkDetails#{@detail_count}").click(function () {
+              $("a#linkDetails#{model_title}").click(function () {
                 $("#details_#{@detail_count}").toggle();
                 //document.location = document.location + "#" + "details";
               });
@@ -127,21 +128,20 @@
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             %p Algorithm: Lazar
             %p Type: classification
-            %p Training compounds: integer
-            %p Descriptors: Fminer
+            %p Training compounds: 86
+            %p{:style=>"display:inline;"} Descriptors:
+            %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
             %h3 Validation: 
-            %a{:href => "#"} 
+            %a{:href => "http://lazar-services.in-silico.ch/validation/report/crossvalidation/22", :title=>"Link opens in new window.", :target=>"_blank"} 
               Detailed report link
-            %p Number of predictions: integer
-            %p Correct predictions: %
+            /%p Number of predictions: integer
+            /%p Correct predictions: %
             %br
-      %br
-      %b Mutagenicity:
-      - @models.each do |model|
-        - model_title = model.title.split("_").last(2)[0]
-        - if model_title =~ /Mutagenicity/i
+        - when /mutagenicity/i
+          %br
+          %b Mutagenicity:
           - @detail_count +=1
           %div{:id => model_title}
             %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
@@ -151,7 +151,7 @@
               [Details]
         
             :javascript
-              $("a#linkDetails#{@detail_count}").click(function () {
+              $("a#linkDetails#{model_title}").click(function () {
                 $("#details_#{@detail_count}").toggle();
                 //document.location = document.location + "#" + "details";
               });
@@ -161,15 +161,16 @@
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             %p Algorithm: Lazar
             %p Type: classification
-            %p Training compounds: integer
-            %p Descriptors: Fminer
+            %p Training compounds: 828
+            %p{:style=>"display:inline;"} Descriptors:
+            %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
             %h3 Validation: 
-            %a{:href => "#"} 
+            %a{:href => "http://lazar-services.in-silico.ch/validation/report/crossvalidation/25", :title=>"Link opens in new window.", :target=>"_blank"} 
               Detailed report link
-            %p Number of predictions: integer
-            %p Correct predictions: %
+            /%p Number of predictions: integer
+            /%p Correct predictions: %
 
 
       %br
