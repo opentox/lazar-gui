@@ -94,11 +94,12 @@
           #details{:id => "#{@detail_count}", :style=> "display:none;"}
             %h3 Model Details:
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            %p Algorithm: Lazar
+            %p{:style=>"display:inline;"} Algorithm:
+            %code{:style=>"font-size:x-large;"} lazar
             %p Type: regression
             %p Training compounds: 580
             %p{:style=>"display:inline;"} Descriptors:
-            %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC)properties
+            %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem/list", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC) properties
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
             //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
             /%h3 Validation: 
@@ -126,7 +127,8 @@
           #details{:id=>"#{@detail_count}", :style=> "display:none;"}
             %h3 Model Details:
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            %p Algorithm: Lazar
+            %p{:style=>"display:inline;"} Algorithm:
+            %code{:style=>"font-size:x-large;"} lazar
             %p Type: classification
             %p Training compounds: 86
             %p{:style=>"display:inline;"} Descriptors:
@@ -159,7 +161,8 @@
           #details{:id => "#{@detail_count}", :style=> "display:none;"}
             %h3 Model Details:
             //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            %p Algorithm: Lazar
+            %p{:style=>"display:inline;"} Algorithm:
+            %code{:style=>"font-size:x-large;"} lazar
             %p Type: classification
             %p Training compounds: 828
             %p{:style=>"display:inline;"} Descriptors:

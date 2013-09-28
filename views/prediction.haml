@@ -42,10 +42,6 @@
               - case c
               - when /(false|true|inactive|active)/i
                 - c = c
-              -#- when /(0|false|inactive)/
-                - c = "non-carcinogen"
-              -#- when /(1|true|active)/
-                - c = "carcinogen"
               - else
                 /- c = Array.new
                 - c = (p.data_entries[0][0].class == Float) ? p.data_entries[0][0].round(3) : (p.data_entries[0][0] != nil ? p.data_entries[0][0] : "no prediction")
@@ -72,9 +68,10 @@
                     %dt
                       Result
                     %dd
-                      %code lazar 
+                      %code{:style=>"font-size:x-large;"} lazar 
                       calculates searches the training dataset for similar compounds (neighbors) 
-                      and calculates the prediction from their measured activities. lazar 
+                      and calculates the prediction from their measured activities. 
+                      %code{:style=>"font-size:x-large;"} lazar 
                       calculates predictions using
                       %ul
                         %li a majority vote (weighted by compound similarity) for 
@@ -109,7 +106,7 @@
                   /TODO add tooltip for significant ftagments and descriptors
                   - if @model_type[count] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Significant fragments:
-                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :target=>"details_overview"}Significant fragments
+                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :title=>"", :target=>"details_overview"}Significant fragments
                     :javascript
                       $(function() {
                         $("a#linkPredictionSf").on('click', function(e) {
@@ -125,14 +122,6 @@
                           $('#iframe_overview').bPopup();
                         });
                       });
-                  / title must be empty for tooltip
-                  -#%a{:href =>"#sfragments", :title=>"", :id=>"sfragments"}
-                    %img{:src=>"/images/info_white.png"}
-                  -#.tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
-                    %dt
-                      Significant fragments
-                    %dd
-                      Significant fragments are solely used to determine activity specific similarities of neighbors.
                   %p
                   - if c != ''
                     %b Neighbors:

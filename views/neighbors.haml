@@ -42,7 +42,6 @@
                 sortList: [[2,1]]
               });
             });
-          /%h2= "Neighbors: "
           - $logger.debug "neighbors compounds:\t#{p.data_entries[0]}\n"
           - if p.data_entries[0][2] != nil && p.data_entries[0].size != 3
             %h2= "Neighbors: "
@@ -70,7 +69,7 @@
                       %dt
                         Similarity
                       %dd
-                        %code lazar 
+                        %code{:style=>"font-size:x-large;"} lazar 
                         calculates 
                         %em
                           activity specific 
@@ -93,10 +92,6 @@
                 - case c
                 - when /(false|true|inactive|active)/i
                   - c = c
-                -#- when /(0|false|inactive)/
-                  - c = "non-carcinogen"
-                -#- when /(1|true|active)/
-                  - c = "carcinogen"
                 - else
                   /- c = Array.new
                   - c = p.data_entries[count][2].round(3)
