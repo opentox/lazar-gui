@@ -32,18 +32,23 @@ end
 get '/prediction/:neighbor/details/?' do
   @compound = OpenTox::Compound.new params[:neighbor]
   @smiles = @compound.smiles
-
+=begin 
+  # temporarily no names because cactvs outage (07.Oct.2013 DG)
   task = OpenTox::Task.run("look for names.") do
     names = @compound.names
   end
   task.wait
-
+  
   case task[RDF::OT.hasStatus]
   when "Error"
     @names = "No names for this compound available."
   when "Completed"
     @names = @compound.names
+  else
+    @names = "No names for this compound available."
   end
+=end
+  @names = "No names, this service is temporarily down."
   @inchi = @compound.inchi.gsub("InChI=", "")
 
   haml :details, :layout => false
