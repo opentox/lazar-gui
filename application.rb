@@ -12,7 +12,7 @@ helpers do
   # model uris must be manually added
   @@models = []
   CSV.foreach("./prediction_models.csv"){|uri| m = OpenTox::Model::Lazar.find uri[0]; @@models << m}
-  $logger.debug "model uris from csv file:\t#{@@models}\n"
+  #$logger.debug "model uris from csv file:\t#{@@models}\n"
 end
 
 get '/?' do
@@ -32,7 +32,7 @@ end
 get '/prediction/:neighbor/details/?' do
   @compound = OpenTox::Compound.new params[:neighbor]
   @smiles = @compound.smiles
-  task = OpenTox::Task.run("look for names.") do
+  task = OpenTox::Task.run("Get names for '#{@smiles}'.") do
     names = @compound.names
   end
   task.wait
@@ -63,8 +63,7 @@ get '/prediction/:model_uri/:type/:compound_uri/fingerprints/?' do
     #$logger.debug "fingerprints:\t#{fingerprints}\n"
 
     # collect fingerprints with value 1
-    @fingerprint_values = []
-    fingerprints.each{|smarts, value| @fingerprint_values << [smarts, value] if value > 0}
+    @fingerprint_values = fingerprints.collect{|smarts, value| [smarts, value] if value > 0}
     
     # collect all features from feature_dataset
     @features = feature_dataset.features.collect{|f| f }
@@ -107,36 +106,29 @@ end
 
 get '/prediction/:model_uri/:type/:neighbor/significant_fragments/?' do
   @type = params[:type]
-  #$logger.debug "sf type:\t#{@type}"
   @compound = OpenTox::Compound.new params[:neighbor]
-  #$logger.debug "neighbor compound uri:\t#{@compound.uri}\n"
-  
   model = OpenTox::Model::Lazar.find params[:model_uri]
   #$logger.debug "model for significant fragments:\t#{model.uri}"
   
   feature_dataset = OpenTox::Dataset.find model[RDF::OT.featureDataset]
-  $logger.debug "fd :\t#{feature_dataset.uri}"
+  $logger.debug "feature_dataset_uri:\t#{feature_dataset.uri}\n"
   
   # load all compounds
   feature_dataset.compounds
   
   # load all features
-  @features = []
-  feature_dataset.features.each{|f| @features << f}
-  #$logger.debug "all features in fd:\t#{@features}\n"
+  @features = feature_dataset.features.collect{|f| f}
   
   # find all features and values for a neighbor compound
   @significant_fragments = []
   # check type first
   if @type =~ /classification/i
-    @feat = []
     # get compound index in feature dataset
     c_idx = feature_dataset.compound_indices @compound.uri
-    #$logger.debug "compound idx:\t#{c_idx}\n"
 
     # collect feature uris with value
-    @features.each{|f| @feat << [feature_dataset.data_entry_value(c_idx[0], f.uri), f.uri]}
-    #$logger.debug "collected features:\t#{@feat}\n"
+    @feat = @features.collect{|f| [feature_dataset.data_entry_value(c_idx[0], f.uri), f.uri]}
+    #$logger.debug "@feat:\t#{@feat}\n"
 
     # pass feature uris if value > 0
     @feat.each do |f|
@@ -159,12 +151,10 @@ get '/prediction/:model_uri/:type/:neighbor/significant_fragments/?' do
 
   else # regression
     # find a value in feature dataset by compound and feature
-    @values = []
-    @features.each{|f| @values << feature_dataset.values(@compound, f)}
+    @values = @features.collect{|f| feature_dataset.values(@compound, f)}
     #$logger.debug "values in fd:\t#{@values}"
     
-    count = 0
-    @features.each{|f| @significant_fragments << [f.description, @values[count]]; count +=1}
+    @features.each_with_index{|f, i| @significant_fragments << [f.description, @values[i]]}
   end  
   #$logger.debug "significant fragments:\t#{@significant_fragments}\n"
   
@@ -199,9 +189,8 @@ post '/predict/?' do
     # init arrays
     @prediction_models = []
     @predictions = []
-    # init lazar algorithm
-    lazar = OpenTox::Algorithm::Fminer.new File.join($algorithm[:uri],"lazar")
-    
+    @model_type = []
+
     # get selected models
     #TODO compare if model is selected by uri not title
     params[:selection].each do |model|
@@ -215,8 +204,6 @@ post '/predict/?' do
     # predict with selected models
     # one prediction in 'pa' array = OpenTox::Dataset
     # all collected predictions in '@predictions' array
-    # init model_type array
-    @model_type = []
     @prediction_models.each do |m|
       # define type (classification|regression)
       m.type.join =~ /classification/i ? (@model_type << "classification") : (@model_type << "regression")
