@@ -74,13 +74,13 @@
       
     #models
       - @detail_count = 0
-      // TODO order models by echa endpoint
-      #endpoint
       - @models.each do |model|
+        - model_endpoint = model.type.select{|endpoint| endpoint =~ /Endpoint/}.to_s
         - model_title = model.title.split("_").last(2)[0]
         - model_t = model.title.gsub("_", " ")
-        - case model_title
-        - when /LC50/i
+        - case model_endpoint
+        - when /fish/i
+          %br
           %b Acute toxicity to fish (lethality):
           - @detail_count +=1
           %div{:id => model_title}
@@ -112,7 +112,7 @@
               Detailed report link
             /%p Number of predictions: integer
             /%p Correct predictions: %
-        - when /hamster/i
+        - when /Carcinogenicity/i
           %br
           %b Carcinogenicity:
           - @detail_count +=1
@@ -146,7 +146,7 @@
             /%p Number of predictions: integer
             /%p Correct predictions: %
             %br
-        - when /mutagenicity/i
+        - when /Mutagenicity/i
           %br
           %b Mutagenicity:
           - @detail_count +=1

@@ -12,7 +12,6 @@ helpers do
   # model uris must be manually added
   @@models = []
   CSV.foreach("./prediction_models.csv"){|uri| m = OpenTox::Model::Lazar.find uri[0]; @@models << m}
-  #$logger.debug "model uris from csv file:\t#{@@models}\n"
 end
 
 get '/?' do
@@ -20,7 +19,8 @@ get '/?' do
 end
 
 get '/predict/?' do
-  @models = @@models
+  # sort models by endpoint alphabetically
+  @models = @@models.sort{|a, b| a.type.find{|e| e =~ /endpoint/}.to_s.downcase <=> b.type.find{|e| e =~ /endpoint/i}.to_s.downcase}.reverse
   haml :predict
 end
 
