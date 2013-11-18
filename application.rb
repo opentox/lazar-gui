@@ -1,11 +1,16 @@
 require 'rubygems'
 require 'compass' #must be loaded before sinatra
 require 'sinatra'
+require 'sinatra/contrib'
 require 'haml' #must be loaded after sinatra
 require 'opentox-client'
 require 'opentox-server'
 require_relative 'helper.rb'
 require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
+
+# DG: workaround for https://github.com/sinatra/sinatra/issues/808
+# Date: 18/11/2013
+set :protection, :except => :path_traversal
 
 helpers do
   # get prediction models from text file, ignore validation models
@@ -20,7 +25,7 @@ end
 
 get '/predict/?' do
   # sort models by endpoint alphabetically
-  @models = @@models.sort{|a, b| a.type.find{|e| e =~ /endpoint/}.to_s.downcase <=> b.type.find{|e| e =~ /endpoint/i}.to_s.downcase}.reverse
+  @models = @@models.sort!{|a, b| a.type.select{|e| e =~ /endpoint/i} <=> b.type.select{|e| e =~ /endpoint/i}}
   haml :predict
 end
 
@@ -208,8 +213,6 @@ post '/predict/?' do
       # define type (classification|regression)
       m.type.join =~ /classification/i ? (@model_type << "classification") : (@model_type << "regression")
       
-      #TODO each prediction get a task; load predictions page if first task finished and load results individually
-
       # predict against compound
       @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
       $logger.debug "prediction dataset:\t#{@prediction_uri}\n"
