@@ -1,7 +1,6 @@
 require 'rubygems'
 require 'compass' #must be loaded before sinatra
 require 'sinatra'
-require 'sinatra/contrib'
 require 'haml' #must be loaded after sinatra
 require 'opentox-client'
 require 'opentox-server'
@@ -13,10 +12,10 @@ require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added 
 set :protection, :except => :path_traversal
 
 helpers do
-  # get prediction models from text file, ignore validation models
-  # model uris must be manually added
+  # models must be edited with RDF.type => (RDF::OT.PrediCtionModel, EchaEndpoint)
   @@models = []
-  CSV.foreach("./prediction_models.csv"){|uri| m = OpenTox::Model::Lazar.find uri[0]; @@models << m}
+  models = `curl -k GET -H accept:text/uri-list #{$model[:uri]}`.split("\n")
+    .collect{|m| model = OpenTox::Model::Lazar.find m; model.type.flatten.to_s =~ /PredictionModel/ ; @@models << model } 
 end
 
 get '/?' do

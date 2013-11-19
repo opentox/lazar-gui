@@ -78,110 +78,56 @@
         - model_endpoint = model.type.select{|endpoint| endpoint =~ /Endpoint/}.to_s
         - model_title = model.title.split("_").last(2)[0]
         - model_t = model.title.gsub("_", " ")
-        - case model_endpoint
-        - when /fish/i
-          %br
-          %b Acute toxicity to fish (lethality):
-          - @detail_count +=1
-          %div{:id => model_title}
-            %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
-            %label{:for => "selection[#{model_title}]"}
-              = model_t
-            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
-              [Details]
-        
-            :javascript
-              $("a#linkDetails#{model_title}").click(function () {
-                $("#details_#{@detail_count}").toggle();
-                //document.location = document.location + "#" + "details";
-              });
-
-          #details{:id => "#{@detail_count}", :style=> "display:none;"}
-            %h3 Model Details:
-            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            %p{:style=>"display:inline;"} Algorithm:
-            %code{:style=>"font-size:x-large;"} lazar
-            %p Type: regression
-            %p Training compounds: 580
-            %p{:style=>"display:inline;"} Descriptors:
+        %br
+        %b= model_endpoint.split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
+        - @detail_count +=1
+        %div{:id => model_title}
+          %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+          %label{:for => "selection[#{model_title}]"}
+            = model_t
+          %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
+            [Details]
+      
+          :javascript
+            $("a#linkDetails#{model_title}").click(function () {
+              $("#details_#{@detail_count}").toggle();
+              //document.location = document.location + "#" + "details";
+            });
+        #details{:id => "#{@detail_count}", :style => "display:none;background-color:white;padding:1em;"}
+          %h3 Model Details:
+          %p{:style=>"display:inline;"} Algorithm:
+          %code{:style=>"font-size:x-large;"} lazar
+          - model.type.to_s =~ /regression/i ? type = "regression" : type = "classification"
+          %p= "Type: "+type
+          - training_dataset = OpenTox::Dataset.new "#{model[RDF::OT.trainingDataset]}"
+          - training_compounds = training_dataset.compounds.size.to_s
+          %p= "Training compounds: "+training_compounds
+          %p{:style=>"display:inline;"} Descriptors:
+          - if type == "regression"
             %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem/list", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC) properties
-            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
-            /%h3 Validation: 
-            -#%a{:href => "#"} 
-              Detailed report link
-            /%p Number of predictions: integer
-            /%p Correct predictions: %
-        - when /Carcinogenicity/i
-          %br
-          %b Carcinogenicity:
-          - @detail_count +=1
-          %div{:id => model_title}
-            %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
-            %label{:for => "selection[#{model_title}]"}
-              = model.title.gsub("_", " ")
-            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
-              [Details]
-
-            :javascript
-              $("a#linkDetails#{model_title}").click(function () {
-                $("#details_#{@detail_count}").toggle();
-                //document.location = document.location + "#" + "details";
-              });
-
-          #details{:id=>"#{@detail_count}", :style=> "display:none;"}
-            %h3 Model Details:
-            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            %p{:style=>"display:inline;"} Algorithm:
-            %code{:style=>"font-size:x-large;"} lazar
-            %p Type: classification
-            %p Training compounds: 86
-            %p{:style=>"display:inline;"} Descriptors:
+          - else
             %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
-            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
-            %h3 Validation: 
-            %a{:href => "http://lazar-services.in-silico.ch/validation/report/crossvalidation/22", :title=>"Link opens in new window.", :target=>"_blank"} 
-              Detailed report link
-            /%p Number of predictions: integer
-            /%p Correct predictions: %
-            %br
-        - when /Mutagenicity/i
           %br
-          %b Mutagenicity:
-          - @detail_count +=1
-          %div{:id => model_title}
-            %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
-            %label{:for => "selection[#{model_title}]"}
-              = model.title.gsub("_", " ")
-            %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
-              [Details]
-        
-            :javascript
-              $("a#linkDetails#{model_title}").click(function () {
-                $("#details_#{@detail_count}").toggle();
-                //document.location = document.location + "#" + "details";
-              });
-
-          #details{:id => "#{@detail_count}", :style=> "display:none;"}
-            %h3 Model Details:
-            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            %p{:style=>"display:inline;"} Algorithm:
-            %code{:style=>"font-size:x-large;"} lazar
-            %p Type: classification
-            %p Training compounds: 828
-            %p{:style=>"display:inline;"} Descriptors:
-            %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
-            //%p= "Training Dataset:\t#{model[RDF::OT.trainingDataset]}"
-            //%p= "Feature Dataset:\t#{model[RDF::OT.featureDataset]}"
-            %h3 Validation: 
-            %a{:href => "http://lazar-services.in-silico.ch/validation/report/crossvalidation/25", :title=>"Link opens in new window.", :target=>"_blank"} 
-              Detailed report link
-            /%p Number of predictions: integer
-            /%p Correct predictions: %
+          %br
+          %p{:style=>"display:inline"}= "Training Dataset: "
+          %a{:href=>"#{model[RDF::OT.trainingDataset]}", :title=>"link opens in new window.", :target=>"_blank"} download
+          %br
+          %br
+          %p{:style=>"display:inline"}= "Feature Dataset: "
+          %a{:href=>"#{model[RDF::OT.featureDataset]}", :title=>"link opens in new window.", :target=>"_blank"} download
+          %br
+          %br
+          %p{:style=>"display:inline"}= "Model: "
+          %a{:href=>"#{model.uri}", :title=>"link opens in new window.", :target=>"_blank"} download
+          %br
+          %h3 Validation: 
+          %a{:href => "#"} 
+            Detailed report link
+          %p Number of predictions: integer
+          %p Correct predictions: %
 
 
-      %br
+      //%br
 
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
