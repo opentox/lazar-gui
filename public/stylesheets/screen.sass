@@ -2,8 +2,10 @@
 @import compass/css3
 
 //$bg-color: #CCCCFF
-$ist-color: #C5C1E4
-
+//$ist-color: #C5C1E4
+$ist-color: #C8C2C8  
+$black: #2b2b2b
+$orange: #f76700
 body
   background-image: url("/images/gray_jean.png")
   //background-color: $bg-color
@@ -12,53 +14,51 @@ body
   a
     text-decoration: none
     font-weight: bold
-    color: black
+    color: $black
   //for IE
   img
     border: 0
+  h1
+    color: $black
   h2
     padding-top: 12px
-    text-shadow: #FFF 1px 1px 0
+    //text-shadow: #FFF 1px 1px 0
     font-size: x-large
-    color: #FF5555 
+    color: $orange 
 
 .logo
+  top: 0
+  position: fixed
+  background-color: #efefef
+  width: 100%
+  z-index: 40
   img
     float: left
     display: inline
     margin-right: 1em
+    padding: 1em
   h1
-    display: inline
+    //display: inline
     width: 80%
   img.ote
     width: 100px
     height: 50px
     display: inline
     float: right
-  hr
-    margin: 0.5em
 
 .content
   background-image: url("/images/gray_jean.png")
+  margin-top: 6em
   h1
-    margin: 0.3em
+    //margin: 0.3em
     text-shadow: #FFF 1px 1px 0
     font-size: x-large
-    font-family: Verdana
     display: inline
   .arrow
     margin: 8px 0px 5px 20px
   .back
     display: inline
-  //.close
-    //text-align: right
-  #back-top
-    z-index: 100
-    position: fixed
-    bottom: 3%
-    margin-left: 91%
-    a:hover
-      color: #bbb
+  
   fieldset#top
     a#linkInsert
       display: block
@@ -67,10 +67,7 @@ body
     border: 0
     padding: 10px
     background-color: $ist-color
-    +border-top-left-radius(25px)
-    +border-top-right-radius(25px)
-    +background-clip(border-box)
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset)
     #appletContainer
       padding: 10px
   fieldset#middle
@@ -81,7 +78,7 @@ body
     border: 0
     padding: 10px
     background-color: $ist-color
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset)
     #models
       padding-left: 1em
     #model a
@@ -92,32 +89,25 @@ body
     background-color: $ist-color
     padding: 10px
     margin-bottom: 5em   
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    +border-bottom-left-radius(25px)
-    +border-bottom-right-radius(25px)
-    +background-clip(border-box)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset)
     input#predict
       margin-left: 1em
+
+
   .predictions
     background-color: $ist-color
     padding: 10px
     text-align: justify
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    +border-left-radius(25px)
-    +border-right-radius(25px)
-    +background-clip(border-box)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset)
   .overview
     a:hover
-      color: #FF5555 
+      color: $orange 
     background-image: url("/images/gray_jean.png")
     padding: 12px
     margin-top: 1em
     margin-bottom: 1em
     text-align: left
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    +border-top-left-radius(25px)
-    +border-top-right-radius(25px)
-    +background-clip(border-box)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset)
     caption
       text-align: left
     #overview tr td
@@ -136,38 +126,29 @@ body
   .error
     background-color: $ist-color
     padding: 15px
-    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba(black, 0.3) inset)
-    +border-left-radius(25px)
-    +border-right-radius(25px)
-    +background-clip(border-box)
+    +box-shadow(1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset)
     .message
-      margin-top: 1em
+      margin: 2em
       padding: 1em
-      border: 2px solid #FF5555
+      border: 2px solid $orange
       background-color: #FFFFFF
-      color: #FF5555
-      +border-left-radius(25px)
-      +border-right-radius(25px)
-      +background-clip(border-box)
+      color: $black
   // close button for iframe also in content class
   #closebutton
-    color: #FF5555
+    color: $orange
     margin-left: 98%
-    padding: 0
-    //background-color: $ist-color
-    //+border-bottom-left-radius(5px)
-    //+border-bottom-right-radius(5px)
+    //padding: 0
     
 .details
   //height: 100%
   width: 98%
   background-color: $ist-color
-  +border-bottom-left-radius(5px)
-  +border-bottom-right-radius(5px)
-  +background-clip(border-box)
-  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
+  //+border-bottom-left-radius(5px)
+  //+border-bottom-right-radius(5px)
+  //+background-clip(border-box)
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba($black, 0.3) inset)
   a:hover
-    color: #FF5555
+    color: $orange
   img
     display: inline
     float: left
@@ -179,10 +160,7 @@ body
   margin-bottom: 2em
   background-color: $ist-color
   //background-image: url("/images/gray_jean.png")
-  +border-bottom-left-radius(5px)
-  +border-bottom-right-radius(5px)
-  +background-clip(border-box)
-  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba($black, 0.3) inset)
   img
     display: inline
     float: left
@@ -198,10 +176,7 @@ body
   margin-bottom: 2em
   background-color: $ist-color
   //background-image: url("/images/gray_jean.png")
-  +border-bottom-left-radius(5px)
-  +border-bottom-right-radius(5px)
-  +background-clip(border-box)
-  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba($black, 0.3) inset)
   img
     display: inline
     float: left
@@ -218,8 +193,8 @@ body
   margin-top: 2em
   margin-bottom: 2em
   a:hover
-    color: #FF5555
-  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
+    color: $orange
+  +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba($black, 0.3) inset)
   .tablesorter
     width: 100%
     text-align: left
@@ -243,7 +218,7 @@ body
     tbody
       tr td
         padding-left: 1em
-        +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba(black, 0.3) inset)
+        +box-shadow(1px 1px 1px rgba(white, 1) inset, 0px -1px 2px rgba($black, 0.3) inset)
       .compound
         width: 200px
         padding: 0.2em
@@ -260,7 +235,7 @@ input#predict
   
 .tooltip
   background-color: #fff
-  border: 2px solid #ccc
+  border: 2px solid $orange
   font-size: 0.5em
   padding: 1em
   display: none
@@ -268,3 +243,9 @@ input#predict
   
 .footer
   margin: 20px 0 20px 0
+  a
+    text-decoration: none
+    color: black
+    &:hover
+      color: $orange
+

@@ -1,11 +1,11 @@
 %link{ :href=>"/stylesheets/screen.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
 
-.content
-  %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
-    X
-    
-  .details{:style=>"padding:0.5em;min-height:400px;"}
-    %h2{:style=>"margin:0px;margin-left:8px;"}
+.content{:style=>"margin-top:0;"}
+  .details{:style=>"padding:0.5em;height:100%;"}
+    %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
+      X
+      
+    %h2{:style=>"margin-left:8px;"}
       Names and synonyms:
     %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px"}
     %p

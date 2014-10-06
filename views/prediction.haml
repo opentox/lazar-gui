@@ -14,11 +14,10 @@
 
       %tbody
         %tr
-          %td{:id=>"compound", :style=>"align:center;"}
+          %td{:id=>"compound", :style=>"width: 200px;padding:0.2em;"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
+              Names and synonyms
               %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
-            %p
-            %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"} Names and synonyms
             %p
             :javascript
               $(function() {
@@ -124,9 +123,8 @@
                       });
                   %p
                   - if c != ''
-                    %b Neighbors:
                     %a{:href=> "#tabs", :id=>"link#{count}"}
-                      %img{:src=>"/images/arrow_down_float.png", :alt=>"v"}
+                      %b Neighbors
                       :javascript
                         $("a#link#{count}").click(function () {
                           $(".results").show();

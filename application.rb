@@ -12,10 +12,12 @@ require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added 
 set :protection, :except => :path_traversal
 
 helpers do
-  # models must be edited with RDF.type => (RDF::OT.PrediCtionModel, EchaEndpoint)
+  # models must be edited with RDF.type => (RDF::OT.PredictionModel, EchaEndpoint)
   @@models = []
   models = `curl -k GET -H accept:text/uri-list #{$model[:uri]}`.split("\n")
-    .collect{|m| model = OpenTox::Model::Lazar.find m; model.type.flatten.to_s =~ /PredictionModel/ ; @@models << model } 
+  .collect{|m| model = OpenTox::Model::Lazar.find m; if model.type.flatten.to_s =~ /PredictionModel/ then @@models << model end}
+  @@cv = []
+  `curl -k GET -H accept:text/uri-list #{$validation[:uri]}/crossvalidation`.split("\n").each{|cv| x = OpenTox::Validation.find cv; @@cv << x}
 end
 
 get '/?' do
@@ -24,7 +26,9 @@ end
 
 get '/predict/?' do
   # sort models by endpoint alphabetically
+  $size = 0
   @models = @@models.sort!{|a, b| a.type.select{|e| e =~ /endpoint/i} <=> b.type.select{|e| e =~ /endpoint/i}}
+  @cv = @@cv.collect{|cv| cv.metadata.select{|x| x =~ /predictionFeature/}}
   haml :predict
 end
 
@@ -165,6 +169,15 @@ get '/prediction/:model_uri/:type/:neighbor/significant_fragments/?' do
   haml :significant_fragments, :layout => false
 end
 
+get '/predict/:dataset/?' do
+  t = Tempfile.new("tempfile.rdf")
+  t << `curl -k -H accept:application/rdf+xml #{params[:dataset]}`
+  send_file t.path,
+    :filename => params[:dataset].split("_").last+".rdf"
+  t.close
+  t.unlink
+end
+
 post '/predict/?' do
   # validate identifier input
   task = OpenTox::Task.run("Validate SMILES string.") do
@@ -173,14 +186,12 @@ post '/predict/?' do
 
     # get compound from SMILES
     @compound = OpenTox::Compound.from_smiles @identifier.to_s
-
+    
     # validate SMILES by converting to INCHI
     inchi = @compound.inchi
-  end
-
+  end#smiles
   # necessary to wait for task
   task.wait
-
   # case task fails return message smiles invalid  
   # case task completed go ahead
   case task[RDF::OT.hasStatus]
@@ -194,21 +205,19 @@ post '/predict/?' do
     @prediction_models = []
     @predictions = []
     @model_type = []
-
     # get selected models
     #TODO compare if model is selected by uri not title
     params[:selection].each do |model|
       # selected model = model[0]
       # compare selected with all models
       @@models.each do |m|
-        @prediction_models << m if m.title =~ /#{model[0]}/i
+        @prediction_models << m if m.uri == model[0]
       end
     end
-
     # predict with selected models
     # one prediction in 'pa' array = OpenTox::Dataset
     # all collected predictions in '@predictions' array
-    @prediction_models.each do |m|
+    @prediction_models.each_with_index do |m, idx|
       # define type (classification|regression)
       m.type.join =~ /classification/i ? (@model_type << "classification") : (@model_type << "regression")
       
@@ -221,11 +230,8 @@ post '/predict/?' do
       pa << prediction
       @predictions << pa
     end
-    
     haml :prediction
   end
-  
-  
 end
 
 get '/predict/stylesheets/:name.css' do

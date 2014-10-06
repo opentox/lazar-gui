@@ -97,7 +97,9 @@
                   - c = p.data_entries[count][2].round(3)
                 %tr
                   %td.compound
-                    %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
+                    %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
+                      Names and synonymes
+                      %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
                   %td
                     - if c.class == String
                       = c
@@ -106,8 +108,6 @@
                   %td
                     = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset." 
                   %td
-                    -#- if p.data_entries[count][3] != nil
-                    %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"} Names and synonymes
                     %br
                     - if @type =~ /classification/i
                       - if p.data_entries[count][3] != nil 

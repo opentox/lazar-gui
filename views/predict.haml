@@ -1,9 +1,22 @@
 :javascript
+  function progress(percent, $element) {
+    var progressBarWidth = percent * $element.width() / 100;
+    $element.show();
+    setInterval(function(){
+      if($element.find('#bar').is(":visible") & $element.find('#bar').width() < 400){
+        var next = $element.find('#bar').width() + 20;
+      } else if ($element.find('#bar').is(":visible") & $element.find('#bar').width() == 400) {
+        var next = $element.find('#bar').width() - 20;
+      }
+      $element.find('#bar').animate({ width:next }, 300).html(value + "%&nbsp;");
+    }, 2000);
+  };
   function checksmiles () {
     if (document.form.identifier.value == "") {
       alert("Please draw or insert a chemical structure.");
-      $("img.circle").hide();
+      //$("img.circle").hide();
       document.form.identifier.focus();
+      $('#progressBar').hide();
       return false;
     };
     return true;
@@ -17,7 +30,8 @@
     });
     if (checked == false){
       alert("Please select an endpoint.");
-      $("img.circle").hide();
+      //$("img.circle").hide();
+      $('#progressBar').hide();
       return false;
     };
     return true;
@@ -34,9 +48,9 @@
       document.form.identifier.value = document.JME.smiles() ;
     };
   };
-  function showcircle(){
-    $("img.circle").show();
-  };
+  //function showcircle(){
+    //$("img.circle").show();
+  //};
 
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
@@ -82,7 +96,7 @@
         %b= model_endpoint.split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
         - @detail_count +=1
         %div{:id => model_title}
-          %input{:type => "checkbox", :name => "selection[#{model_title}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+          %input{:type => "checkbox", :name => "selection[#{model.uri}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
           %label{:for => "selection[#{model_title}]"}
             = model_t
           %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
@@ -110,17 +124,18 @@
           %br
           %br
           %p{:style=>"display:inline"}= "Training Dataset: "
-          %a{:href=>"#{model[RDF::OT.trainingDataset]}", :title=>"link opens in new window.", :target=>"_blank"} download
+          %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}")}", :title=>"link opens in new window."} download rdf
           %br
           %br
           %p{:style=>"display:inline"}= "Feature Dataset: "
-          %a{:href=>"#{model[RDF::OT.featureDataset]}", :title=>"link opens in new window.", :target=>"_blank"} download
+          %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}", :title=>"download"} download rdf
           %br
           %br
           %p{:style=>"display:inline"}= "Model: "
-          %a{:href=>"#{model.uri}", :title=>"link opens in new window.", :target=>"_blank"} download
+          %a{:href=>"#{to("/predict/#{CGI.escape(model.uri)}")}", :title=>"download"} download rdf
           %br
-          %h3 Validation: 
+          %h3 Validation:
+          -#%p= @cv.inspect
           %a{:href => "#"} 
             Detailed report link
           %p Number of predictions: integer
@@ -131,9 +146,16 @@
 
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
-
+  
   %fieldset#bottom
-    %h1
-      3. Predict
-    %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(getsmiles() & showcircle())", :style=>"height:30px;width:30px;"}
-    %img{:src=>"/images/wait30trans.gif", :alt=>"processing", :class=>"circle", :style=>"display:none;background-color:white;margin-left:10%;border:solid 1px;vertical-align:middle;"}
+    %table{:style=>"cellspacing:10;cellpadding:20"}
+      %tr
+        %td{:style=>"width:10em;align:center;valign:middle;"}
+          %h1
+            3. Predict
+        %td{:style=>"width:10%;align:center;valign:middle;"}
+          %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress(1,$('#progressBar')) & getsmiles() & showcircle())", :style=>"cursor: pointer;display:inline;width:50px;height:50px;border-radius: 50%;color:#2b2b2b;text-align:center;text-decoration:none;background:#f76700;box-shadow: 0 0 5px white;font-weight:bold;"}
+
+        %td{:style=>"align:center;valign:middle;"}
+          #progressBar{:style=>"width: 400px;height: 22px;border:1px solid #2b2b2b;background-color:gray;display:none;"}
+            #bar{:style =>"width:0;height: 100%;color: #fff;text-align: right;line-height: 22px;background-color: #0099ff;"}
