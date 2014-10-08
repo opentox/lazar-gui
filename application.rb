@@ -1,9 +1,3 @@
-require 'rubygems'
-require 'compass' #must be loaded before sinatra
-require 'sinatra'
-require 'haml' #must be loaded after sinatra
-require 'opentox-client'
-require 'opentox-server'
 require_relative 'helper.rb'
 require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
@@ -234,8 +228,8 @@ post '/predict/?' do
   end
 end
 
-get '/predict/stylesheets/:name.css' do
-  content_type 'text/css', :charset => 'utf-8'
-  sass(:"stylesheets/#{params[:name]}", Compass.sass_engine_options )
+get '/style.css' do
+  headers 'Content-Type' => 'text/css; charset=utf-8'
+  scss :style
 end
 
