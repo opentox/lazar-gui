@@ -9,7 +9,7 @@ helpers do
   # models must be edited with RDF.type => (RDF::OT.PredictionModel, EchaEndpoint)
   @@models = []
   models = `curl -k GET -H accept:text/uri-list #{$model[:uri]}`.split("\n")
-  .collect{|m| model = OpenTox::Model::Lazar.find m; if model.type.flatten.to_s =~ /PredictionModel/ then @@models << model end}
+  .collect{|m| model = OpenTox::Model::Lazar.find m; @@models << model if model.type.flatten.to_s =~ /PredictionModel/}
   @@cv = []
   `curl -k GET -H accept:text/uri-list #{$validation[:uri]}/crossvalidation`.split("\n").each{|cv| x = OpenTox::Validation.find cv; @@cv << x}
 end

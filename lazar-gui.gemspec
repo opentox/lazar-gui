@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "opentox-feature"
   s.add_runtime_dependency "opentox-model"
   s.add_runtime_dependency "opentox-task"
+  s.add_runtime_dependency "opentox-validation"
   s.add_runtime_dependency "sinatra"
   s.add_runtime_dependency "haml"
   s.add_runtime_dependency "sass"
