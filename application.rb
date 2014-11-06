@@ -23,7 +23,7 @@ get '/predict/?' do
   $size = 0
   @models = @@models.sort!{|a, b| a.type.select{|e| e =~ /endpoint/i} <=> b.type.select{|e| e =~ /endpoint/i}}
   @cv = @@cv.collect{|cv| cv.metadata.select{|x| x =~ /predictionFeature/}}
-  haml :predict
+  @models.size <= 0 ? (haml :info) : (haml :predict)
 end
 
 get '/jme_help/?' do
