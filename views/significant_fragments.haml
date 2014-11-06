@@ -1,8 +1,7 @@
 %link{ :href=>"/style.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
-/TODO put smiles in div if compound image is not available, prevent overlay to table
 .content{:style=>"margin-top:0;"}
   - if @type =~ /classification/i
-    .significant_fragments{:style=>"padding:0.5em;height:100%"}
+    .significant_fragments{:style=>"padding:0.7em;padding-bottom:5em;"}
       %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
         X
       %h2{:style=>"margin-left:8px;"}
@@ -26,6 +25,7 @@
                   %td
                     / fragments[1] = smarts 
                     = fragments[1]
+                    %img{:src => "http://smartsview.de/smartsview/auto/png/1/none/#{CGI.escape(fragments[1])}", :class => "smarts"}
                   %td
                     /fragments[2] = pValue
                     = fragments[2]
