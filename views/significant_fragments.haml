@@ -25,7 +25,7 @@
                   %td
                     / fragments[1] = smarts 
                     = fragments[1]
-                    %img{:src => "http://smartsview.de/smartsview/auto/png/1/none/#{CGI.escape(fragments[1])}", :class => "smarts"}
+                    %img{:src => "http://smartsview.de/smartsview/auto/png/2/none/#{CGI.escape(fragments[1])}", :class => "smarts"}
                   %td
                     /fragments[2] = pValue
                     = fragments[2]
@@ -42,6 +42,7 @@
               - if fragments[0] == @value_map.index("active")
                 %tr
                   %td
+                    %img{:src => "http://smartsview.de/smartsview/auto/png/2/none/#{CGI.escape(fragments[1])}", :class => "smarts"}
                     = fragments[1]
                   %td
                     = fragments[2]
