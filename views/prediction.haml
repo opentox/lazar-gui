@@ -14,7 +14,7 @@
 
       %tbody
         %tr
-          %td{:id=>"compound", :style=>"width: 200px;padding:0.2em;"}
+          %td{:id=>"compound", :style=>"width: 200px;vertical-align:top;"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
               Names and synonyms
               %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
@@ -57,9 +57,13 @@
                   %b Result:
                   %b
                     - if c.class == String
-                      = (c != '' ? c : "No prediction result.")
+                      - result = (c != '' ? c : "No prediction result.")
+                      = result
                     - else
-                      = (c != '' ? c.round(3) : "No prediction result.")
+                      - result = (c != '' ? c.round(3) : "No prediction result.")
+                      = result
+                    - confidence = (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0) ? p.data_entries[0][1].round(2) : "--"
+                  
                   / title must be empty for tooltip
                   %a{:href=>"#result", :title=>"", :id=>"result"}
                     %img{:src=>"/images/info_white.png"}
@@ -84,10 +88,16 @@
                         %a{:href=>"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract", :target=>"_blank"} original publication
                         )
                       Please keep in mind that predictions are based on the measured activities of neighbors.
+                  - @cv = OpenTox::Validation.find @prediction_models[count].metadata[RDF::OT.crossValidation][0]+"/statistics" unless @prediction_models[count].title.include?("Mutagenicity")
+                    - unless @model_type[count] == "regression"
+                    %b
+                      = "Probalitity: "
+                    - unless result == "No prediction result." or confidence == "--"
+                      = "#{@cv.probabilities( confidence, result )[:probs][result].round(3)*100} %"
                   %p
                   .confidence
                     %b Confidence:
-                    = (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0) ? p.data_entries[0][1].round(3) : "--"
+                    = confidence
                     / title must be empty for tooltip
                     %a{:href=>"#confidence", :title=>"", :id=>"confidence"}
                       %img{:src=>"/images/info_white.png"}
@@ -101,6 +111,8 @@
                         Confidence values may take any value between 0 and 1.
                         For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between 
                         reliable and unreliable predictions.
+
+
                   %p
                   /TODO add tooltip for significant ftagments and descriptors
                   - if @model_type[count] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)

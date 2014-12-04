@@ -112,6 +112,7 @@
           %p{:style=>"display:inline;"} Algorithm:
           %code{:style=>"font-size:x-large;"} lazar
           - model.type.to_s =~ /regression/i ? type = "regression" : type = "classification"
+          - @model_type = type
           %p= "Type: "+type
           - training_dataset = OpenTox::Dataset.new "#{model[RDF::OT.trainingDataset]}"
           - training_compounds = training_dataset.compounds.size.to_s
@@ -123,26 +124,24 @@
             %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
           %br
           %br
-          %p{:style=>"display:inline"}= "Training Dataset: "
-          %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}")}", :title=>"link opens in new window."} download rdf
+          %p{:style=>"display:inline"}= "Model: "
+          %a{:href=>"#{to("/predict/#{CGI.escape(model.uri)}")}", :title=>"download"} rdf
           %br
           %br
           %p{:style=>"display:inline"}= "Feature Dataset: "
-          %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}", :title=>"download"} download rdf
+          %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}", :title=>"download"} rdf
           %br
           %br
-          %p{:style=>"display:inline"}= "Model: "
-          %a{:href=>"#{to("/predict/#{CGI.escape(model.uri)}")}", :title=>"download"} download rdf
+          %p{:style=>"display:inline"}= "Training Dataset: "
+          %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}")}", :title=>"link opens in new window."} rdf
           %br
-          %h3 Validation:
-          -#%p= @cv.inspect
-          %a{:href => "#"} 
-            Detailed report link
-          %p Number of predictions: integer
-          %p Correct predictions: %
-
-
-      //%br
+          - unless model.metadata[RDF::OT.crossValidation].nil?
+            %h3 Validation:
+            %a{:href => "#{model.metadata[RDF::OT.crossValidation][0]}", :title=>"link opens in new window.", :target=>"_blank"} 
+              Detailed report link
+            %br
+            - @cv = OpenTox::Validation.find "#{model.metadata[RDF::OT.crossValidation][0]+"/statistics"}"
+            = haml :validation, :layout => false, :validation => @cv, :model_type => @model_type
 
   .arrow
     %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}

@@ -10,8 +10,9 @@ helpers do
   @@models = []
   models = `curl -k GET -H accept:text/uri-list #{$model[:uri]}`.split("\n")
   .collect{|m| model = OpenTox::Model::Lazar.find m; @@models << model if model.type.flatten.to_s =~ /PredictionModel/}
-  @@cv = []
-  `curl -k GET -H accept:text/uri-list #{$validation[:uri]}/crossvalidation`.split("\n").each{|cv| x = OpenTox::Validation.find cv; @@cv << x}
+  #@@cv = []
+  #`curl -k GET -H accept:text/uri-list #{$validation[:uri]}/crossvalidation`.split("\n").each{|cv| x = OpenTox::Validation.find cv+"/statistics" if cv =~ /7/; @@cv << x}
+  #@@cv = OpenTox::Validation.find "https://dg.in-silico.ch/validation/crossvalidation/7/statistics"
 end
 
 get '/?' do
@@ -22,7 +23,7 @@ get '/predict/?' do
   # sort models by endpoint alphabetically
   $size = 0
   @models = @@models.sort!{|a, b| a.type.select{|e| e =~ /endpoint/i} <=> b.type.select{|e| e =~ /endpoint/i}}
-  @cv = @@cv.collect{|cv| cv.metadata.select{|x| x =~ /predictionFeature/}}
+  #@cv = @@cv#.collect{|cv| cv.metadata.select{|x| x =~ /predictionFeature/}}
   @models.size <= 0 ? (haml :info) : (haml :predict)
 end
 
@@ -200,7 +201,7 @@ post '/predict/?' do
     @predictions = []
     @model_type = []
     # get selected models
-    #TODO compare if model is selected by uri not title
+    # compare selected model by uri
     params[:selection].each do |model|
       # selected model = model[0]
       # compare selected with all models
