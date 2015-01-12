@@ -90,8 +90,9 @@
                       Please keep in mind that predictions are based on the measured activities of neighbors.
                   - @cv = OpenTox::Validation.find @prediction_models[count].metadata[RDF::OT.crossValidation][0]+"/statistics" unless @prediction_models[count].title.include?("Mutagenicity")
                     - unless @model_type[count] == "regression"
+                    %br  
                     %b
-                      = "Probalitity: "
+                      = "Probability: "
                     - unless result == "No prediction result." or confidence == "--"
                       = "#{@cv.probabilities( confidence, result )[:probs][result].round(3)*100} %"
                   %p
