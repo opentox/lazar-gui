@@ -89,9 +89,9 @@
     #models
       - @detail_count = 0
       - @endpoints.each do |endpoint|
-        %b= endpoint.split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
+        %b= endpoint[0].split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
         - @models.each do |model|
-          - if endpoint == model.type.select{|e| e =~ /Endpoint/}
+          - if endpoint[0] == model.type.select{|e| e =~ /Endpoint/}
             - model_title = model.title.split("_").last(2)[0]
             - model_t = model.title.gsub("_", " ")
             - @detail_count +=1
