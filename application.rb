@@ -20,6 +20,7 @@ get '/predict/?' do
   # sort models by endpoint alphabetically
   $size = 0
   @models = @@models.sort!{|a, b| a.type.select{|e| e =~ /endpoint/i} <=> b.type.select{|e| e =~ /endpoint/i}}
+  @endpoints = @@models.collect{|e| e.type.select{|e| e =~ /endpoint/i}}.sort!.uniq
   @models.size <= 0 ? (haml :info) : (haml :predict)
 end
 
