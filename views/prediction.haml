@@ -1,3 +1,10 @@
+:javascript
+  // increase body width if more than 2 models selected
+  window.onload = function(){
+    var plusSize = ("#{@predictions.size}" > 2 ) ? ("#{@predictions.size}" * 100) : 0;
+    var width = $(window).width() + plusSize;
+    $("body").width(width);
+  };
 .predictions
   .back
     %h1
@@ -14,9 +21,9 @@
 
       %tbody
         %tr
-          %td{:id=>"compound", :style=>"width: 200px;vertical-align:top;"}
+          %td{:id=>"compound", :style=>"vertical-align:top;"}
             %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
-              Names and synonyms
+              Names and synonyms >
               %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
             %p
             :javascript
@@ -118,7 +125,7 @@
                   /TODO add tooltip for significant ftagments and descriptors
                   - if @model_type[count] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Significant fragments:
-                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :title=>"", :target=>"details_overview"}Significant fragments
+                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :title=>"", :target=>"details_overview"}Significant fragments >
                     :javascript
                       $(function() {
                         $("a#linkPredictionSf").on('click', function(e) {
@@ -137,7 +144,7 @@
                   %p
                   - if c != ''
                     %a{:href=> "#tabs", :id=>"link#{count}"}
-                      %b Neighbors
+                      %b Neighbors >
                       :javascript
                         $("a#link#{count}").click(function () {
                           $(".results").show();

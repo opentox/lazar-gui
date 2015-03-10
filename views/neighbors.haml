@@ -98,7 +98,7 @@
                 %tr
                   %td.compound
                     %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
-                      Names and synonymes
+                      Names and synonymes >
                       %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
                   %td
                     - if c.class == String
@@ -110,7 +110,7 @@
                   %td
                     - if @type =~ /classification/i
                       - if p.data_entries[count][3] != nil 
-                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Significant fragments
+                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Significant fragments >
                     - if @type =~ /regression/i
                       - if p.data_entries[count][3] != nil
                         %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Descriptors

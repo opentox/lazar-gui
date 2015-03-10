@@ -49,7 +49,30 @@ get '/prediction/:neighbor/details/?' do
 
   haml :details, :layout => false
 end
-
+=begin
+# sdf representation for datasets
+#TODO fix 502 errors from compound service
+get '/predict/:dataset_uri/sdf/?' do
+  uri = CGI.unescape(params[:dataset_uri])
+  $logger.debug uri
+  bad_request_error "Not a dataset uri." unless URI.dataset? uri
+  dataset = OpenTox::Dataset.find uri
+  @compounds = dataset.compounds
+  @data_entries = dataset.data_entries
+  sum=""
+  @compounds.each_with_index{ |c, idx|
+    sum << c.inchi
+    sum << c.sdf.sub(/\n\$\$\$\$/,'')
+    @data_entries[idx].each{ |f,v|
+      sum << "> <\"#{f}\">\n"
+      sum << v.join(", ")
+      sum << "\n\n"
+    }
+    sum << "$$$$\n"
+  }
+  send_file sum, :filename => "#{dataset.title}.sdf"
+end
+=end
 # fingerprints for compound in predictions
 get '/prediction/:model_uri/:type/:compound_uri/fingerprints/?' do
   @type = params[:type]

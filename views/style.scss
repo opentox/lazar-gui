@@ -105,8 +105,8 @@ body {
       border: 1px solid #dad9c7;
       padding-left: 1em;
       padding-top: 0.5em; }
-      .content .overview #overview tr td #compound {
-        width: 200px; }
+      .content .overview #overview tr td#compound {
+        width: 250px; }
       .content .overview #overview tr td b.c {
         color: #d42200; }
       .content .overview #overview tr td b.n {
@@ -207,7 +207,7 @@ body {
       box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
       padding-left: 1em; }
     .results .tablesorter tbody .compound {
-      width: 200px;
+      width: 250px;
       padding: 0.2em; }
     .results .tablesorter tbody .n {
       color: #5c8533; }
