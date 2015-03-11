@@ -1,22 +1,46 @@
 :javascript
-  function progress(percent, $element) {
-    var progressBarWidth = percent * $element.width() / 100;
-    $element.show();
-    setInterval(function(){
-      if($element.find('#bar').is(":visible") & $element.find('#bar').width() < 400){
-        var next = $element.find('#bar').width() + 20;
-      } else if ($element.find('#bar').is(":visible") & $element.find('#bar').width() == 400) {
-        var next = $element.find('#bar').width() - 20;
+  function callTask(url) {
+    var result="";
+    $.ajax({
+      url: url,
+      async: false,
+      success:function(data) {
+        var response = data.match(/Completed\s.*\./)[0];
+        var arr = response.split(" ");
+        result = arr[1].replace(/"/g, "");
       }
-      $element.find('#bar').animate({ width:next }, 300);
-    }, 2000);
+    });
+    return result;
+  };
+  function progressBarWidth(p,w){
+    percent = p * w / 100;
+    return percent ;
+  };
+  // form function
+  function progress($element, url) {
+    $element.show();
+    var fullWidth = $element.width();
+    var timer = setInterval(function(){
+      var percent = callTask(url);
+      if(percent == 100.0){
+        var next = progressBarWidth(percent,fullWidth);
+        clearInterval(timer);
+        //$element.delay(3000).hide();
+        //percent = 0;
+      }
+      //else if($element.find('#bar').is(":visible") & $element.find('#bar').width() < 400){
+      else {
+        var next = progressBarWidth(percent,fullWidth);
+      }
+      $element.find('#bar').animate({ width:next }, 3000);
+    }, 3000);
   };
   function checksmiles () {
     if (document.form.identifier.value == "") {
       alert("Please draw or insert a chemical structure.");
-      $("img.circle").hide();
+      //$("img.circle").hide();
       document.form.identifier.focus();
-      //$('#progressBar').hide();
+      $('#progressBar').hide();
       return false;
     };
     return true;
@@ -30,8 +54,8 @@
     });
     if (checked == false){
       alert("Please select an endpoint.");
-      $("img.circle").hide();
-      //$('#progressBar').hide();
+      //$("img.circle").hide();
+      $('#progressBar').hide();
       return false;
     };
     return true;
@@ -51,6 +75,10 @@
   function showcircle(){
     $("img.circle").show();
   };
+
+// init task for progress
+- task_uri = OpenTox::Task.task_uri
+- OpenTox::Task.run("Predict compound.", "#{$lazar[:uri]}", task_uri)do;end
 
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
@@ -155,9 +183,10 @@
           %h1
             3. Predict
         %td{:style=>"width:10%;align:center;valign:middle;"}
-          %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(showcircle() & getsmiles() & checkboxes())", :style=>"cursor: pointer;display:inline;width:50px;height:50px;border-radius: 50%;color:#2b2b2b;text-align:center;text-decoration:none;background:#f76700;box-shadow: 0 0 5px white;font-weight:bold;"}
+          %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress($('#progressBar'),'#{task_uri}') & getsmiles() & checkboxes())", :style=>"cursor: pointer;display:inline;width:50px;height:50px;border-radius: 50%;color:#2b2b2b;text-align:center;text-decoration:none;background:#f76700;box-shadow: 0 0 5px white;font-weight:bold;"}
+          %input{:type => "hidden", :name => "task_uri", :value => "#{task_uri}"}
 
         %td{:style=>"align:center;valign:middle;"}
-          %img{:src=>"/images/wait30trans.gif", :class=>"circle", :style=>"display:none;background-color:white;margin-left:10%;border:solid 1px;vertical-align:middle;"}
-          -##progressBar{:style=>"width: 400px;height: 22px;border:1px solid #2b2b2b;background-color:gray;display:none;"}
-            -##bar{:style =>"width:0;height: 100%;color: #fff;text-align: right;line-height: 22px;background-color: #0099ff;"}
+          -#%img{:src=>"/images/wait30trans.gif", :class=>"circle", :style=>"display:none;background-color:white;margin-left:10%;border:solid 1px;vertical-align:middle;"}
+          #progressBar{:style=>"width:400px;height:22px;border:1px solid #2b2b2b;background-color:gray;display:none;"}
+            #bar{:style =>"width:0;height:100%;color:#fff;text-align:right;line-height:22px;background-color:#0099ff;"}

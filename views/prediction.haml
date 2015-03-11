@@ -134,7 +134,7 @@
                       });
                   - if @model_type[count] =~ /regression/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Descriptors
-                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :target=>"details_overview"} Descriptors
+                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :target=>"details_overview"} Descriptors >
                     :javascript
                       $(function() {
                         $("a#linkPredictionSf").on('click', function(e) {

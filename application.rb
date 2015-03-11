@@ -10,6 +10,13 @@ helpers do
   @@models = []
   models = `curl -k GET -H accept:text/uri-list #{$model[:uri]}`.split("\n")
   .collect{|m| model = OpenTox::Model::Lazar.find m; @@models << model if model.type.flatten.to_s =~ /PredictionModel/}
+  
+  class Numeric
+    def percent_of(n)
+      self.to_f / n.to_f * 100.0
+    end
+  end
+
 end
 
 get '/?' do
@@ -232,7 +239,15 @@ post '/predict/?' do
     # predict with selected models
     # one prediction in 'pa' array = OpenTox::Dataset
     # all collected predictions in '@predictions' array
+    # add task for progressBar
+    total = @prediction_models.size
+    toptask = OpenTox::Task.find params[:task_uri]
+    toptask.metadata
+    toptask[RDF::OT.hasStatus] = "Running"
+    toptask[RDF::OT.percentageCompleted] = "10"
+    toptask.put
     @prediction_models.each_with_index do |m, idx|
+      idx = idx+1
       # define type (classification|regression)
       m.type.join =~ /classification/i ? (@model_type << "classification") : (@model_type << "regression")
       
@@ -244,6 +259,8 @@ post '/predict/?' do
       pa = []
       pa << prediction
       @predictions << pa
+      toptask[RDF::OT.percentageCompleted] = idx.percent_of(total).round(1)
+      toptask.put
     end
     haml :prediction
   end

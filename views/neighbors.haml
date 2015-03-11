@@ -113,7 +113,7 @@
                         %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Significant fragments >
                     - if @type =~ /regression/i
                       - if p.data_entries[count][3] != nil
-                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Descriptors
+                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Descriptors >
                     :javascript
                       $(function() {
                           $("a#link#{count_rs}#{count}").on('click', function(e) {
