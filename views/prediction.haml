@@ -101,7 +101,8 @@
                     %b
                       = "Probability: "
                     - unless result == "No prediction result." or confidence == "--"
-                      = "#{@cv.probabilities( confidence, result )[:probs][result].round(3)*100} %"
+                      - prob = @cv.probabilities( confidence, result )[:probs][result]*100
+                      = "#{prob.round(3)} %"
                   %p
                   .confidence
                     %b Confidence:
