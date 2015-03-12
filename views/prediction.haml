@@ -102,7 +102,7 @@
                       = "Probability: "
                     - unless result == "No prediction result." or confidence == "--"
                       - prob = @cv.probabilities( confidence, result )[:probs][result]*100
-                      = "#{prob.round(3)} %"
+                      = "#{prob.round(1)} %"
                   %p
                   .confidence
                     %b Confidence:
