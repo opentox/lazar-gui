@@ -95,7 +95,7 @@
                         %a{:href=>"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract", :target=>"_blank"} original publication
                         )
                       Please keep in mind that predictions are based on the measured activities of neighbors.
-                  - @cv = OpenTox::Validation.find @prediction_models[count].metadata[RDF::OT.crossValidation][0]+"/statistics" unless @prediction_models[count].title.include?("Mutagenicity")
+                  - @cv = OpenTox::Validation.find @prediction_models[count].metadata[RDF::OT.crossValidation][0]+"/statistics" #unless @prediction_models[count].title.include?("Mutagenicity")
                     - unless @model_type[count] == "regression"
                     %br  
                     %b
