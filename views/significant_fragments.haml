@@ -1,71 +1,66 @@
-%link{ :href=>"/style.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
-.content{:style=>"margin-top:0;"}
+%div.modal-body{:style=>"padding:10px;"}
+  %button.close{ :type=>" button", data: { dismiss:"modal"}} &times;
   - if @type =~ /classification/i
-    .significant_fragments{:style=>"padding:0.7em;padding-bottom:10em;"}
-      %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
-        X
-      %h2{:style=>"margin-left:8px;"}
-        Significant fragments:
-
-      %img{:src=>"#{@compound.uri}/image", :alt=>"#{@compound.smiles}", :title=>"#{@compound.smiles}", :width=>"300px", :heigth=>"300px"}
+    %div.row
+      %div.col-md-4
+        %h2{:style=>"margin-left:8px;"}
+          Significant fragments:
+        %img{:src=>"#{@compound.uri}/image", :alt=>"#{@compound.smiles}", :title=>"#{@compound.smiles}", :width=>"300px", :heigth=>"300px"}
       - if !@significant_fragments.empty?
-        %table{:id => "sf1"}
-          %tr
-            / @value_map => hash; interpret the effect
-            %th{:style=>"border:2px solid #E6E6E6;"}
-              Predominantly in compounds with activity "inactive"
-            %th{:style=>"border:2px solid #E6E6E6;"}
-              p value
-            - @significant_fragments.each do |fragments|
-              / fragments == [effect, smarts, pValue]
-              / fragments[0] = effect
-              /- $logger.debug "effect:\t#{fragments[0]}\n"
-              - if fragments[0] == @value_map.index("inactive")
-                %tr
-                  %td
-                    / fragments[1] = smarts 
-                    = fragments[1]
-                    %img{:src => "http://smartsview.de/smartsview/auto/png/1/both/#{CGI.escape(fragments[1])}", :class => "smarts"}
-                  %td
-                    /fragments[2] = pValue
-                    = fragments[2]
-          %tr
-            %td
-              %br
-          %tr
-            %th{:style=>"border:2px solid #E6E6E6;"}
-              Predominantly in compounds with activity "active"   
-            %th{:style=>"border:2px solid #E6E6E6;"}
-              p value
-            - @significant_fragments.each do |fragments|
-              / fragments == [effect, smarts, pValue]
-              - if fragments[0] == @value_map.index("active")
-                %tr
-                  %td
-                    %img{:src => "http://smartsview.de/smartsview/auto/png/1/both/#{CGI.escape(fragments[1])}", :class => "smarts"}
-                    = fragments[1]
-                  %td
-                    = fragments[2]
+        %div.col-md-8
+          %table{:id => "sf"}
+            %tr
+              / @value_map => hash; interpret the effect
+              %th{:style=>"border:2px solid #E6E6E6;"}
+                Predominantly in compounds with activity "inactive"
+              %th{:style=>"border:2px solid #E6E6E6;"}
+                p value
+              - @significant_fragments.each do |fragments|
+                / fragments == [effect, smarts, pValue]
+                / fragments[0] = effect
+                /- $logger.debug "effect:\t#{fragments[0]}\n"
+                - if fragments[0] == @value_map.index("inactive")
+                  %tr
+                    %td
+                      / fragments[1] = smarts 
+                      = fragments[1]
+                      -#%img{:src => "http://smartsview.de/smartsview/auto/png/1/both/#{CGI.escape(fragments[1])}", :class => "smarts"}
+                    %td
+                      /fragments[2] = pValue
+                      = fragments[2]
+            %tr
+              %th{:style=>"border:2px solid #E6E6E6;"}
+                Predominantly in compounds with activity "active"   
+              %th{:style=>"border:2px solid #E6E6E6;"}
+                p value
+              - @significant_fragments.each do |fragments|
+                / fragments == [effect, smarts, pValue]
+                - if fragments[0] == @value_map.index("active")
+                  %tr
+                    %td
+                      %img{:src => "http://smartsview.de/smartsview/auto/png/1/both/#{CGI.escape(fragments[1])}", :class => "smarts"}
+                      = fragments[1]
+                    %td
+                      = fragments[2]
 
   - if @type =~ /regression/i
-    .descriptors{:style=>"padding:0.5em;height:100%"}
-      %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
-        X
-      %h2{:style=>"margin:0px;margin-left:8px;"}
-        Descriptors:
-
-      %img{:src=>"#{@compound.uri}/image", :alt=>"#{@compound.smiles}", :title=>"#{@compound.smiles}", :width=>"300px", :heigth=>"300px"}
+    %div.row
+      %div.col-md-4
+        %h2
+          Descriptors:
+        %img{:src=>"#{@compound.uri}/image", :alt=>"#{@compound.smiles}", :title=>"#{@compound.smiles}", :width=>"300px", :heigth=>"300px"}
       - if !@significant_fragments.empty?
-        %table{:id => "sf2"}
-          %tr
-            %th{:style=>"border:2px solid #E6E6E6;"}
-              Descriptor
-            %th{:style=>"border:2px solid #E6E6E6;"}
-              value
-            - @significant_fragments.each do |fragments|
-              %tr
-                %td
-                  = fragments[0]
-                %td
-                  = fragments[1][0].round(3)
+        %div.col-md-8
+          %table{:id =>"de"}
+            %tr
+              %th{:style=>"border:2px solid #E6E6E6;"}
+                Descriptor
+              %th{:style=>"border:2px solid #E6E6E6;"}
+                value
+              - @significant_fragments.each do |fragments|
+                %tr
+                  %td
+                    = fragments[0]
+                  %td
+                    = fragments[1][0].round(3)
 

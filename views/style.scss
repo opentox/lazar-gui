@@ -52,7 +52,6 @@ body {
   .content .back {
     display: inline; }
   .content fieldset#top {
-    box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
     border: 0;
     padding: 10px;
     background-color: $ist-color; }
@@ -65,7 +64,6 @@ body {
   .content fieldset#middle {
     border: 0;
     padding: 10px;
-    box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
     background-color: $ist-color; }
     .content fieldset#middle a#linkModels {
       display: block;
@@ -78,7 +76,6 @@ body {
       font-weight: normal; }
   .content fieldset#bottom {
     border: 0;
-    box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
     background-color: $ist-color;
     padding: 10px;
     margin-bottom: 5em; }
@@ -86,12 +83,9 @@ body {
       margin-left: 1em; }
   .content .predictions {
     background-color: $ist-color;
-    box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
     padding: 10px;
     text-align: justify; }
   .content .overview {
-    background-image: url("/images/gray_jean.png");
-    box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
     padding: 12px;
     margin-top: 1em;
     margin-bottom: 1em;
@@ -176,8 +170,6 @@ body {
       padding: 0.2em; }
 
 .results {
-  box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
-  background-image: url("/images/gray_jean.png");
   overflow-x: auto;
   overflow-y: hidden;
   margin-top: 2em;
@@ -200,11 +192,11 @@ body {
       .results .tablesorter thead tr th.headerSortDown {
         background-image: url("/images/desc.gif");
         background-color: $ist-color; }
-      .results .tablesorter thead tr th.headerSortUp {
+      table.tablesorter .tablesorter-default thead tr .tablesorter-headerRow th .tablesorter-header .tablesorter-headerAsc {
         background-image: url("/images/asc.gif");
         background-color: $ist-color; }
     .results .tablesorter tbody tr td {
-      box-shadow: (1px 1px 1px rgba(white, 1) inset, -1px -1px 5px rgba($black, 0.3) inset);
+      border-spacing: 1px;
       padding-left: 1em; }
     .results .tablesorter tbody .compound {
       width: 250px;
@@ -235,3 +227,4 @@ input#predict {
     color: black; }
     .footer a:hover {
       color: $orange; }
+

@@ -1,15 +1,22 @@
-/ @@prediction_models and @@predictions defined in POST request '/predict'
+:javascript
+  $(function() {
+    $("#deatils.modal").on('show.bs.modal', function() {
+      alert("alert");
+      //$(this).removeData('bs.modal');
+    });
+  });
+
 / unpacks multi prediction array ;
 / prepare it for neighbors ;
 / align single prediction to endpoint ;
 / display preordered in table view ;
 
-.results{:style=>"display:none"}
+%div.results{:style=>"display:none"}
   - count_m = 0
   / tabs div ;
   #tabs
     %ul
-      / each endpoint becomes a tab head ;
+      / each model a tab head ;
       - @prediction_models.each do |m|
         - count_m += 1
         - m_title = m.title.split("_").last(2)[0]
@@ -36,8 +43,16 @@
           :javascript
             $(document).ready(function(){
               $("table##{count_rs}").tablesorter({
-                //debug: true,
-                //widgets: ['zebra'],
+                debug: false,
+                table: 'ui-widget ui-widget-content ui-corner-all',
+                header: 'ui-widget-header ui-corner-all ui-state-default',
+                theme: "bootstrap",
+                widthFixed: true,
+                hover: 'ui-state-hover',
+                even: 'ui-widget-content',
+                odd: 'ui-state-default',
+                headerTemplate: '{content} {icon}',
+                widgets: ['zebra', 'columns', 'uitheme'],
                 headers: {0: {sorter: false}, 3: {sorter: false}},
                 sortList: [[2,1]]
               });
@@ -45,46 +60,29 @@
           - $logger.debug "neighbors compounds:\t#{p.data_entries[0]}\n"
           - if p.data_entries[0][2] != nil && p.data_entries[0].size != 3
             %h2= "Neighbors: "
-            %table{:id=>"#{count_rs}", :class=>"tablesorter", :cellspacing=>"1"}
+                
+          %div.table-responsive
+            %table.tablesorter{:id=>"#{count_rs}", :style=>"border-style: solid;"}
               %thead
                 %tr
-                  %th
+                  %th{:style =>"vertical-align:middle;"}
                     Compound
-                  %th
-                    %b Measured Activity
-                    / title must be empty for tooltip
-                    %a{:href=>"#", :title=>"", :id=>"measured_activity"}
-                      %img{:src=>"/images/info_white.png"}
-                    .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
-                      %dt
-                        Measured Activity
-                      %dd
-                        Experimental result(s) from the training dataset.
-                  %th
-                    %b Similarity
-                    / title must be empty for tooltip
-                    %a{:href=>"#", :title=>"", :id=>"similarity"}
-                      %img{:src=>"/images/info_white.png"}
-                    .tooltip{:style=>"font-weight: normal; font-size: 1em; text-align: left;"}
-                      %dt
-                        Similarity
-                      %dd
-                        %code{:style=>"font-size:x-large;"} lazar 
-                        calculates 
-                        %em
-                          activity specific 
-                        similarities based on the presence of statistically significant fragments.
-                        This procedure will
-                        %ul
-                          %li consider only those parts of a chemical structure that are relevant 
-                          for a particular endpoint
-                          %li ignore inert parts of the structure
-                          %li lead to different similarities, depending on the toxic endpoint
-                          Similarities of 1 may be encountered even for structurally dissimilar 
-                          compounds, because inert parts are ignored.
-                  %th
-                    Supporting information
-              -#%tbody
+                  %th{:style =>"vertical-align:middle;"}
+                    Measured Activity
+                    -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Measured Activity", data: {toggle:"popover", placement:"auto", trigger:"focus", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
+                  %th{:style =>"vertical-align:middle;"}
+                    Similarity
+                    -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", trigger:"focus", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
+                  %th{:style =>"vertical-align:middle;"}
+                    Supporting Information
+              %info
+                %tr
+                  %td
+                  %td{:style=>"font-size:x-small;padding:0px;"}
+                    %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Measured Activity", data: {toggle:"popover", placement:"auto", trigger:"focus", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
+                  %td{:style=>"font-size:x-small;padding:0px;"}
+                    %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", trigger:"focus", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
+              %tbody
               - count = 0
               - p.compounds.each do |neighbor_compound|
                 / prevent conversion of nil
@@ -96,38 +94,29 @@
                   /- c = Array.new
                   - c = p.data_entries[count][2].to_f.round(3)
                 %tr
-                  %td.compound
-                    %a{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", :target=>"details"}
-                      Names and synonymes >
-                      %img{:src=>"#{neighbor_compound.uri}/image", :alt=>"Compound image not available", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
-                  %td
+                  %td{:style =>"vertical-align:middle;padding-left:1em;"}
+                    %a.btn.btn-link{:href => to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}", data: { toggle: "modal", target:"#details"}}
+                      %img.blind{:src=>"#{neighbor_compound.uri}/image", :alt=>"no image", :onError=>"this.onerror=null;", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
+                  %td{:style =>"vertical-align:middle;padding-left:1em;"}
                     - if c.class == String
                       = c
                     - else
                       = c
-                  %td
+                  %td{:style =>"vertical-align:middle;padding-left:1em;"}
                     = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset." 
-                  %td
+                  %td{:style =>"vertical-align:middle;padding-left:1em;"}
                     - if @type =~ /classification/i
                       - if p.data_entries[count][3] != nil 
-                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Significant fragments >
+                        %a.btn.btn-primary{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", data: { toggle: "modal", target:"#details"}} Significant fragments
                     - if @type =~ /regression/i
                       - if p.data_entries[count][3] != nil
-                        %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", :target=>"details"} Descriptors >
-                    :javascript
-                      $(function() {
-                          $("a#link#{count_rs}#{count}").on('click', function(e) {
-                              $('#iframe_details').bPopup();
-                          });
-                      });
-                      $(function() {
-                          $("a#link#{count_rs}#{count}sf").on('click', function(e) {
-                              $('#iframe_details').bPopup();
-                          });
-                      });
+                        %a.btn.btn-primary{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments"), :id=>"link#{count_rs}#{count}sf", data: { toggle: "modal", target:"#details"}} Descriptors
                   - count += 1
           -#- else
             %h3
               Not enough similar compounds in training dataset
 
-%iframe{:id=>"iframe_details", :name=>"details", :height=>"95%", :width=>"95%", :style=>"display:none;border:0px"}
+%div.modal.fade{:id=>"details", :role=>"dialog"}
+  %div.modal-dialog.modal-lg
+    %div.modal-content
+

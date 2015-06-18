@@ -1,8 +1,6 @@
-.error
-  .back
-    %h1
-      %img{:src=>"/images/arrow_left_float.png", :alt=>"<"}
-        %a{:href => to('/predict')} New Prediction
-  .message
+%div.well
+  %a.btn.btn-primary{:href => to('/predict')} New Prediction
+  %hr
+  %span.btn.btn-danger.btn-block.disabled
     = @error_report
       

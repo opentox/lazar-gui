@@ -1,28 +1,31 @@
-%link{ :href=>"/style.css", :media=>"screen, projection", :rel=>"stylesheet", :type=>"text/css"}
+:javascript
+  $(document).ready(function(){
+    $("#details").on('hidden.bs.modal', function() {
+      $(this).removeData('bs.modal');
+    });
+  });
 
-.content{:style=>"margin-top:0;"}
-  .details{:style=>"padding:0.7em;padding-bottom:5em;"}
-    %button{:id=>"closebutton", :onclick=>"parent.$('#iframe_details').bPopup().close();parent.$('#iframe_overview').bPopup().close();"}
-      X
-      
-    %h2{:style=>"margin-left:8px;"}
-      Names and synonyms:
-    %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px"}
-    %p
-    %b="SMILES:"
-    %p= @smiles
-    %br
-    %b="InChI:"
-    %p= @inchi
-    %br
-    %b="Names:"
-    %p{:style=>"padding-left:0.5em;"}
-    - if @names !~ /^no names/i
-      = @names.join("; ")
-    - else
-      = @names
-    %p{:style=>"padding-left:0.5em;"}
-      / pubchem link
-      %a{:href=>"http://aop.in-silico.ch/", :title=>"Link opens in new window.", :alt=>"pubchem read across", :target=>"_blank"} PubChem read across 
-      %i (experimental)
+%div.modal-body{:style=>"padding:10px;"}
+  %button.close{ :type=>" button", data: { dismiss:"modal"}} &times;
+  %h2
+    Names and synonyms:
+  %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px", :style=>"float:left;"}
+  %p
+  %b="SMILES:"
+  %p= @smiles
+  %br
+  %b="InChI:"
+  %p= @inchi
+  %br
+  %b="Names:"
+  %p{:style=>"padding-left:0.5em;"}
+  - if @names !~ /^no names/i
+    = @names.join("; ")
+  - else
+    = @names
+  %hr
+  %p{:style=>"padding-left:0.5em;"}
+    / pubchem link
+    %a.btn.btn-primary{:href=>"http://aop.in-silico.ch/", :title=>"Link opens in new window.", :alt=>"pubchem read across", :target=>"_blank"} PubChem read across 
+    %i (experimental)
 

@@ -1,3 +1,4 @@
+%script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
   function callTask(url) {
     var result="";
@@ -12,35 +13,27 @@
     });
     return result;
   };
-  function progressBarWidth(p,w){
-    percent = p * w / 100;
-    return percent ;
-  };
   // form function
   function progress($element, url) {
+    $element.width("2%");
     $element.show();
-    var fullWidth = $element.width();
     var timer = setInterval(function(){
       var percent = callTask(url);
       if(percent == 100.0){
-        var next = progressBarWidth(percent,fullWidth);
+        var next = percent;
         clearInterval(timer);
-        //$element.delay(3000).hide();
-        //percent = 0;
       }
-      //else if($element.find('#bar').is(":visible") & $element.find('#bar').width() < 400){
       else {
-        var next = progressBarWidth(percent,fullWidth);
+        var next = percent;
       }
-      $element.find('#bar').animate({ width:next }, 3000);
+      $element.width(next+"%");
     }, 3000);
   };
   function checksmiles () {
     if (document.form.identifier.value == "") {
       alert("Please draw or insert a chemical structure.");
-      //$("img.circle").hide();
       document.form.identifier.focus();
-      $('#progressBar').hide();
+      $('.progress-bar').hide();
       return false;
     };
     return true;
@@ -54,8 +47,7 @@
     });
     if (checked == false){
       alert("Please select an endpoint.");
-      //$("img.circle").hide();
-      $('#progressBar').hide();
+      $('.progress-bar').hide();
       return false;
     };
     return true;
@@ -72,9 +64,6 @@
       document.form.identifier.value = document.JME.smiles() ;
     };
   };
-  function showcircle(){
-    $("img.circle").show();
-  };
 
 // init task for progress
 - task_uri = OpenTox::Task.task_uri
@@ -82,9 +71,8 @@
 
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
-  %fieldset#top
-    %a{:href => "#", :id => "linkInsert"}
-      %h1 1. Draw a chemical structure
+  %fieldset#top.well
+    %h2 1. Draw a chemical structure
     :javascript
       $("a#linkInsert").click(function () {
         $("#insert").toggle();
@@ -99,14 +87,12 @@
         or enter the
         %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
         string:
+      %br
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
     
-  .arrow
-    %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
    
-  %fieldset#middle
-    %a{:href => "#models", :id => "linkModels"}
-      %h1 2. Select one or more endpoints
+  %fieldset#middle.well
+    %h2 2. Select one or more endpoints
     
     :javascript
       $("a#linkModels").click(function () {
@@ -117,76 +103,84 @@
     #models
       - @detail_count = 0
       - @endpoints.each do |endpoint|
-        %b= endpoint[0].split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
-        - @models.each do |model|
-          - if endpoint == model.type.select{|e| e =~ /Endpoint/}
-            - model_title = model.title.split("_").last(2)[0]
-            - model_t = model.title.gsub("_", " ")
-            - @detail_count +=1
-            %div{:id => model_title}
-              %input{:type => "checkbox", :name => "selection[#{model.uri}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
-              %label{:for => "selection[#{model_title}]"}
-                = model_t
-              %a{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
-                [Details]
-          
-              :javascript
-                $("a#linkDetails#{model_title}").click(function () {
-                  $("#details_#{@detail_count}").toggle();
-                  //document.location = document.location + "#" + "details";
-                });
-            #details{:id => "#{@detail_count}", :style => "display:none;background-color:white;padding:1em;"}
-              %h3 Model Details:
-              %p{:style=>"display:inline;"} Algorithm:
-              %code{:style=>"font-size:x-large;"} lazar
-              - model.type.to_s =~ /regression/i ? type = "regression" : type = "classification"
-              - @model_type = type
-              %p= "Type: "+type
-              - training_dataset = OpenTox::Dataset.new "#{model[RDF::OT.trainingDataset]}"
-              - training_compounds = training_dataset.compounds.size.to_s
-              %p= "Training compounds: "+training_compounds
-              %p{:style=>"display:inline;"} Descriptors:
-              - if type == "regression"
-                %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem/list", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC) properties
-              - else
-                %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
-              %br
-              %br
-              %p{:style=>"display:inline"}= "Model: "
-              %a{:href=>"#{to("/predict/#{CGI.escape(model.uri)}")}", :title=>"download"} rdf
-              %br
-              %br
-              %p{:style=>"display:inline"}= "Feature Dataset: "
-              %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}", :title=>"download"} rdf
-              -#%a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}/sdf", :title=>"download"} sdf
-              %br
-              %br
-              %p{:style=>"display:inline"}= "Training Dataset: "
-              %a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}")}", :title=>"link opens in new window."} rdf
-              -#%a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}/sdf")}", :title=>"link opens in new window."} sdf
-              %br
-              - unless model.metadata[RDF::OT.crossValidation].nil?
-                %h3 Validation:
-                %a{:href => "#{model.metadata[RDF::OT.crossValidation][0]}", :title=>"link opens in new window.", :target=>"_blank"} 
-                  Detailed report link
-                %br
-                - @cv = OpenTox::Validation.find "#{model.metadata[RDF::OT.crossValidation][0]+"/statistics"}"
-                = haml :validation, :layout => false, :validation => @cv, :model_type => @model_type
+        %div
+          %b= endpoint[0].split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
+          - @models.each do |model|
+            - if endpoint == model.type.select{|e| e =~ /Endpoint/}
+              - model_title = model.title.split("_").last(2)[0]
+              - model_t = model.title.gsub("_", " ")
+              - @detail_count +=1
+              %div{:id => model_title}
+                %input{:type => "checkbox", :name => "selection[#{model.uri}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
+                %label{:for => "selection[#{model_title}]"}
+                  = model_t
+                %a.btn.btn-default.btn-xs{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
+                  Details | Validation
+            
+                :javascript
+                  $("a#linkDetails#{model_title}").click(function () {
+                    $("#details_#{@detail_count}").toggle();
+                    //document.location = document.location + "#" + "details";
+                  });
+              #details{:id => "#{@detail_count}", :style => "display:none;"}
+                %div.panel{:style=>"padding:0.5em;"}
+                  %div.row
+                    %div.col-md-6
+                      %h3 Model Details:
+                      %p
+                        Algorithm: LAZAR
+                        - model.type.to_s =~ /regression/i ? type = "regression" : type = "classification"
+                        - @model_type = type
+                      %p
+                        = "Type: "+type
+                      - training_dataset = OpenTox::Dataset.new "#{model[RDF::OT.trainingDataset]}"
+                      - training_compounds = training_dataset.compounds.size.to_s
+                      %p
+                        Training compounds:
+                        = training_compounds
+                      %p
+                        Descriptors:
+                        - if type == "regression"
+                          %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem/list", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC) properties
+                        - else
+                          %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
+                      %p
+                        Model:
+                        %a.btn{:href=>"#{to("/predict/#{CGI.escape(model.uri)}")}", :title=>"download"}
+                          rdf
+                          %span.glyphicon.glyphicon-download-alt
+                      %p
+                        Feature Dataset:
+                        %a.btn{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}", :title=>"download"}
+                          rdf
+                          %span.glyphicon.glyphicon-download-alt
+                        -#%a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}/sdf", :title=>"download"} sdf
+                      %p
+                        Training Dataset:
+                        %a.btn{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}")}", :title=>"link opens in new window."}
+                          rdf
+                          %span.glyphicon.glyphicon-download-alt
+                        -#%a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}/sdf")}", :title=>"link opens in new window."} sdf
+                    - unless model.metadata[RDF::OT.crossValidation].nil?
+                      %div.col-md-6
+                        %h3 Validation:
+                        %a.btn.btn-info.btn-xs{:href => "#{model.metadata[RDF::OT.crossValidation][0]}", :title=>"link opens in new window.", :target=>"_blank"} 
+                          Detailed report link
+                        %p
+                        - @cv = OpenTox::Validation.find "#{model.metadata[RDF::OT.crossValidation][0]+"/statistics"}"
+                        = haml :validation, :layout => false, :validation => @cv, :model_type => @model_type
+            %p
 
-  .arrow
-    %img{:src=>"/images/arrow_down_float.png", :alt=>"v", :class=> "arrow"}
   
-  %fieldset#bottom
-    %table{:style=>"cellspacing:10;cellpadding:20"}
-      %tr
-        %td{:style=>"width:10em;align:center;valign:middle;"}
-          %h1
-            3. Predict
-        %td{:style=>"width:10%;align:center;valign:middle;"}
-          %input{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress($('#progressBar'),'#{task_uri}') & getsmiles() & checkboxes())", :style=>"cursor: pointer;display:inline;width:50px;height:50px;border-radius: 50%;color:#2b2b2b;text-align:center;text-decoration:none;background:#f76700;box-shadow: 0 0 5px white;font-weight:bold;"}
-          %input{:type => "hidden", :name => "task_uri", :value => "#{task_uri}"}
-
-        %td{:style=>"align:center;valign:middle;"}
-          -#%img{:src=>"/images/wait30trans.gif", :class=>"circle", :style=>"display:none;background-color:white;margin-left:10%;border:solid 1px;vertical-align:middle;"}
-          #progressBar{:style=>"width:400px;height:22px;border:1px solid #2b2b2b;background-color:gray;display:none;"}
-            #bar{:style =>"width:0;height:100%;color:#fff;text-align:right;line-height:22px;background-color:#0099ff;"}
+  %fieldset#bottom.well
+    %div.row
+      %div.col-md-2
+        %h2
+          3. Predict
+      %div.col-md-10
+        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress($('.progress-bar'),'#{task_uri}') & getsmiles() & checkboxes())"}
+        %input{:type => "hidden", :name => "task_uri", :value => "#{task_uri}"}
+    %div.row
+      %div.col-md-12
+        %div.progress
+          %div.progress-bar.progress-bar-striped.active{:role=>"progressbar", aria: { valuemin: 0, valuemax: 100}, :style=>"width:0%;"}

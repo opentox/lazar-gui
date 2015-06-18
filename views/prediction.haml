@@ -1,37 +1,25 @@
 :javascript
-  // increase body width if more than 2 models selected
-  window.onload = function(){
-    var plusSize = ("#{@predictions.size}" > 2 ) ? ("#{@predictions.size}" * 100) : 0;
-    var width = $(window).width() + plusSize;
-    $("body").width(width);
-  };
-.predictions
-  .back
-    %h1
-      %img{:src=>"/images/arrow_left_float.png", :alt=>"<"}
-        %a{:href => to('/predict')} New Prediction
+  $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    $(".modal").on('hidden.bs.modal', function() {
+      $(this).removeData('bs.modal');
+    });
+  });
+%div.well
+  %a.btn.btn-primary{:href => to('/predict')} New Prediction
 
   / displays all prediction result in first table
-  .overview
-    %table{:width=>"100%", :cellspacing=>"1", :id=>"overview"}
+  %div.table-responsive
+    %table.table.table-bordered{:id=>"overview"}
       %thead
         %tr
-          %caption
-            %h2 Prediction Results:
+          %h2 Prediction Results:
 
       %tbody
         %tr
           %td{:id=>"compound", :style=>"vertical-align:top;"}
-            %a{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", :target=>"details_overview"}
-              Names and synonyms >
-              %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
-            %p
-            :javascript
-              $(function() {
-                $("a#linkCompound").on('click', function(e) {
-                  $('#iframe_overview').bPopup();
-                });
-              });
+            %a.btn.btn-link{:href => to("/prediction/#{CGI.escape(@compound.uri)}/details"), :id=>"linkCompound", data: { toggle: "modal", target:"#detailsTop"}}
+              %img{:src=>"#{@compound.uri}/image", :alt=>"no image", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
           - count=0
           - @predictions.each do |pa|
             / unpack to single array/prediction
@@ -70,31 +58,7 @@
                       - result = (c != '' ? c.round(3) : "No prediction result.")
                       = result
                     - confidence = (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0) ? p.data_entries[0][1].round(2) : "--"
-                  
-                  / title must be empty for tooltip
-                  %a{:href=>"#result", :title=>"", :id=>"result"}
-                    %img{:src=>"/images/info_white.png"}
-                  .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
-                    %dt
-                      Result
-                    %dd
-                      %code{:style=>"font-size:x-large;"} lazar 
-                      calculates searches the training dataset for similar compounds (neighbors) 
-                      and calculates the prediction from their measured activities. 
-                      %code{:style=>"font-size:x-large;"} lazar 
-                      calculates predictions using
-                      %ul
-                        %li a majority vote (weighted by compound similarity) for 
-                        %em classification 
-                        (
-                        %a{:href=>"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract", :target=>"_blank"} original publication
-                        )
-                        %li a local QSAR model based on neighbors for
-                        %em regression
-                        (
-                        %a{:href=>"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract", :target=>"_blank"} original publication
-                        )
-                      Please keep in mind that predictions are based on the measured activities of neighbors.
+                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Result", data: {toggle:"popover", placement:"left", trigger:"focus", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
                   - @cv = OpenTox::Validation.find @prediction_models[count].metadata[RDF::OT.crossValidation][0]+"/statistics" #unless @prediction_models[count].title.include?("Mutagenicity")
                     - unless @model_type[count] == "regression"
                     %br  
@@ -104,54 +68,27 @@
                       - prob = @cv.probabilities( confidence, result )[:probs][result]*100
                       = "#{prob.round(1)} %"
                   %p
-                  .confidence
-                    %b Confidence:
-                    = confidence
-                    / title must be empty for tooltip
-                    %a{:href=>"#confidence", :title=>"", :id=>"confidence"}
-                      %img{:src=>"/images/info_white.png"}
-                    .tooltip{:style=>"font-weight: normal; font-size: 1em; width: 50%; text-align: left;"}
-                      %dt
-                        Confidence
-                      %dd
-                        Indicates the applicability domain of a model.
-                        Predictions with a high confidence can be expected to be more reliable than predictions 
-                        with low confidence.
-                        Confidence values may take any value between 0 and 1.
-                        For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between 
-                        reliable and unreliable predictions.
-
-
+                  %b Confidence:
+                  = confidence
+                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", trigger:"focus", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
                   %p
                   /TODO add tooltip for significant ftagments and descriptors
                   - if @model_type[count] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Significant fragments:
-                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :title=>"", :target=>"details_overview"}Significant fragments >
-                    :javascript
-                      $(function() {
-                        $("a#linkPredictionSf").on('click', function(e) {
-                          $('#iframe_overview').bPopup();
-                        });
-                      });
+                    %a.btn.btn-primary.btn-sm{:id=>"linkSigFragments", :href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), data: { toggle: "modal", target:"#detailsTop"}} Significant fragments
                   - if @model_type[count] =~ /regression/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
                     / Descriptors
-                    %a{:href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), :id=>"linkPredictionSf", :target=>"details_overview"} Descriptors >
-                    :javascript
-                      $(function() {
-                        $("a#linkPredictionSf").on('click', function(e) {
-                          $('#iframe_overview').bPopup();
-                        });
-                      });
+                    %a.btn.btn-primary.btn-sm{:id=>"linkDescriptors", :href => to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints"), data: { toggle: "modal", target:"#detailsTop"}} Descriptors
                   %p
                   - if c != ''
-                    %a{:href=> "#tabs", :id=>"link#{count}"}
-                      %b Neighbors >
-                      :javascript
-                        $("a#link#{count}").click(function () {
-                          $(".results").show();
-                          document.getElementById('tabs').focus();
-                          $("#tabs").tabs({ active: "#{count}" });
-                        });
+                    %a.btn.btn-warning.btn-sm{:href=> "#tabs", :id=>"link#{count}"}
+                      Neighbors
+                    :javascript
+                      $("a#link#{count}").click(function () {
+                        $(".results").show();
+                        document.getElementById('tabs').focus();
+                        $("#tabs").tabs({ active: "#{count}" });
+                      });
                   %p
                   - count+=1
                 - else # database hit
@@ -166,4 +103,6 @@
 
   / always show the neighbors table, message is given there  
   = haml :neighbors, :layout => false, :model_type => @model_type
-%iframe{:id=>"iframe_overview", :name=>"details_overview", :height=>"95%", :width=>"95%", :style=>"display:none;border:0px"}
+%div.modal.fade{:id=>"detailsTop", :role=>"dialog"}
+  %div.modal-dialog.modal-lg
+    %div.modal-content
