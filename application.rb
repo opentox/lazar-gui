@@ -195,7 +195,7 @@ get '/predict/:dataset/?' do
   t = Tempfile.new("tempfile.rdf")
   t << `curl -k -H accept:application/rdf+xml #{params[:dataset]}`
   send_file t.path,
-    :filename => params[:dataset].split("_").last+".rdf"
+    :filename => params[:dataset].split("/").last+".rdf"
   t.close
   t.unlink
 end

@@ -1,15 +1,8 @@
-:javascript
-  $(document).ready(function(){
-    $("#details").on('hidden.bs.modal', function() {
-      $(this).removeData('bs.modal');
-    });
-  });
-
 %div.modal-body{:style=>"padding:10px;"}
   %button.close{ :type=>" button", data: { dismiss:"modal"}} &times;
-  %h2
+  %h3
     Names and synonyms:
-  %img{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px", :style=>"float:left;"}
+  %img.img-responsive{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px", :style=>"float:left;"}
   %p
   %b="SMILES:"
   %p= @smiles
@@ -28,4 +21,4 @@
     / pubchem link
     %a.btn.btn-primary{:href=>"http://aop.in-silico.ch/", :title=>"Link opens in new window.", :alt=>"pubchem read across", :target=>"_blank"} PubChem read across 
     %i (experimental)
-
+  %br

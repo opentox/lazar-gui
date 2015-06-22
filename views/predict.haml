@@ -1,3 +1,4 @@
+%link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
   function callTask(url) {
@@ -178,9 +179,9 @@
         %h2
           3. Predict
       %div.col-md-10
-        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress($('.progress-bar'),'#{task_uri}') & getsmiles() & checkboxes())"}
+        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress($('.progress-bar'),'#{task_uri}') & getsmiles())"}
         %input{:type => "hidden", :name => "task_uri", :value => "#{task_uri}"}
     %div.row
       %div.col-md-12
         %div.progress
-          %div.progress-bar.progress-bar-striped.active{:role=>"progressbar", aria: { valuemin: 0, valuemax: 100}, :style=>"width:0%;"}
+          %div.progress-bar.progress-bar-striped.active{:role=>"progressbar", aria: { valuemin: 0, valuemax: 100}, :style=>"width:0;"}
