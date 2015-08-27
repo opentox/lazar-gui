@@ -18,89 +18,58 @@
       %tbody
         %tr
           %td{:id=>"compound", :style=>"vertical-align:top;"}
-            %a.btn.btn-link{:href => "#detailsTop", :id=>"linkCompound", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@compound.uri)}/details")}}
-              %img.img-responsive{:src=>"#{@compound.uri}/image", :alt=>"no image", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
-          - count=0
-          - @predictions.each do |pa|
-            / unpack to single array/prediction
-            / if p.data_entries array[0].size == 3 -> database hit
-            / change 'result' if database hit
-            / change 'confidence' if database hit
-            - pa.each do |p|
-              / prevent conversion of nil
-              /- $logger.debug "data entries in prediction array:\t#{p.data_entries}\n"
-              - database_hit = 0
-              - if p.data_entries[0].size == 3
-                - database_hit = 1
-              - c = p.data_entries[0][0] != nil ? p.data_entries[0][0] : ''
-              - case c
-              - when /(false|true|inactive|active)/i
-                - c = c
-              - else
-                /- c = Array.new
-                - c = (p.data_entries[0][0].class == Float) ? p.data_entries[0][0].round(3) : (p.data_entries[0][0] != nil ? p.data_entries[0][0] : "no prediction")
-              %td{:style=>"vertical-align:top;"}
-                %b{:class => "title"}
-                  = @prediction_models[count].title.gsub("_", " ")
-                - @model_uri = @prediction_models[count].uri
+            %a.btn.btn-link{:href => "#detailsTop", :id=>"linkCompound", data: { toggle: "modal", remote: to("/prediction/#{@compound.id.to_s}/details")}}
+              / %img.img-responsive{:src=>"#{@compound.id}/image", :alt=>"no image", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
+              = @compound.svg
+          - @predictions.each_with_index do |prediction,i|
+            %td{:style=>"vertical-align:top;"}
+              %b{:class => "title"}
+                = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
+              %p
+              - if prediction[:confidence] == "measured"
+                %p
+                / TODO fix scientific notation from database
+                %b Measured activity:
+                = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{@models[i].unit})" : prediction[:value]
+                %p Compound is part of the training dataset
+              - elsif prediction[:neighbors].size > 0
                 %p
                 / model type (classification|regression)
                 %b Type:
-                = @model_type[count]
+                = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+                %br
+                %b Prediction:
+                / TODO scientific notation
+                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{@models[i].unit}" : prediction[:value]
+                / TODO update description
+                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
+                %br
+                / TODO probability
+                %b Confidence:
+                = prediction[:confidence].round(3)
+                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
                 %p
-                - unless database_hit > 0
-                  %b Result:
-                  %b
-                    - if c.class == String
-                      - result = (c != '' ? c : "No prediction result.")
-                      = result
-                    - else
-                      - result = (c != '' ? c.round(3) : "No prediction result.")
-                      = result
-                    - confidence = (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0) ? p.data_entries[0][1].round(2) : "--"
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Result", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
-                  - @cv = OpenTox::Validation.find @prediction_models[count].metadata[RDF::OT.crossValidation][0]+"/statistics" #unless @prediction_models[count].title.include?("Mutagenicity")
-                    - unless @model_type[count] == "regression"
-                    %br  
-                    %b
-                      = "Probability: "
-                    - unless result == "No prediction result." or confidence == "--"
-                      - prob = @cv.probabilities( confidence, result )[:probs][result]*100
-                      = "#{prob.round(1)} %"
-                  %p
-                  %b Confidence:
-                  = confidence
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
-                  %p
-                  /TODO add tooltip for significant ftagments and descriptors
-                  - if @model_type[count] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
-                    / Significant fragments:
-                    %a.btn.btn-default.btn-sm{:id=>"linkSigFragments", :href => "#detailsTop", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Significant fragments
-                  - if @model_type[count] =~ /regression/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
-                    / Descriptors
-                    %a.btn.btn-default.btn-sm{:id=>"linkDescriptors", :href => "#detailsTop", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[count]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Descriptors
-                  %p
-                  - if c != ''
-                    %a.btn.btn-default.btn-sm{:href=> "#tabs", :id=>"link#{count}"}
-                      Neighbors
-                    :javascript
-                      $("a#link#{count}").click(function () {
-                        $(".results").show();
-                        //document.getElementById('tabs').focus();
-                        $('#neighborTabs a[href="#results_#{count+1}"]').tab('show');
-                        //$("#tabs").tabs({ active: "#{count}" });
-                      });
-                  %p
-                  - count+=1
-                - else # database hit
-                  %b Database hit: 
-                  %br Compound found in training dataset
-                  %p
-                  %b Measured activity:
-                  = p.data_entries[0][2]
-                  %p
-                    
-                  - count+=1
+                /TODO add tooltip for significant ftagments and descriptors
+                / - if @model_type[i] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
+                / Significant fragments:
+                / %a.btn.btn-default.btn-sm{:id=>"linkSigFragments", :href => "#detailsTop", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[i]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Significant fragments
+                / - if @model_type[i] =~ /regression/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
+                / Descriptors
+                / %a.btn.btn-default.btn-sm{:id=>"linkDescriptors", :href => "#detailsTop", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[i]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Descriptors
+                / %p
+                %a.btn.btn-default.btn-sm{:href=> "#tabs", :id=>"link#{i+1}"}
+                  Neighbors
+                :javascript
+                  $("a#link#{i}").click(function () {
+                    $(".results").show();
+                    //document.getElementById('tabs').focus();
+                    $('#neighborTabs a[href="#results_#{i+1}"]').tab('show');
+                    //$("#tabs").tabs({ active: "#{i}" });
+                  });
+                %p
+              - else
+                %p
+                Not enough similar compounds in training dataset.
 
   / always show the neighbors table, message is given there  
   = haml :neighbors, :layout => false, :model_type => @model_type

@@ -1,35 +1,6 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
-  function callTask(url) {
-    var result="";
-    $.ajax({
-      url: url,
-      async: false,
-      success:function(data) {
-        var response = data.match(/Completed\s.*\./)[0];
-        var arr = response.split(" ");
-        result = arr[1].replace(/"/g, "");
-      }
-    });
-    return result;
-  };
-  // form function
-  function progress($element, url) {
-    $element.width("2%");
-    $element.show();
-    var timer = setInterval(function(){
-      var percent = callTask(url);
-      if(percent == 100.0){
-        var next = percent;
-        clearInterval(timer);
-      }
-      else {
-        var next = percent;
-      }
-      $element.width(next+"%");
-    }, 3000);
-  };
   function checksmiles () {
     if (document.form.identifier.value == "") {
       alert("Please draw or insert a chemical structure.");
@@ -48,7 +19,6 @@
     });
     if (checked == false){
       alert("Please select an endpoint.");
-      $('.progress-bar').hide();
       return false;
     };
     return true;
@@ -67,8 +37,6 @@
   };
 
 // init task for progress
-- task_uri = OpenTox::Task.task_uri
-- OpenTox::Task.run("Predict compound.", "#{$lazar[:uri]}", task_uri)do;end
 
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
@@ -102,74 +70,14 @@
       });
       
     #models
-      - @detail_count = 0
       - @endpoints.each do |endpoint|
         %div
-          %b= endpoint[0].split("#").last.gsub("_", " ").gsub(/\"|\]/, "")+" :"
-          - @models.each do |model|
-            - if endpoint == model.type.select{|e| e =~ /Endpoint/}
-              - model_title = model.title.split("_").last(2)[0]
-              - model_t = model.title.gsub("_", " ")
-              - @detail_count +=1
-              %div{:id => model_title}
-                %input{:type => "checkbox", :name => "selection[#{model.uri}]", :id => "selection[#{model_title}]", :value => true, :disabled => false}
-                %label{:for => "selection[#{model_title}]"}
-                  = model_t
-                %a.btn.btn-default.btn-xs{:href=>"#details", :id => "linkDetails#{model_title}", :title=>"#{model_title} details", :style=>"font-size:small;"}
-                  Details | Validation
-            
-                :javascript
-                  $("a#linkDetails#{model_title}").click(function () {
-                    $("#details_#{@detail_count}").toggle();
-                    //document.location = document.location + "#" + "details";
-                  });
-              #details{:id => "#{@detail_count}", :style => "display:none;"}
-                %div.panel{:style=>"padding:0.5em;"}
-                  %div.row
-                    %div.col-md-6
-                      %h3 Model Details:
-                      %p
-                        Algorithm: LAZAR
-                        - model.type.to_s =~ /regression/i ? type = "regression" : type = "classification"
-                        - @model_type = type
-                      %p
-                        = "Type: "+type
-                      - training_dataset = OpenTox::Dataset.new "#{model[RDF::OT.trainingDataset]}"
-                      - training_compounds = training_dataset.compounds.size.to_s
-                      %p
-                        Training compounds:
-                        = training_compounds
-                      %p
-                        Descriptors:
-                        - if type == "regression"
-                          %a{:href=>"https://services.in-silico.ch/algorithm/descriptor/physchem/list", :title=>"link opens in new window.", :target=>"_blank"} Physico-chemical (PC) properties
-                        - else
-                          %a{:href=>"http://www.maunz.de/libfminer2-bbrc-doc/", :title=>"link opens in new window.", :target=>"_blank"} Fminer backbone refinement classes
-                      %p
-                        Model:
-                        %a.btn{:href=>"#{to("/predict/#{CGI.escape(model.uri)}")}", :title=>"download"}
-                          rdf
-                          %span.glyphicon.glyphicon-download-alt
-                      %p
-                        Feature Dataset:
-                        %a.btn{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}", :title=>"download"}
-                          rdf
-                          %span.glyphicon.glyphicon-download-alt
-                        -#%a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.featureDataset])}")}/sdf", :title=>"download"} sdf
-                      %p
-                        Training Dataset:
-                        %a.btn{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}")}", :title=>"link opens in new window."}
-                          rdf
-                          %span.glyphicon.glyphicon-download-alt
-                        -#%a{:href=>"#{to("/predict/#{CGI.escape(model[RDF::OT.trainingDataset])}/sdf")}", :title=>"link opens in new window."} sdf
-                    - unless model.metadata[RDF::OT.crossValidation].nil?
-                      %div.col-md-6
-                        %h3 Validation:
-                        %a.btn.btn-info.btn-xs{:href => "#{model.metadata[RDF::OT.crossValidation][0]}", :title=>"link opens in new window.", :target=>"_blank"} 
-                          Detailed report link
-                        %p
-                        - @cv = OpenTox::Validation.find "#{model.metadata[RDF::OT.crossValidation][0]+"/statistics"}"
-                        = haml :validation, :layout => false, :validation => @cv, :model_type => @model_type
+          %b= endpoint
+          - @models.select{|m| m.endpoint == endpoint}.each do |model|
+            %div{:id => model.id}
+              %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.id}]", :value => true, :disabled => false}
+                %label{:for => "selection[#{model.id}]"}
+                  = model.species
             %p
 
   
@@ -179,9 +87,4 @@
         %h2
           3. Predict
       %div.col-md-10
-        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "(progress($('.progress-bar'),'#{task_uri}') & getsmiles())"}
-        %input{:type => "hidden", :name => "task_uri", :value => "#{task_uri}"}
-    %div.row
-      %div.col-md-12
-        %div.progress
-          %div.progress-bar.progress-bar-striped.active{:role=>"progressbar", aria: { valuemin: 0, valuemax: 100}, :style=>"width:0;"}
+        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}

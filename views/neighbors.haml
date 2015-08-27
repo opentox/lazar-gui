@@ -4,110 +4,74 @@
 / display preordered in table view ;
 
 %div.results{:style=>"display:none"}
-  - count_m = 0
   %h3 Neighbors:
   / tabs div
   #tabs
     %ul.nav.nav-tabs.nav-justified{:id=>"neighborTabs", :role=>"tablist"}
       / each model a tab head ;
-      - @prediction_models.each do |m|
-        - count_m += 1
-        - m_title = m.title.split("_").last(2)[0]
+      - @models.each_with_index do |model,i|
         %li
-          %a{:href => "#results_#{count_m}", :id => "linkTab#{count_m}", data: {toggle:"tab"}}
-            = m_title
-    - count_rs = 0
+          %a{:href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}}
+            = "#{model.endpoint} (#{model.species})"
     %div.tab-content
       / unpack to single arrays
-      - @predictions.each do |pa|
+      - @predictions.each_with_index do |prediction,j|
         / pass model type for significant fragments view
-        - @type = @model_type[count_rs]
-        - count_rs += 1
-        #results.tab-pane.fade{:id=>"#{count_rs}"}
-          - pa.each do |p|
-            / prepare dataset for neighbors table ;
-            / delete first array which contains prediction ;
-            / following arrays are the neighbor predictions ;
-            - @model_uri = p.metadata[RDF::OT.hasSource][0]
-            - p.data_entries.shift
-            - p.compounds.shift
-            
-            / call the tablesorter plugin ;
-            / presort by similarity ;
-            :javascript
-              $(document).ready(function(){
-                $("table##{count_rs}").tablesorter({
-                  debug: false,
-                  //table: 'ui-widget ui-widget-content ui-corner-all',
-                  //header: 'ui-widget-header ui-corner-all ui-state-default',
-                  theme: "bootstrap",
-                  //widthFixed: true,
-                  //hover: 'ui-state-hover',
-                  //even: 'ui-widget-content',
-                  //odd: 'ui-state-default',
-                  headerTemplate: '{content} {icon}',
-                  widgets: ['zebra', 'columns', 'uitheme'],
-                  headers: {0: {sorter: false}, 3: {sorter: false}},
-                  sortList: [[2,1]]
-                });
+        #results.tab-pane.fade{:id=>"#{j+1}"}
+          / prepare dataset for neighbors table ;
+          / delete first array which contains prediction ;
+          / following arrays are the neighbor predictions ;
+          / call the tablesorter plugin ;
+          / presort by similarity ;
+          :javascript
+            $(document).ready(function(){
+              $("table##{j+1}").tablesorter({
+                debug: false,
+                theme: "bootstrap",
+                headerTemplate: '{content} {icon}',
+                widgets: ['zebra', 'columns', 'uitheme'],
+                headers: {0: {sorter: false}, 3: {sorter: false}},
+                sortList: [[2,1]]
               });
-            - $logger.debug "neighbors compounds:\t#{p.data_entries[0]}\n"
-            - if p.data_entries[0][2] != nil && p.data_entries[0].size != 3
-              -#%h2= "Neighbors: "
-                  
-              %div.table-responsive
-                %table.tablesorter{:id=>"#{count_rs}", :style=>"border-style: solid;"}
-                  %thead
-                    %tr
-                      %th{:style =>"vertical-align:middle;"}
-                        Compound
-                      %th{:style =>"vertical-align:middle;"}
-                        Measured Activity
-                      %th{:style =>"vertical-align:middle;"}
-                        Similarity
-                      %th{:style =>"vertical-align:middle;"}
-                        Supporting Information
-                  %info
-                    %tr
-                      %td
-                      %td{:style=>"font-size:x-small;padding:0px;"}
-                        %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Measured Activity", data: {toggle:"popover", placement:"auto", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
-                      %td{:style=>"font-size:x-small;padding:0px;"}
-                        %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
-                  %tbody
-                  - count = 0
-                  - p.compounds.each do |neighbor_compound|
-                    / prevent conversion of nil
-                    - c = p.data_entries[count][2] != nil ? p.data_entries[count][2] : '' 
-                    - case c
-                    - when /(false|true|inactive|active)/i
-                      - c = c
-                    - else
-                      /- c = Array.new
-                      - c = p.data_entries[count][2].to_f.round(3)
-                    %tr
-                      %td{:style =>"vertical-align:middle;padding-left:1em;"}
-                        %a.btn.btn-link{:href => "#details#{count_rs}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor_compound.uri)}/details"), :id=>"link#{count_rs}#{count}"}}
-                          %img.blind{:src=>"#{neighbor_compound.uri}/image", :alt=>"no image", :onError=>"this.onerror=null;", :title=>"#{neighbor_compound.smiles}", :width=>"150px"}
-                      %td{:style =>"vertical-align:middle;padding-left:1em;"}
-                        - if c.class == String
-                          = c
-                        - else
-                          = c
-                      %td{:style =>"vertical-align:middle;padding-left:1em;"}
-                        = p.data_entries[count][3] != nil ? p.data_entries[count][3].round(3) : "Not enough similar compounds in training dataset." 
-                      %td{:style =>"vertical-align:middle;padding-left:1em;"}
-                        - if @type =~ /classification/i
-                          - if p.data_entries[count][3] != nil 
-                            %a.btn.btn-default{:href => "#details#{count_rs}", :id=>"link#{count_rs}#{count}sf", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments")}} Significant Fragments
-                        - if @type =~ /regression/i
-                          - if p.data_entries[count][3] != nil
-                            %a.btn.btn-default{:href => "#details#{count_rs}", :id=>"link#{count_rs}#{count}sf", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@type}/#{CGI.escape(neighbor_compound.uri)}/significant_fragments")}} Descriptors
-                      - count += 1
-            - else
-              %span.btn.btn-default.disabled Not enough similar compounds in training dataset
+            });
+          - if prediction[:neighbors].size > 0
+                
+            %div.table-responsive
+              %table.tablesorter{:id=>"#{j+1}", :style=>"border-style: solid;"}
+                %thead
+                  %tr
+                    %th{:style =>"vertical-align:middle;"}
+                      Compound
+                    %th{:style =>"vertical-align:middle;"}
+                      Measured Activity
+                    %th{:style =>"vertical-align:middle;"}
+                      Similarity
+                    / %th{:style =>"vertical-align:middle;"}
+                    / Supporting Information
+                %info
+                  %tr
+                    %td
+                    %td{:style=>"font-size:x-small;padding:0px;"}
+                      %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Measured Activity", data: {toggle:"popover", placement:"auto", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
+                    %td{:style=>"font-size:x-small;padding:0px;"}
+                      %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
+                    / %td
+                %tbody
+                - prediction[:neighbors].each_with_index do |neighbor,count|
+                  %tr
+                    %td{:style =>"vertical-align:middle;padding-left:1em;"}
+                      %a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor[0].to_s)}/details"), :id=>"link#{j+1}#{count}"}}
+                        = Compound.find(neighbor[0]).svg
+                    %td{:style =>"vertical-align:middle;padding-left:1em;"}
+                      = neighbor[2].collect{|n| '%.2e' % n}.join ", "
+                    %td{:style =>"vertical-align:middle;padding-left:1em;"}
+                      / TODO differentiate between no neighbors found and compound found in dataset, display neighbors for compounds in dataset?
+                      = neighbor[1] != nil ? neighbor[1] : "Not enough similar compounds in training dataset." 
 
-          %div.modal.fade{:id=>"details#{count_rs}", :role=>"dialog"}
+          - else
+            %span.btn.btn-default.disabled Not enough similar compounds in training dataset
+
+          %div.modal.fade{:id=>"details#{j+1}", :role=>"dialog"}
             %div.modal-dialog.modal-lg
               %div.modal-content
 

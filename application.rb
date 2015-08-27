@@ -1,16 +1,12 @@
 require_relative 'helper.rb'
-require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
+include OpenTox
+#require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
 # DG: workaround for https://github.com/sinatra/sinatra/issues/808
 # Date: 18/11/2013
 set :protection, :except => :path_traversal
 
 helpers do
-  # models must be edited with RDF.type => (RDF::OT.PredictionModel, EchaEndpoint)
-  @@models = []
-  models = `curl -k GET -H accept:text/uri-list #{$model[:uri]}`.split("\n")
-  .collect{|m| model = OpenTox::Model::Lazar.find m; @@models << model if model.type.flatten.to_s =~ /PredictionModel/}
-  
   class Numeric
     def percent_of(n)
       self.to_f / n.to_f * 100.0
@@ -24,11 +20,9 @@ get '/?' do
 end
 
 get '/predict/?' do
-  # sort models by endpoint alphabetically
-  $size = 0
-  @models = @@models.sort!{|a, b| a.type.select{|e| e =~ /endpoint/i} <=> b.type.select{|e| e =~ /endpoint/i}}
-  @endpoints = @@models.collect{|e| e.type.select{|e| e =~ /endpoint/i}}.sort!.uniq
-  @models.size <= 0 ? (haml :info) : (haml :predict)
+  @models = OpenTox::Model::Prediction.all
+  @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
+  @models.count <= 0 ? (haml :info) : (haml :predict)
 end
 
 get '/jme_help/?' do
@@ -202,68 +196,23 @@ end
 
 post '/predict/?' do
   # validate identifier input
-  task = OpenTox::Task.run("Validate SMILES string.") do
-    # transfered input
-    @identifier = params[:identifier]
-
+  # transfered input
+  @identifier = params[:identifier]
+  begin
     # get compound from SMILES
-    @compound = OpenTox::Compound.from_smiles @identifier.to_s
-    
-    # validate SMILES by converting to INCHI
-    inchi = @compound.inchi
-  end#smiles
-  # necessary to wait for task
-  task.wait
-  # case task fails return message smiles invalid  
-  # case task completed go ahead
-  case task[RDF::OT.hasStatus]
-  when "Error"
+    @compound = Compound.from_smiles @identifier#.to_s
+  rescue
     @error_report = "Attention, '#{params[:identifier]}' is not a valid SMILES string."
     haml :error
-  when "Completed"
-    @identifier = params[:identifier]
-    @compound = OpenTox::Compound.from_smiles @identifier.to_s
-    # init arrays
-    @prediction_models = []
-    @predictions = []
-    @model_type = []
-    # get selected models
-    # compare selected model by uri
-    params[:selection].each do |model|
-      # selected model = model[0]
-      # compare selected with all models
-      @@models.each do |m|
-        @prediction_models << m if m.uri == model[0]
-      end
-    end
-    # predict with selected models
-    # one prediction in 'pa' array = OpenTox::Dataset
-    # all collected predictions in '@predictions' array
-    # add task for progressBar
-    total = @prediction_models.size
-    toptask = OpenTox::Task.find params[:task_uri]
-    toptask.metadata
-    toptask[RDF::OT.hasStatus] = "Running"
-    toptask[RDF::OT.percentageCompleted] = "10"
-    toptask.put
-    @prediction_models.each_with_index do |m, idx|
-      idx = idx+1
-      # define type (classification|regression)
-      m.type.join =~ /classification/i ? (@model_type << "classification") : (@model_type << "regression")
-      
-      # predict against compound
-      @prediction_uri = m.run :compound_uri => "#{@compound.uri}"
-      $logger.debug "prediction dataset:\t#{@prediction_uri}\n"
-      
-      prediction = OpenTox::Dataset.new @prediction_uri
-      pa = []
-      pa << prediction
-      @predictions << pa
-      toptask[RDF::OT.percentageCompleted] = idx.percent_of(total).round(1)
-      toptask.put
-    end
-    haml :prediction
   end
+  @models = []
+  @predictions = []
+  params[:selection].keys.each do |model_id|
+    model = Model::Prediction.find model_id
+    @models << model
+    @predictions << model.predict(@compound)
+  end
+  haml :prediction
 end
 
 get '/style.css' do
