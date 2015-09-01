@@ -3,21 +3,21 @@
 / align single prediction to endpoint ;
 / display preordered in table view ;
 
-%div.results{:style=>"display:none"}
+%div.results
   %h3 Neighbors:
   / tabs div
   #tabs
     %ul.nav.nav-tabs.nav-justified{:id=>"neighborTabs", :role=>"tablist"}
       / each model a tab head ;
       - @models.each_with_index do |model,i|
-        %li
+        %li{:class => ("active" if i == 0)}
           %a{:href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}}
             = "#{model.endpoint} (#{model.species})"
     %div.tab-content
       / unpack to single arrays
       - @predictions.each_with_index do |prediction,j|
         / pass model type for significant fragments view
-        #results.tab-pane.fade{:id=>"#{j+1}"}
+        #results.tab-pane{:id=>"#{j+1}", :class => ("active" if j == 0)}
           / prepare dataset for neighbors table ;
           / delete first array which contains prediction ;
           / following arrays are the neighbor predictions ;
@@ -52,16 +52,17 @@
                   %tr
                     %td
                     %td{:style=>"font-size:x-small;padding:0px;"}
-                      %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Measured Activity", data: {toggle:"popover", placement:"auto", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
+                      / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Measured Activity", data: {toggle:"popover", placement:"auto", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
                     %td{:style=>"font-size:x-small;padding:0px;"}
-                      %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
+                      / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
                     / %td
                 %tbody
                 - prediction[:neighbors].each_with_index do |neighbor,count|
                   %tr
                     %td{:style =>"vertical-align:middle;padding-left:1em;"}
-                      %a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor[0].to_s)}/details"), :id=>"link#{j+1}#{count}"}}
-                        = Compound.find(neighbor[0]).svg
+                      /%a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor[0].to_s)}/details"), :id=>"link#{j+1}#{count}"}}
+                      %p= Compound.find(neighbor[0]).svg
+                      %p= Compound.find(neighbor[0]).smiles
                     %td{:style =>"vertical-align:middle;padding-left:1em;"}
                       = neighbor[2].collect{|n| '%.2e' % n}.join ", "
                     %td{:style =>"vertical-align:middle;padding-left:1em;"}

@@ -18,9 +18,8 @@
       %tbody
         %tr
           %td{:id=>"compound", :style=>"vertical-align:top;"}
-            %a.btn.btn-link{:href => "#detailsTop", :id=>"linkCompound", data: { toggle: "modal", remote: to("/prediction/#{@compound.id.to_s}/details")}}
-              / %img.img-responsive{:src=>"#{@compound.id}/image", :alt=>"no image", :title=>"#{@compound.smiles}", :width=>"150", :height=>"150"}
-              = @compound.svg
+            %p= @compound.svg
+            %p= @compound.smiles
           - @predictions.each_with_index do |prediction,i|
             %td{:style=>"vertical-align:top;"}
               %b{:class => "title"}
@@ -42,12 +41,12 @@
                 / TODO scientific notation
                 = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{@models[i].unit}" : prediction[:value]
                 / TODO update description
-                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
+                / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
                 %br
                 / TODO probability
                 %b Confidence:
                 = prediction[:confidence].round(3)
-                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
+                / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
                 %p
                 /TODO add tooltip for significant ftagments and descriptors
                 / - if @model_type[i] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
@@ -57,15 +56,6 @@
                 / Descriptors
                 / %a.btn.btn-default.btn-sm{:id=>"linkDescriptors", :href => "#detailsTop", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[i]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Descriptors
                 / %p
-                %a.btn.btn-default.btn-sm{:href=> "#tabs", :id=>"link#{i+1}"}
-                  Neighbors
-                :javascript
-                  $("a#link#{i}").click(function () {
-                    $(".results").show();
-                    //document.getElementById('tabs').focus();
-                    $('#neighborTabs a[href="#results_#{i+1}"]').tab('show');
-                    //$("#tabs").tabs({ active: "#{i}" });
-                  });
                 %p
               - else
                 %p
@@ -73,7 +63,4 @@
 
   / always show the neighbors table, message is given there  
   = haml :neighbors, :layout => false, :model_type => @model_type
-  %div.modal.fade{:id=>"detailsTop", :role=>"dialog"}
-    %div.modal-dialog.modal-lg
-      %div.modal-content
 
