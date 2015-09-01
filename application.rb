@@ -200,10 +200,10 @@ post '/predict/?' do
   @identifier = params[:identifier]
   begin
     # get compound from SMILES
-    @compound = Compound.from_smiles @identifier#.to_s
+    @compound = Compound.from_smiles @identifier
   rescue
     @error_report = "Attention, '#{params[:identifier]}' is not a valid SMILES string."
-    haml :error
+    return haml :error
   end
   @models = []
   @predictions = []
