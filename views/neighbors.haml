@@ -64,7 +64,8 @@
                       %p= Compound.find(neighbor[0]).svg
                       %p= Compound.find(neighbor[0]).smiles
                     %td{:style =>"vertical-align:middle;padding-left:1em;"}
-                      = neighbor[2].collect{|n| '%.2e' % n}.join ", "
+                      -#= neighbor[2].collect{|n| '%.2e' % n}.join ", "
+                      = neighbor[2].join ", "
                     %td{:style =>"vertical-align:middle;padding-left:1em;"}
                       / TODO differentiate between no neighbors found and compound found in dataset, display neighbors for compounds in dataset?
                       = neighbor[1] != nil ? neighbor[1] : "Not enough similar compounds in training dataset." 
