@@ -1,11 +1,22 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
+  function showcircle() {
+    if (checksmiles() && checkboxes()){
+      button = document.getElementById("submit");
+      image = document.getElementById("circle");
+      button.parentNode.replaceChild(image, button);
+      $("img.circle").show();
+      return true;
+    };
+    return false;
+  };
   function checksmiles () {
     if (document.form.identifier.value == "") {
       alert("Please draw or insert a chemical structure.");
       document.form.identifier.focus();
-      $('.progress-bar').hide();
+      //$('.progress-bar').hide();
+      $("img.circle").hide();
       return false;
     };
     return true;
@@ -19,6 +30,7 @@
     });
     if (checked == false){
       alert("Please select an endpoint.");
+      $("img.circle").hide();
       return false;
     };
     return true;
@@ -39,7 +51,7 @@
 // init task for progress
 
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
-%form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(checksmiles() & checkboxes())" }
+%form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(showcircle())" }
   %fieldset#top.well
     %h2 1. Draw a chemical structure
     :javascript
@@ -88,3 +100,4 @@
           3. Predict
       %div.col-md-10
         %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
+        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :style=>"display:none;"}
