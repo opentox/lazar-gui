@@ -208,13 +208,13 @@ post '/predict/?' do
     input = OpenTox::Dataset.from_csv_file File.join "tmp", params[:fileselect][:filename]
     dataset = OpenTox::Dataset.find input.id 
     @compounds = dataset.compounds
-    @models = []
-    @predictions = []
+    @batch = {}
     @compounds.each do |compound|
+      @batch[compound] = []
       params[:selection].keys.each do |model_id|
         model = Model::Prediction.find model_id
-        @models << model
-        @predictions << model.predict(compound)
+        prediction = model.predict(compound)
+        @batch[compound] << [model, prediction]
       end
     end
     input.delete
