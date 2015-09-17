@@ -6,6 +6,10 @@ include OpenTox
 # Date: 18/11/2013
 set :protection, :except => :path_traversal
 
+configure :development do
+  $logger = Logger.new(STDOUT)
+end
+
 helpers do
   class Numeric
     def percent_of(n)
@@ -195,24 +199,49 @@ get '/predict/:dataset/?' do
 end
 
 post '/predict/?' do
+
+  # process batch prediction
+  if !params[:fileselect].blank?
+    File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
+      f.write(params[:fileselect][:tempfile].read)
+    end
+    input = OpenTox::Dataset.from_csv_file File.join "tmp", params[:fileselect][:filename]
+    dataset = OpenTox::Dataset.find input.id 
+    @compounds = dataset.compounds
+    @models = []
+    @predictions = []
+    @compounds.each do |compound|
+      params[:selection].keys.each do |model_id|
+        model = Model::Prediction.find model_id
+        @models << model
+        @predictions << model.predict(compound)
+      end
+    end
+    input.delete
+    return haml :batch
+  end
+
   # validate identifier input
   # transfered input
-  @identifier = params[:identifier]
-  begin
-    # get compound from SMILES
-    @compound = Compound.from_smiles @identifier
-  rescue
-    @error_report = "Attention, '#{params[:identifier]}' is not a valid SMILES string."
-    return haml :error
+  if !params[:identifier].blank?
+    @identifier = params[:identifier]
+    begin
+      # get compound from SMILES
+      @compound = Compound.from_smiles @identifier
+    rescue
+      @error_report = "Attention, '#{params[:identifier]}' is not a valid SMILES string."
+      return haml :error
+    end
+
+    @models = []
+    @predictions = []
+    params[:selection].keys.each do |model_id|
+      model = Model::Prediction.find model_id
+      @models << model
+      @predictions << model.predict(@compound)
+    end
+    haml :prediction
   end
-  @models = []
-  @predictions = []
-  params[:selection].keys.each do |model_id|
-    model = Model::Prediction.find model_id
-    @models << model
-    @predictions << model.predict(@compound)
-  end
-  haml :prediction
 end
 
 get '/style.css' do

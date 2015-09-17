@@ -1,0 +1,39 @@
+/ displays all prediction result in first table
+%div.table-responsive
+  %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
+    %thead
+      %tr
+        %h3 Batch Prediction Results:
+
+    %tbody
+    - @compounds.each_with_index do |compound,i|
+      %tr
+        %td{:id=>"compound", :style=>"vertical-align:top;"}
+          %p= compound.svg
+          %p= compound.smiles
+        - @predictions.each_with_index do |prediction,i|
+          %td{:style=>"vertical-align:top;"}
+            %b{:class => "title"}
+              = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
+            %p
+            - if prediction[:confidence] == "measured"
+              %p
+              / TODO fix scientific notation from database
+              %b Measured activity:
+              = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{@models[i].unit})" : prediction[:value]
+              %p Compound is part of the training dataset
+            - elsif prediction[:neighbors].size > 0
+              %p
+              / model type (classification|regression)
+              %b Type:
+              = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+              %br
+              %b Prediction:
+              / TODO scientific notation
+              = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{@models[i].unit}" : prediction[:value]
+              %br
+              / TODO probability
+              %b Confidence:
+              = prediction[:confidence].round(3)
+              %p
+              %p

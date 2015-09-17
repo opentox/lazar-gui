@@ -1,21 +1,58 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
+  function getTab(){
+    t = $('.nav-tabs li.active').text();
+    return t.trim();
+  };
   function showcircle() {
-    if (checksmiles() && checkboxes()){
+    /*if (checksmiles() && checkboxes()){
       button = document.getElementById("submit");
       image = document.getElementById("circle");
       button.parentNode.replaceChild(image, button);
       $("img.circle").show();
       return true;
     };
+    return false;*/
+    switch (getTab()){
+      case "single":
+        if (checksmiles() && checkboxes()){
+          button = document.getElementById("submit");
+          image = document.getElementById("circle");
+          button.parentNode.replaceChild(image, button);
+          $("img.circle").show();
+          return true;
+        };
+        return false;
+        break;
+      case "batch":
+        if (checkfile() && checkboxes()){
+          button = document.getElementById("submit");
+          image = document.getElementById("circle");
+          button.parentNode.replaceChild(image, button);
+          $("img.circle").show();
+          return true;
+        };
+        return false;
+        break;
+      default: false;
+    };
+    return false;
+  };
+  function checkfile() {
+    var fileinput = document.getElementById("fileselect");
+    if(fileinput.value != "") {
+      //TODO check file type is csv
+      return true;
+    };
+    alert("Please select a file (csv).");
     return false;
   };
   function checksmiles () {
+    getsmiles();
     if (document.form.identifier.value == "") {
       alert("Please draw or insert a chemical structure.");
       document.form.identifier.focus();
-      //$('.progress-bar').hide();
       $("img.circle").hide();
       return false;
     };
@@ -48,49 +85,171 @@
     };
   };
 
-// init task for progress
-
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(showcircle())" }
   %fieldset#top.well
-    %h2 1. Draw a chemical structure
-    :javascript
-      $("a#linkInsert").click(function () {
-        $("#insert").toggle();
-        document.location = document.location + "#" + "insert";
-      });
-    #insert
-      %p
-      %label &nbsp;
-      #appletContainer
-      %br
-      %label{:for => 'identifier'}
-        or enter the
-        %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
-        string:
-      %br
-      %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
+    // tabs to select single prediction or batch prediction
+    %ul.nav.nav-tabs{:role=>"tablist"}
+      - ["single", "batch"].each do |select|  
+        %li{:class => ("active" if select == "single")}
+          %a{:href => "div##{select}", :id => "linkTab#{select}", :data=> {:toggle=>"tab"}} 
+            = select
+
+    %div.tab-content
+      #single.tab-pane.fade-in.active
+        %h2 1. Draw a chemical structure
+        #insert
+          %p
+          %label &nbsp;
+          #appletContainer
+          %br
+          %label{:for => 'identifier'}
+            or enter the
+            %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
+            string:
+          %br
+          %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
+
+      #batch.tab-pane.fade-in
+        %h2 1. Select a file to upload
+        Browse (csv):
+        %span.btn.btn-default.btn-file
+          %input{:type=>"file", :name=> "fileselect", :id=>"fileselect"}
     
    
   %fieldset#middle.well
     %h2 2. Select one or more endpoints
-    
-    :javascript
-      $("a#linkModels").click(function () {
-        $("#models").toggle();
-        document.location = document.location + "#" + "models";
-      });
-      
     #models
       - @endpoints.each do |endpoint|
-        %div
-          %b= endpoint
+        %div{:id=>endpoint}
+          %h4.head-back=endpoint
           - @models.select{|m| m.endpoint == endpoint}.each do |model|
-            %div{:id => model.id}
-              %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.id}]", :value => true, :disabled => false}
+            %div.row{:id => model.id}
+              %span.col-sm-4
+                %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.id}]", :value => true, :disabled => false}
                 %label{:for => "selection[#{model.id}]"}
                   = model.species
-            %p
+              %span.col-sm-8
+                %a.btn.btn-default.btn-xs{:data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :id => "link#{model.id}", :style=>"font-size:small;"}
+                  Details | Validation
+            %div.panel-collapse.collapse{:id=>"details#{model.id}", :style=>"margin-left:1em;"}
+              %b Model:
+              = model.id
+              %br
+              = "Algorithm:\tLAZAR"
+              %br
+              - model.classification? ? type = "classification" : type = "regression"
+              = "Type:\t"
+              = type
+              %br
+              - training_dataset = OpenTox::Dataset.find model.training_dataset.id
+              = "Training dataset:\t"
+              = training_dataset.source.split("/").last
+              %br
+              = "Training compounds:\t"
+              = training_dataset.compounds.size
+
+
+              %p
+              %b Validation:
+              %br
+              - cv = OpenTox::CrossValidation.find model.crossvalidation.id
+              = "Num folds:\t"
+              = cv.folds
+              %br
+              = "Num instances:\t"
+              = cv.nr_instances
+              %br
+              = "Num unpredicted"
+              = cv.nr_unpredicted
+              - if model.classification? 
+                %br
+                = "Accuracy:\t"
+                = cv.accuracy.round(3)
+                %br
+                = "Weighted Accuracy:\t"
+                = cv.weighted_accuracy.round(3)
+                %br
+                = "True positive rate:\t"
+                = cv.true_rate["active"].round(3)
+                %br
+                = "True negative rate:\t"
+                = cv.true_rate["inactive"].round(3)
+                %br 
+                = "Positive predictive value:\t"
+                = cv.predictivity["active"].round(3)
+                %br
+                = "Negative predictive value:\t"
+                = cv.predictivity["inactive"].round(3)
+                %p
+                %b Confusion Matrix:
+                %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
+                  %tbody
+                    %tr
+                      %td
+                      %td
+                      %td 
+                        %b actual
+                      %td
+                      %td
+                    %tr
+                      %td
+                      %td
+                      %td active
+                      %td inactive
+                      %td total
+                    %tr
+                      %td 
+                        %b predicted
+                      %td active
+                      %td 
+                        =cv.confusion_matrix[0][0]
+                      %td 
+                        =cv.confusion_matrix[0][1]
+                      %td 
+                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
+                    %tr
+                      %td
+                      %td inactive
+                      %td 
+                        =cv.confusion_matrix[1][0]
+                      %td 
+                        =cv.confusion_matrix[1][1]
+                      %td 
+                        =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
+                    %tr
+                      %td
+                      %td total
+                      %td
+                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
+                      %td
+                        =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
+                      %td
+                -#= "Confusion Matrix:\t"
+                -#= cv.confusion_matrix
+              - if model.regression? 
+                %br
+                = "Root mean squared error:\t"
+                = cv.rmse.round(3)
+                %br
+                = "Weighted root mean squared error:\t"
+                = cv.weighted_rmse.round(3)
+                %br
+                = "Mean absolute error:\t"
+                = cv.mae.round(3)
+                %br
+                = "Weighted mean absolute error:\t"
+                = cv.weighted_mae.round(3)
+                %br 
+                = "R square:\t"
+                = cv.r_squared.round(3)
+                %br
+                -#= "Correlation plot"
+                -#= cv.correlation_plot
+                %br
+                -#= "Confidence plot:"
+                -#= cv.confidence_plot
+              %hr
 
   
   %fieldset#bottom.well
