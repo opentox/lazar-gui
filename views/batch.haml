@@ -1,44 +1,50 @@
-/ displays all prediction result in first table
-%div.table-responsive
-  %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
-    %thead
-      %tr
-        %h3 Batch Prediction Results:
+%div.well
+  %a.btn.btn-warning{:href => to('/predict')} Make New Prediction
+  / displays all prediction result in first table
+  %div.table-responsive
+    %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
+      %thead
+        %tr
+          %h3.col-md-4 Batch Prediction Results: 
+          %h3.col-md-8= @filename
 
-    %tbody
-    / key = compound, values = array of arrays with model, prediction
-    - @batch.each do |key, values|
-      - compound = key
-      %tr
-        %td{:style=>"vertical-align:top;"}
-          %p= compound.svg
-          %p= compound.smiles
-        / array = single prediction [endpoint, result]
-        - values.each_with_index do |array,i|
+      %tbody
+      / key = compound, values = array of arrays with model, prediction
+      - @batch.each do |key, values|
+        - compound = key
+        %tr
           %td{:style=>"vertical-align:top;"}
-            - model = array[0]
-            - prediction = array[1]
-            %b{:class => "title"}
-              = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
-            %p
-            - if prediction[:confidence] == "measured"
+            %p= compound.svg
+            %p= compound.smiles
+          / array = single prediction [endpoint, result]
+          - values.each_with_index do |array,i|
+            %td{:style=>"vertical-align:top;"}
+              - model = array[0]
+              - prediction = array[1]
+              %b{:class => "title"}
+                = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
               %p
-              / TODO fix scientific notation from database
-              %b Measured activity:
-              = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{model.unit})" : prediction[:value]
-              %p Compound is part of the training dataset
-            - elsif prediction[:neighbors].size > 0
-              %p
-              / model type (classification|regression)
-              %b Type:
-              = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
-              %br
-              %b Prediction:
-              / TODO scientific notation
-              = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit}" : prediction[:value]
-              %br
-              / TODO probability
-              %b Confidence:
-              = prediction[:confidence].round(3)
-              %p
+              - if prediction[:confidence] == "measured"
+                %p
+                / TODO fix scientific notation from database
+                %b Measured activity:
+                = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{model.unit})" : prediction[:value]
+                %p Compound is part of the training dataset
+              - elsif prediction[:neighbors].size > 0
+                %p
+                / model type (classification|regression)
+                %b Type:
+                = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
+                %br
+                %b Prediction:
+                / TODO scientific notation
+                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit}" : prediction[:value]
+                %br
+                / TODO probability
+                %b Confidence:
+                = prediction[:confidence].round(3)
+                %p
+              - else
+                %p
+                Not enough similar compounds in training dataset.
               %p

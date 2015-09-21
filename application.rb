@@ -4,7 +4,7 @@ include OpenTox
 
 # DG: workaround for https://github.com/sinatra/sinatra/issues/808
 # Date: 18/11/2013
-set :protection, :except => :path_traversal
+#set :protection, :except => :path_traversal
 
 configure :development do
   $logger = Logger.new(STDOUT)
@@ -205,6 +205,7 @@ post '/predict/?' do
     File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
     end
+    @filename = params[:fileselect][:filename]
     input = OpenTox::Dataset.from_csv_file File.join "tmp", params[:fileselect][:filename]
     dataset = OpenTox::Dataset.find input.id 
     @compounds = dataset.compounds

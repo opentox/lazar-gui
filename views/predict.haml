@@ -1,19 +1,21 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
+  $(function() { 
+    $('a[data-toggle="tab"]').on('click', function (e) {
+      localStorage.setItem('lastTab', $(e.target).attr('href'));
+    });
+    var lastTab = localStorage.getItem('lastTab');
+    if (lastTab) {
+      $('a[href="'+lastTab+'"]').click();
+    }
+  });  
+  
   function getTab(){
     t = $('.nav-tabs li.active').text();
     return t.trim();
   };
   function showcircle() {
-    /*if (checksmiles() && checkboxes()){
-      button = document.getElementById("submit");
-      image = document.getElementById("circle");
-      button.parentNode.replaceChild(image, button);
-      $("img.circle").show();
-      return true;
-    };
-    return false;*/
     switch (getTab()){
       case "single":
         if (checksmiles() && checkboxes()){
@@ -92,11 +94,11 @@
     %ul.nav.nav-tabs{:role=>"tablist"}
       - ["single", "batch"].each do |select|  
         %li{:class => ("active" if select == "single")}
-          %a{:href => "div##{select}", :id => "linkTab#{select}", :data=> {:toggle=>"tab"}} 
+          %a{:href => "##{select}", :id => "linkTab#{select}", :aria=>{:controls=>"#{select}"}, :data=> {:toggle=>"tab"}} 
             = select
 
-    %div.tab-content
-      #single.tab-pane.fade-in.active
+    %div.tab-content{:id=>"predict"}
+      #single.tab-pane.fade-in.active{:role=>"tabpanel"}
         %h2 1. Draw a chemical structure
         #insert
           %p
@@ -110,12 +112,12 @@
           %br
           %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
 
-      #batch.tab-pane.fade-in
+      #batch.tab-pane.fade-in{:role=>"tabpanel"}
         %h2 1. Select a file to upload
         Browse (csv):
         %span.btn.btn-default.btn-file
           %input{:type=>"file", :name=> "fileselect", :id=>"fileselect"}
-    
+  
    
   %fieldset#middle.well
     %h2 2. Select one or more endpoints
