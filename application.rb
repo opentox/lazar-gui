@@ -202,6 +202,10 @@ post '/predict/?' do
 
   # process batch prediction
   if !params[:fileselect].blank?
+    if params[:fileselect][:filename] !~ /\.csv$/
+      @error_report = "Please submit a csv file."
+      return haml :error
+    end
     File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
     end

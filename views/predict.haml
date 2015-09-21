@@ -11,14 +11,27 @@
     }
   });  
   
-  function getTab(){
-    t = $('.nav-tabs li.active').text();
-    return t.trim();
+  function getInput(){
+    identifier = document.getElementById("identifier").value;
+    fileselect = document.getElementById("fileselect").value;
+    console.log(identifier);
+    console.log(fileselect);
+    if (fileselect != ""){
+      return 1;
+    };
+    if (identifier != ""){
+      return 2;
+    };
+    return 0;
   };
   function showcircle() {
-    switch (getTab()){
-      case "single":
-        if (checksmiles() && checkboxes()){
+    switch (getInput()){
+      case 0:
+        alert("Please draw or insert a chemical structure.");
+        return false;
+        break;
+      case 1:
+        if (checkfile() && checkboxes()){
           button = document.getElementById("submit");
           image = document.getElementById("circle");
           button.parentNode.replaceChild(image, button);
@@ -27,8 +40,8 @@
         };
         return false;
         break;
-      case "batch":
-        if (checkfile() && checkboxes()){
+      case 2:
+        if (checksmiles() && checkboxes()){
           button = document.getElementById("submit");
           image = document.getElementById("circle");
           button.parentNode.replaceChild(image, button);
@@ -90,18 +103,12 @@
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(showcircle())" }
   %fieldset#top.well
-    // tabs to select single prediction or batch prediction
-    %ul.nav.nav-tabs{:role=>"tablist"}
-      - ["single", "batch"].each do |select|  
-        %li{:class => ("active" if select == "single")}
-          %a{:href => "##{select}", :id => "linkTab#{select}", :aria=>{:controls=>"#{select}"}, :data=> {:toggle=>"tab"}} 
-            = select
-
-    %div.tab-content{:id=>"predict"}
-      #single.tab-pane.fade-in.active{:role=>"tabpanel"}
-        %h2 1. Draw a chemical structure
+    %div.row
+      %h2.col-md-6 1. Draw a chemical structure
+      %h2.col-md-6 Select csv file
+    %div.row
+      %div.col-md-6
         #insert
-          %p
           %label &nbsp;
           #appletContainer
           %br
@@ -111,14 +118,39 @@
             string:
           %br
           %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
+      %div.col-md-6{:style=>"padding-top:3em;"}
+        #batch
+          Browse file (csv) for batch prediction:
+          %br
+          %span.btn.btn-default.btn-file
+            %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>".csv"}
+          %p
+          Example structure:
+          %table.table.table-bordered{:style=>"border-bottom:0;"}
+            %thead
+              %tr
+                %th
+                  SMILES
+                %th
+                  notes
+            %tbody
+              %tr
+                %td
+                  compound
+                %td
+              %tr
+                %td
+                  compound
+                %td
+              %tr
+                %td
+                  compound
+                %td
+              %tr
+                %td{:style=>"border-bottom:0;"}
+                  = "...."
+                %td{:style=>"border-bottom:0;"}
 
-      #batch.tab-pane.fade-in{:role=>"tabpanel"}
-        %h2 1. Select a file to upload
-        Browse (csv):
-        %span.btn.btn-default.btn-file
-          %input{:type=>"file", :name=> "fileselect", :id=>"fileselect"}
-  
-   
   %fieldset#middle.well
     %h2 2. Select one or more endpoints
     #models
