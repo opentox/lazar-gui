@@ -65,7 +65,66 @@ class LazarWebTest < MiniTest::Test
     links.each{|l| assert page.has_link?(l), "true"}
   end
 
-  def test_04_predict
+  def test_04_model_details
+    visit("/")
+    details = page.all('a', :text => 'Details | Validation')
+    details[0].click
+    assert page.has_content?('Model:')
+    assert page.has_content?('Source: http://www.epa.gov/comptox/dsstox/sdf_epafhm.html')
+    assert page.has_content?('Algorithm: LAZAR')
+    assert page.has_content?('Type: regression')
+    assert page.has_content?('Training dataset: EPAFHM.csv')
+    assert page.has_content?('Training compounds: 617')
+    assert page.has_content?('Validation:')
+    assert page.has_content?('Num folds: 10')
+    details[0].click
+    #
+    details[1].click
+    assert page.has_content?('Model:')
+    assert page.has_content?('Source: http://www.epa.gov/ncct/dsstox/sdf_cpdbas.html')
+    assert page.has_content?('Algorithm: LAZAR')
+    assert page.has_content?('Type: classification')
+    assert page.has_content?('Training dataset: DSSTox_Carcinogenic_Potency_DBS_Rat.csv')
+    assert page.has_content?('Training compounds: 1195')
+    assert page.has_content?('Validation:')
+    assert page.has_content?('Num folds: 10')
+    details[1].click
+    #
+    details[2].click
+    assert page.has_content?('Model:')
+    assert page.has_content?('Source: http://www.epa.gov/ncct/dsstox/sdf_cpdbas.html')
+    assert page.has_content?('Algorithm: LAZAR')
+    assert page.has_content?('Type: classification')
+    assert page.has_content?('Training dataset: DSSTox_Carcinogenic_Potency_DBS_MultiCellCall.csv')
+    assert page.has_content?('Training compounds: 1116')
+    assert page.has_content?('Validation:')
+    assert page.has_content?('Num folds: 10')
+    details[2].click
+    #
+    details[3].click
+    assert page.has_content?('Model:')
+    assert page.has_content?('Source: http://www.epa.gov/ncct/dsstox/sdf_cpdbas.html')
+    assert page.has_content?('Algorithm: LAZAR')
+    assert page.has_content?('Type: classification')
+    assert page.has_content?('Training dataset: DSSTox_Carcinogenic_Potency_DBS_Mouse.csv')
+    assert page.has_content?('Training compounds: 973')
+    assert page.has_content?('Validation:')
+    assert page.has_content?('Num folds: 10')
+    details[3].click
+    #
+    details[4].click
+    assert page.has_content?('Model:')
+    assert page.has_content?('Source: http://www.epa.gov/comptox/dsstox/sdf_fdamdd.html')
+    assert page.has_content?('Algorithm: LAZAR')
+    assert page.has_content?('Type: regression')
+    assert page.has_content?('Training dataset: FDA_v3b_Maximum_Recommended_Daily_Dose_mmol.csv')
+    assert page.has_content?('Training compounds: 1216')
+    assert page.has_content?('Validation:')
+    assert page.has_content?('Num folds: 10')
+    details[4].click
+  end 
+
+  def test_05_predict
     visit('/')
     page.fill_in('identifier', :with => "NNc1ccccc1")
     check('selection[Rat]')
@@ -128,7 +187,6 @@ class LazarWebTest < MiniTest::Test
 
   def test_99_kill
     `pidof Xvfb|xargs kill`
-    `kill #{@@pid.to_i}`
   end
 
 end
