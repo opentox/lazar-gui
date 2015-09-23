@@ -1,13 +1,19 @@
 %div.well
-  %a.btn.btn-warning{:href => to('/predict')} Make New Prediction
+  %a.btn.btn-warning{:href => to('/predict')}
+    %span.glyphicon.glyphicon-menu-left{:aria=>{:hidden=>"true"}}
+    Make New Prediction
   / displays all prediction result in first table
   %div.table-responsive
     %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
       %thead
         %tr
-          %h3.col-md-4 Batch Prediction Results: 
+          %h3.col-md-4{:style=>"padding-left:0;"} Batch Prediction Results:
           %h3.col-md-8= @filename
-
+        %tr
+          %span.btn.btn-default
+            %a{:href=>"#{to("/predict/#{@filename}")}", :title=>"download"}
+              %span.glyphicon.glyphicon-download-alt{:aria=>{:hidden=>"true"}}
+                CSV
       %tbody
       / key = compound, values = array of arrays with model, prediction
       - @batch.each do |key, values|

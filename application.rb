@@ -189,13 +189,32 @@ get '/prediction/:model_uri/:type/:neighbor/significant_fragments/?' do
   haml :significant_fragments, :layout => false
 end
 
-get '/predict/:dataset/?' do
-  t = Tempfile.new("tempfile.rdf")
-  t << `curl -k -H accept:application/rdf+xml #{params[:dataset]}`
-  send_file t.path,
-    :filename => params[:dataset].split("/").last+".rdf"
-  t.close
-  t.unlink
+get '/predict/?:csv?' do
+  response['Content-Type'] = "text/csv"
+  @csv = "\"Compound\",\"Endpoint\",\"Type\",\"Prediction\",\"Confidence\"\n"
+  @@batch.each do |key, values|
+    values.each do |array|
+      model = array[0]
+      prediction = array[1]
+      compound = key.smiles
+      endpoint = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
+      if prediction[:confidence] == "measured"
+        type = ""
+        pred = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{model.unit})" : prediction[:value]
+        confidence = "measured activity"
+      elsif prediction[:neighbors].size > 0
+        type = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
+        pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit}" : prediction[:value]
+        confidence = prediction[:confidence]
+      else
+        type = ""
+        pred = "Not enough similar compounds in training dataset."
+        confidence = ""
+      end
+      @csv += "\"#{compound}\",\"#{endpoint}\",\"#{type}\",\"#{pred}\",\"#{confidence}\"\n"
+    end
+  end
+  @csv
 end
 
 post '/predict/?' do
@@ -213,6 +232,11 @@ post '/predict/?' do
     input = OpenTox::Dataset.from_csv_file File.join "tmp", params[:fileselect][:filename]
     dataset = OpenTox::Dataset.find input.id 
     @compounds = dataset.compounds
+    if @compounds.size == 0
+      @error_report = "No valid SMILES submitted."
+      dataset.delete
+      return haml :error
+    end
     @batch = {}
     @compounds.each do |compound|
       @batch[compound] = []
@@ -222,7 +246,8 @@ post '/predict/?' do
         @batch[compound] << [model, prediction]
       end
     end
-    input.delete
+    @@batch = @batch
+    dataset.delete
     return haml :batch
   end
 
