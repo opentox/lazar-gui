@@ -131,8 +131,8 @@
           - @models.select{|m| m.endpoint == endpoint}.each do |model|
             %div.row{:id => model.id}
               %span.col-sm-4
-                %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.id}]", :value => true, :disabled => false}
-                %label{:for => "selection[#{model.id}]"}
+                %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species}]", :value => true, :disabled => false}
+                %label{:for => "selection[#{model.species}]"}
                   = model.species
               %span.col-sm-8
                 %a.btn.btn-default.btn-xs{:data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :id => "link#{model.id}", :style=>"font-size:small;"}
