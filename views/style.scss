@@ -7,8 +7,12 @@ h4.head-back, h5.head-back{
 .nav-tabs {
   background-color: #E7E7E7;
   margin-bottom: 0;
-}
 
-.nav-tabs li.active a:hover {
-  background-color: #f5f5f5;
+  li.active a:hover {
+    background-color: #f5f5f5;
+  }
+
+  li a {
+    height: 5em;
+  }
 }
