@@ -157,105 +157,106 @@
 
 
               %p
-              %b Validation:
-              %br
-              - cv = OpenTox::CrossValidation.find model.crossvalidation.id
-              = "Num folds:\t"
-              = cv.folds
-              %br
-              = "Num instances:\t"
-              = cv.nr_instances
-              %br
-              = "Num unpredicted"
-              = cv.nr_unpredicted
-              - if model.classification? 
+              %b Validation (repeated):
+              %p
+              - model.crossvalidations.each do |crossvalidation|
+                - cv = OpenTox::CrossValidation.find crossvalidation.id
+                = "Num folds:\t"
+                = cv.folds
                 %br
-                = "Accuracy:\t"
-                = cv.accuracy.round(3)
+                = "Num instances:\t"
+                = cv.nr_instances
                 %br
-                = "Weighted Accuracy:\t"
-                = cv.weighted_accuracy.round(3)
-                %br
-                = "True positive rate:\t"
-                = cv.true_rate["active"].round(3)
-                %br
-                = "True negative rate:\t"
-                = cv.true_rate["inactive"].round(3)
-                %br 
-                = "Positive predictive value:\t"
-                = cv.predictivity["active"].round(3)
-                %br
-                = "Negative predictive value:\t"
-                = cv.predictivity["inactive"].round(3)
-                %p
-                %b Confusion Matrix:
-                %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
-                  %tbody
-                    %tr
-                      %td
-                      %td
-                      %td 
-                        %b actual
-                      %td
-                      %td
-                    %tr
-                      %td
-                      %td
-                      %td active
-                      %td inactive
-                      %td total
-                    %tr
-                      %td 
-                        %b predicted
-                      %td active
-                      %td 
-                        =cv.confusion_matrix[0][0]
-                      %td 
-                        =cv.confusion_matrix[0][1]
-                      %td 
-                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
-                    %tr
-                      %td
-                      %td inactive
-                      %td 
-                        =cv.confusion_matrix[1][0]
-                      %td 
-                        =cv.confusion_matrix[1][1]
-                      %td 
-                        =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
-                    %tr
-                      %td
-                      %td total
-                      %td
-                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
-                      %td
-                        =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
-                      %td
-                        -#= "Confusion Matrix:\t"
-                        -#= cv.confusion_matrix
-              - if model.regression? 
-                %br
-                = "Root mean squared error:\t"
-                = cv.rmse.round(3)
-                %br
-                = "Weighted root mean squared error:\t"
-                = cv.weighted_rmse.round(3)
-                %br
-                = "Mean absolute error:\t"
-                = cv.mae.round(3)
-                %br
-                = "Weighted mean absolute error:\t"
-                = cv.weighted_mae.round(3)
-                %br 
-                = "R square:\t"
-                = cv.r_squared.round(3)
-                %br
-                -#= "Correlation plot"
-                -#= cv.correlation_plot
-                %br
-                -#= "Confidence plot:"
-                -#= cv.confidence_plot
-              %hr
+                = "Num unpredicted"
+                = cv.nr_unpredicted
+                - if model.classification? 
+                  %br
+                  = "Accuracy:\t"
+                  = cv.accuracy.round(3)
+                  %br
+                  = "Weighted Accuracy:\t"
+                  = cv.weighted_accuracy.round(3)
+                  %br
+                  = "True positive rate:\t"
+                  = cv.true_rate["active"].round(3)
+                  %br
+                  = "True negative rate:\t"
+                  = cv.true_rate["inactive"].round(3)
+                  %br 
+                  = "Positive predictive value:\t"
+                  = cv.predictivity["active"].round(3)
+                  %br
+                  = "Negative predictive value:\t"
+                  = cv.predictivity["inactive"].round(3)
+                  %p
+                  %b Confusion Matrix:
+                  %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
+                    %tbody
+                      %tr
+                        %td
+                        %td
+                        %td 
+                          %b actual
+                        %td
+                        %td
+                      %tr
+                        %td
+                        %td
+                        %td active
+                        %td inactive
+                        %td total
+                      %tr
+                        %td 
+                          %b predicted
+                        %td active
+                        %td 
+                          =cv.confusion_matrix[0][0]
+                        %td 
+                          =cv.confusion_matrix[0][1]
+                        %td 
+                          =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
+                      %tr
+                        %td
+                        %td inactive
+                        %td 
+                          =cv.confusion_matrix[1][0]
+                        %td 
+                          =cv.confusion_matrix[1][1]
+                        %td 
+                          =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
+                      %tr
+                        %td
+                        %td total
+                        %td
+                          =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
+                        %td
+                          =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
+                        %td
+                          -#= "Confusion Matrix:\t"
+                          -#= cv.confusion_matrix
+                - if model.regression? 
+                  %br
+                  = "Root mean squared error:\t"
+                  = cv.rmse.round(3)
+                  %br
+                  = "Weighted root mean squared error:\t"
+                  = cv.weighted_rmse.round(3)
+                  %br
+                  = "Mean absolute error:\t"
+                  = cv.mae.round(3)
+                  %br
+                  = "Weighted mean absolute error:\t"
+                  = cv.weighted_mae.round(3)
+                  %br 
+                  = "R square:\t"
+                  = cv.r_squared.round(3)
+                  /%br
+                  /= "Correlation plot"
+                  /= cv.correlation_plot
+                  /%br
+                  /= "Confidence plot:"
+                  /= cv.confidence_plot
+                %hr
 
   
   %fieldset#bottom.well
