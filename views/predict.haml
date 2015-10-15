@@ -172,22 +172,22 @@
                 - if model.classification? 
                   %br
                   = "Accuracy:\t"
-                  = cv.accuracy.round(3)
+                  = cv.accuracy.round(3) if cv.accuracy
                   %br
                   = "Weighted Accuracy:\t"
-                  = cv.weighted_accuracy.round(3)
+                  = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
                   %br
                   = "True positive rate:\t"
-                  = cv.true_rate["active"].round(3)
+                  = cv.true_rate["active"].round(3) if cv.true_rate["active"]
                   %br
                   = "True negative rate:\t"
-                  = cv.true_rate["inactive"].round(3)
+                  = cv.true_rate["inactive"].round(3) if cv.true_rate["inactive"]
                   %br 
                   = "Positive predictive value:\t"
-                  = cv.predictivity["active"].round(3)
+                  = cv.predictivity["active"].round(3) if cv.predictivity["active"]
                   %br
                   = "Negative predictive value:\t"
-                  = cv.predictivity["inactive"].round(3)
+                  = cv.predictivity["inactive"].round(3) if cv.predictivity["inactive"]
                   %p
                   %b Confusion Matrix:
                   %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
@@ -234,22 +234,22 @@
                         %td
                           -#= "Confusion Matrix:\t"
                           -#= cv.confusion_matrix
-                - if model.regression? 
+                - if model.regression?
                   %br
                   = "Root mean squared error:\t"
-                  = cv.rmse.round(3)
+                  = cv.rmse.round(3) if cv.rmse
                   %br
                   = "Weighted root mean squared error:\t"
-                  = cv.weighted_rmse.round(3)
+                  = cv.weighted_rmse.round(3) if cv.weighted_rmse
                   %br
                   = "Mean absolute error:\t"
-                  = cv.mae.round(3)
+                  = cv.mae.round(3) if cv.mae
                   %br
                   = "Weighted mean absolute error:\t"
-                  = cv.weighted_mae.round(3)
+                  = cv.weighted_mae.round(3) if cv.weighted_mae
                   %br 
                   = "R square:\t"
-                  = cv.r_squared.round(3)
+                  = cv.r_squared.round(3) if cv.r_squared
                   /%br
                   /= "Correlation plot"
                   /= cv.correlation_plot

@@ -30,7 +30,7 @@
                 %p
                 / TODO fix scientific notation from database
                 %b Measured activity:
-                = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{@models[i].unit})" : prediction[:value]
+                = prediction[:value].numeric? ? "#{prediction[:value].to_f.round(3)} (#{@models[i].unit})" : prediction[:value]
                 %p Compound is part of the training dataset
               - elsif prediction[:neighbors].size > 0
                 %p
