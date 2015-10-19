@@ -22,6 +22,7 @@
             %p= @compound.svg
             %p= @compound.smiles
           - @predictions.each_with_index do |prediction,i|
+            - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
             %td{:style=>"vertical-align:top;"}
               %b{:class => "title"}
                 = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
@@ -30,23 +31,23 @@
                 %p
                 / TODO fix scientific notation from database
                 %b Measured activity:
-                = prediction[:value].numeric? ? "#{prediction[:value].to_f.round(3)} (#{@models[i].unit})" : prediction[:value]
+                = (type == "Regression") ? "#{prediction[:value].round(2)} (#{@models[i].unit})" : prediction[:value]
                 %p Compound is part of the training dataset
               - elsif prediction[:neighbors].size > 0
                 %p
                 / model type (classification|regression)
                 %b Type:
-                = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+                = type
                 %br
                 %b Prediction:
                 / TODO scientific notation
-                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{@models[i].unit}" : prediction[:value]
+                = (type == "Regression") ? "#{'%.2e' % prediction[:value]} #{@models[i].unit}" : prediction[:value]
                 / TODO update description
                 / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
                 %br
                 / TODO probability
                 %b Confidence:
-                = prediction[:confidence].round(3)
+                = prediction[:confidence].round(2)
                 / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
                 %p
                 /TODO add tooltip for significant ftagments and descriptors
