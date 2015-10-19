@@ -204,7 +204,7 @@
                             %td
                             %td active
                             %td inactive
-                            %td total
+                            -#%td total
                           %tr
                             %td 
                               %b predicted
@@ -213,7 +213,7 @@
                               =cv.confusion_matrix[0][0]
                             %td 
                               =cv.confusion_matrix[0][1]
-                            %td 
+                            -#%td 
                               =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
                           %tr
                             %td
@@ -222,7 +222,7 @@
                               =cv.confusion_matrix[1][0]
                             %td 
                               =cv.confusion_matrix[1][1]
-                            %td 
+                            -#%td 
                               =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
                           -#%tr
                             %td
