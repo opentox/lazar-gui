@@ -8,14 +8,11 @@
 %div.well
   %a.btn.btn-warning{:href => to('/predict')}
     %i.glyphicon.glyphicon-menu-left
-    Make New Prediction
+    New Prediction
   / displays all prediction result in first table
+  %h3 Prediction Results:
   %div.table-responsive
     %table.table.table-bordered{:id=>"overview", :style=>"background-color:white;"}
-      %thead
-        %tr
-          %h3 Prediction Results:
-
       %tbody
         %tr
           %td{:id=>"compound", :style=>"vertical-align:top;"}
@@ -23,7 +20,7 @@
             %p= @compound.smiles
           - @predictions.each_with_index do |prediction,i|
             - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
-            %td{:style=>"vertical-align:top;"}
+            %td{:style=>"vertical-align:top;white-space:nowrap;"}
               %b{:class => "title"}
                 = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
               %p
@@ -61,7 +58,7 @@
                 %p
               - else
                 %p
-                Not enough similar compounds in training dataset.
+                  = "Not enough similar compounds </br>in training dataset."
 
   / always show the neighbors table, message is given there  
   = haml :neighbors, :layout => false, :model_type => @model_type

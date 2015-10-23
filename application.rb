@@ -29,6 +29,11 @@ get '/predict/?' do
   @models.count <= 0 ? (haml :info) : (haml :predict)
 end
 
+get '/predict/modeldetails/:model' do
+  model = OpenTox::Model::Prediction.find params[:model]
+  return haml :model_details, :layout=> false, :locals => {:model => model}
+end
+
 get '/jme_help/?' do
   File.read(File.join('views','jme_help.html'))
 end

@@ -1,6 +1,18 @@
-%link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet"}
+%link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet", :property=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
+  var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+    var anHttpRequest = new XMLHttpRequest();
+    anHttpRequest.onreadystatechange = function() {
+    if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+      aCallback(anHttpRequest.responseText);
+    }
+      anHttpRequest.open( "GET", aUrl, true );
+      anHttpRequest.send( null );
+    }
+  };
+
   $(function() { 
     $('a[data-toggle="tab"]').on('click', function (e) {
       localStorage.setItem('lastTab', $(e.target).attr('href'));
@@ -124,140 +136,36 @@
     %h2 2. Select one or more endpoints
     #models
       - @endpoints.each do |endpoint|
-        %div{:id=>endpoint}
+        %div{:id=>endpoint.gsub(/\s+/, "_")}
           %h4.head-back=endpoint
           - @models.select{|m| m.endpoint == endpoint}.each do |model|
             %div.row{:id => model.id}
               %span.col-sm-4
-                %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species}]", :value => true, :disabled => false}
-                %label{:for => "selection[#{model.species}]"}
+                %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species.gsub(/\s+/, "_")}]", :value => true, :disabled => false}
+                %label{:for => "selection[#{model.species.gsub(/\s+/, "_")}]"}
                   = model.species
               %span.col-sm-8
-                %a.btn.btn-default.btn-xs{:data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :id => "link#{model.id}", :style=>"font-size:small;"}
+                %a.btn.btn-default.btn-xs{:data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :onclick=>"load#{model.id}Details('#{model}')", :id => "link#{model.id}", :style=>"font-size:small;"}
                   Details | Validation
+                %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle#{model.id}", :class=>"circle#{model.id}", :alt=>"wait", :style=>"display:none;"}
             %div.panel-collapse.collapse{:id=>"details#{model.id}", :style=>"margin-left:1em;"}
-              %b Model:
-              %br
-              Source:
-              %a{:href=>model.source, :rel=>"external"}
-                = model.source
-              %br
-              = "Algorithm:\tLAZAR"
-              %br
-              - model.classification? ? type = "Classification" : type = "Regression"
-              = "Type:\t"
-              = type
-              %br
-              - training_dataset = OpenTox::Dataset.find model.training_dataset.id
-              = "Training dataset:\t"
-              = training_dataset.source.split("/").last
-              %br
-              = "Training compounds:\t"
-              = training_dataset.compounds.size
-
-              %p
-              %b Validation (repeated):
-              %div.row{:style=>"background-color:#f5f5f5;"}
-                - model.crossvalidations.each do |crossvalidation|
-                  %span.col-xs-4.col-sm-4.col-md-4.col-lg-4
-                    - cv = OpenTox::CrossValidation.find crossvalidation.id
-                    = "Num folds:\t"
-                    = cv.folds
-                    %br
-                    = "Num instances:\t"
-                    = cv.nr_instances
-                    %br
-                    = "Num unpredicted"
-                    = cv.nr_unpredicted
-                    - if model.classification? 
-                      %br
-                      = "Accuracy:\t"
-                      = cv.accuracy.round(3) if cv.accuracy
-                      %br
-                      = "Weighted Accuracy:\t"
-                      = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
-                      %br
-                      = "True positive rate:\t"
-                      = cv.true_rate["active"].round(3) if cv.true_rate["active"]
-                      %br
-                      = "True negative rate:\t"
-                      = cv.true_rate["inactive"].round(3) if cv.true_rate["inactive"]
-                      %br 
-                      = "Positive predictive value:\t"
-                      = cv.predictivity["active"].round(3) if cv.predictivity["active"]
-                      %br
-                      = "Negative predictive value:\t"
-                      = cv.predictivity["inactive"].round(3) if cv.predictivity["inactive"]
-                      %p
-                      %b Confusion Matrix:
-                      %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
-                        %tbody
-                          %tr
-                            %td
-                            %td
-                            %td 
-                              %b actual
-                            %td
-                            %td
-                          %tr
-                            %td
-                            %td
-                            %td active
-                            %td inactive
-                            -#%td total
-                          %tr
-                            %td 
-                              %b predicted
-                            %td active
-                            %td 
-                              =cv.confusion_matrix[0][0]
-                            %td 
-                              =cv.confusion_matrix[0][1]
-                            -#%td 
-                              =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
-                          %tr
-                            %td
-                            %td inactive
-                            %td 
-                              =cv.confusion_matrix[1][0]
-                            %td 
-                              =cv.confusion_matrix[1][1]
-                            -#%td 
-                              =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
-                          -#%tr
-                            %td
-                            %td total
-                            %td
-                              =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
-                            %td
-                              =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
-                            %td
-                              -#= "Confusion Matrix:\t"
-                              -#= cv.confusion_matrix
-                    - if model.regression?
-                      %br
-                      = "Root mean squared error:\t"
-                      = cv.rmse.round(3) if cv.rmse
-                      %br
-                      = "Weighted root mean squared error:\t"
-                      = cv.weighted_rmse.round(3) if cv.weighted_rmse
-                      %br
-                      = "Mean absolute error:\t"
-                      = cv.mae.round(3) if cv.mae
-                      %br
-                      = "Weighted mean absolute error:\t"
-                      = cv.weighted_mae.round(3) if cv.weighted_mae
-                      %br 
-                      = "R square:\t"
-                      = cv.r_squared.round(3) if cv.r_squared
-                      /%br
-                      /= "Correlation plot"
-                      /= cv.correlation_plot
-                      /%br
-                      /= "Confidence plot:"
-                      /= cv.confidence_plot
-
-  
+            :javascript
+              function load#{model.id}Details(model) {
+                button = document.getElementById("link#{model.id}");
+                image = document.getElementById("circle#{model.id}");
+                if ($('modeldetails#{model.id}').length == 0) {
+                  $(button).hide();
+                  $(image).show();
+                  aClient = new HttpClient();
+                  aClient.get("#{to("/predict/modeldetails/#{model.id}")}", function(response) {
+                    var details = document.createElement("modeldetails#{model.id}");
+                    details.innerHTML = response;
+                    document.getElementById("details#{model.id}").appendChild(details);
+                    $(button).show();
+                    $(image).hide();
+                  });
+                }
+              }
   %fieldset#bottom.well
     %div.row
       %div.col-md-2
@@ -265,4 +173,4 @@
           3. Predict
       %div.col-md-10
         %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
-        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :style=>"display:none;"}
+        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}

@@ -1,7 +1,7 @@
 %div.well
   %a.btn.btn-warning{:href => to('/predict')}
     %span.glyphicon.glyphicon-menu-left{:aria=>{:hidden=>"true"}}
-    Make New Prediction
+    New Prediction
   / displays all prediction result in first table
   %div.table-responsive
     %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
@@ -24,7 +24,7 @@
             %p= compound.smiles
           / array = single prediction [endpoint, result]
           - values.each_with_index do |array,i|
-            %td{:style=>"vertical-align:top;"}
+            %td{:style=>"vertical-align:top;white-space:nowrap;"}
               - model = array[0]
               - prediction = array[1]
               %b{:class => "title"}
@@ -52,5 +52,5 @@
                 %p
               - else
                 %p
-                Not enough similar compounds in training dataset.
+                  = "Not enough similar compounds </br>in training dataset."
               %p
