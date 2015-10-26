@@ -10,7 +10,6 @@
     %ul.nav.nav-tabs.nav-justified{:id=>"neighborTabs", :role=>"tablist"}
       / each model a tab head ;
       - @models.each_with_index do |model,i|
-        - @type = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
         %li{:class => ("active" if i == 0)}
           %a{:href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}}
             = "#{model.endpoint} (#{model.species})"
@@ -37,7 +36,6 @@
               });
             });
           - if prediction[:neighbors].size > 0
-                
             %div.table-responsive
               %table.tablesorter{:id=>"#{j+1}", :style=>"border-style: solid;"}
                 %thead
@@ -59,6 +57,7 @@
                       / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#neighbors", :title=>"Similarity", data: {toggle:"popover", placement:"auto", html:"true", content:"LAZAR calculates activity specific similarities based on the presence of statistically significant fragments. This procedure will <ul><li>consider only those parts of a chemical structure that are relevant for a particular endpoint</li><li>ignore inert parts of the structure</li><li>lead to different similarities, depending on the toxic endpoint Similarities of 1 may be encountered even for structurally dissimilar compounds, because inert parts are ignored.</li></ul>"}, :style=>"z-index:auto+10;"}
                     / %td
                 %tbody
+                  - type = @model_types[j]
                 - prediction[:neighbors].each_with_index do |neighbor,count|
                   %tr
                     / Compound
@@ -68,11 +67,11 @@
                       %p= Compound.find(neighbor[0]).smiles
                     / Measured Activity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
-                      = (@type == "Regression") ? neighbor[2].collect{|n| '%.2e' % n}.join(", ") : neighbor[2].join(", ")
+                      = (type == "Regression") ? neighbor[2].collect{|n| '%.2e' % n}.join(", ") : neighbor[2].join(", ")
                     / Similarity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
                       / TODO differentiate between no neighbors found and compound found in dataset, display neighbors for compounds in dataset?
-                      = neighbor[1] != nil ? neighbor[1].round(2) : "Not enough similar compounds </br>in training dataset." 
+                      = neighbor[1] != nil ? neighbor[1].round(2) : "Not enough similar compounds </br>in training dataset."
 
           - else
             %span.btn.btn-default.disabled

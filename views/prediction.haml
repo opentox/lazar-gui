@@ -18,17 +18,21 @@
           %td{:id=>"compound", :style=>"vertical-align:top;"}
             %p= @compound.svg
             %p= @compound.smiles
+          - @model_types = {}
+          - @dbhit = {}
           - @predictions.each_with_index do |prediction,i|
             - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+            - @model_types[i] = type
             %td{:style=>"vertical-align:top;white-space:nowrap;"}
               %b{:class => "title"}
                 = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
               %p
               - if prediction[:confidence] == "measured"
+                - @dbhit[i] = true
                 %p
                 / TODO fix scientific notation from database
                 %b Measured activity:
-                = (type == "Regression") ? "#{prediction[:value].round(2)} (#{@models[i].unit})" : prediction[:value]
+                = (type == "Regression") ? "#{"%.2e" % prediction[:value]} (#{@models[i].unit})" : prediction[:value]
                 %p Compound is part of the training dataset
               - elsif prediction[:neighbors].size > 0
                 %p
@@ -38,7 +42,7 @@
                 %br
                 %b Prediction:
                 / TODO scientific notation
-                = (type == "Regression") ? "#{'%.2e' % prediction[:value]} #{@models[i].unit}" : prediction[:value]
+                = (type == "Regression") ? "#{'%.2e' % prediction[:value]} (#{@models[i].unit})" : prediction[:value]
                 / TODO update description
                 / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
                 %br
@@ -57,9 +61,10 @@
                 / %p
                 %p
               - else
+                - @dbhit[i] = false
                 %p
                   = "Not enough similar compounds </br>in training dataset."
 
   / always show the neighbors table, message is given there  
-  = haml :neighbors, :layout => false, :model_type => @model_type
+  = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
 
