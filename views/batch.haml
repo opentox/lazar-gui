@@ -44,7 +44,7 @@
                 %br
                 %b Prediction:
                 / TODO scientific notation
-                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit}" : prediction[:value]
+                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit})" : prediction[:value]
                 %br
                 / TODO probability
                 %b Confidence:
@@ -53,4 +53,3 @@
               - else
                 %p
                   = "Not enough similar compounds </br>in training dataset."
-              %p
