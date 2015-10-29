@@ -259,12 +259,14 @@ post '/predict/?' do
   # validate identifier input
   # transfered input
   if !params[:identifier].blank?
-    @identifier = params[:identifier]
-    begin
-      # get compound from SMILES
-      @compound = Compound.from_smiles @identifier
-    rescue
-      @error_report = "Attention, '#{params[:identifier]}' is not a valid SMILES string."
+    # remove whitespaces they terminate a SMILES string
+    # can result in wrong conversion for compound object
+    @identifier = params[:identifier].gsub(/\s+/, "")
+    $logger.debug "input:#{@identifier}"
+    # get compound from SMILES
+    @compound = Compound.from_smiles @identifier
+    if @compound.blank?
+      @error_report = "Attention, '#{@identifier}' is not a valid SMILES string."
       return haml :error
     end
 
