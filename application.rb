@@ -259,9 +259,7 @@ post '/predict/?' do
   # validate identifier input
   # transfered input
   if !params[:identifier].blank?
-    # remove whitespaces they terminate a SMILES string
-    # can result in wrong conversion for compound object
-    @identifier = params[:identifier].gsub(/\s+/, "")
+    @identifier = params[:identifier]
     $logger.debug "input:#{@identifier}"
     # get compound from SMILES
     @compound = Compound.from_smiles @identifier
