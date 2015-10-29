@@ -18,6 +18,7 @@
           %td{:id=>"compound", :style=>"vertical-align:top;"}
             %p= @compound.svg
             %p= @compound.smiles
+          - mw = @compound.molecular_weight
           - @model_types = {}
           - @dbhit = {}
           - @predictions.each_with_index do |prediction,i|
@@ -32,7 +33,7 @@
                 %p
                 / TODO fix scientific notation from database
                 %b Measured activity:
-                = (type == "Regression") ? "#{"%.2e" % prediction[:value]} (#{@models[i].unit})" : prediction[:value]
+                = (type == "Regression") ? "#{"%.2e" % prediction[:value]} (#{@models[i].unit}) | #{'%.2e' % @compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
                 %p Compound is part of the training dataset
               - elsif prediction[:neighbors].size > 0
                 %p
@@ -41,8 +42,7 @@
                 = type
                 %br
                 %b Prediction:
-                / TODO scientific notation
-                = (type == "Regression") ? "#{'%.2e' % prediction[:value]} (#{@models[i].unit})" : prediction[:value]
+                = (type == "Regression") ? "#{'%.2e' % prediction[:value]} (#{@models[i].unit}) | #{'%.2e' % @compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
                 / TODO update description
                 / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
                 %br

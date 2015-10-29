@@ -202,14 +202,16 @@ get '/predict/?:csv?' do
       model = array[0]
       prediction = array[1]
       compound = key.smiles
+      mw = key.molecular_weight
+      weight = Compound.from_smiles(compound).mmol_to_mg(prediction[:value], mw)
       endpoint = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
       if prediction[:confidence] == "measured"
         type = ""
-        pred = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{model.unit})" : prediction[:value]
+        pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % weight} (mg/kg_bw/day)" : prediction[:value]
         confidence = "measured activity"
       elsif prediction[:neighbors].size > 0
         type = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
-        pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit}" : prediction[:value]
+        pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit} | #{'%.2e' % weight} (mg/kg_bw/day)" : prediction[:value]
         confidence = prediction[:confidence]
       else
         type = ""
