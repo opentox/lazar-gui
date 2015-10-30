@@ -33,10 +33,13 @@
               %p
               - if prediction[:confidence] == "measured"
                 %p
-                / TODO fix scientific notation from database
-                %b Measured activity:
-                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
-                %p Compound is part of the training dataset
+                  %b Measured activity:
+                - if prediction[:value].is_a?(Array)
+                  = prediction[:value][0].numeric? ? prediction[:value].collect{|v| weight = compound.mmol_to_mg(v, mw); '%.2e' % v + " (#{model.unit})"+" | #{'%.2e' % weight} (mg/kg_bw/day)"}.join("</br>") : prediction[:value].join(", ")
+                - else
+                  = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
+                %p 
+                %b Compound is part of the training dataset
               - elsif prediction[:neighbors].size > 0
                 %p
                 / model type (classification|regression)
@@ -44,7 +47,6 @@
                 = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
                 %br
                 %b Prediction:
-                / TODO scientific notation
                 = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
                 %br
                 / TODO probability
