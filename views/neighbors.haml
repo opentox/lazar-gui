@@ -66,10 +66,10 @@
                       %p= Compound.find(neighbor[0]).svg
                       %p= Compound.find(neighbor[0]).smiles
                     - c = Compound.find(neighbor[0])
-                    - mw = c.molecular_weight
+                    //- mw = c.molecular_weight
                     / Measured Activity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;white-space:nowrap;"}
-                      = (type == "Regression") ? neighbor[2].collect{|n| weight = c.mmol_to_mg(n, mw); '%.2e' % n + " (#{@models[j].unit})"+"|#{'%.2e' % weight} (mg/kg_bw/day)"}.join("</br>") : neighbor[2].join(", ")
+                      = (type == "Regression") ? neighbor[2].collect{|n| weight = c.mmol_to_mg(n); '%.2e' % n + " (#{@models[j].unit})"+"|#{'%.2e' % weight} (mg/kg_bw/day)"}.join("</br>") : neighbor[2].join(", ")
                     / Similarity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
                       / TODO differentiate between no neighbors found and compound found in dataset, display neighbors for compounds in dataset?
