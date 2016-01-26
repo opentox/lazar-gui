@@ -202,21 +202,34 @@ get '/predict/?:csv?' do
       model = array[0]
       prediction = array[1]
       compound = key.smiles
+      mw = key.molecular_weight
       endpoint = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
       if prediction[:confidence] == "measured"
-        type = ""
-        pred = prediction[:value].numeric? ? "#{prediction[:value].round(3)} (#{model.unit})" : prediction[:value]
-        confidence = "measured activity"
+        if prediction[:value].is_a?(Array)
+          prediction[:value].each do |value|
+            type = ""
+            weight = Compound.from_smiles(compound).mmol_to_mg(value, mw)
+            pred = value.numeric? ? "#{'%.2e' % value} (#{model.unit}) | #{'%.2e' % weight} (mg/kg_bw/day)" : value
+            confidence = "measured activity"
+            @csv += "\"#{compound}\",\"#{endpoint}\",\"#{type}\",\"#{pred}\",\"#{confidence}\"\n"
+          end
+        else
+          type = ""
+          weight = Compound.from_smiles(compound).mmol_to_mg(prediction[:value], mw)
+          pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % weight} (mg/kg_bw/day)" : prediction[:value]
+          confidence = "measured activity"
+        end
       elsif prediction[:neighbors].size > 0
+        weight = Compound.from_smiles(compound).mmol_to_mg(prediction[:value], mw)
         type = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
-        pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} #{model.unit}" : prediction[:value]
+        pred = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % weight} (mg/kg_bw/day)" : prediction[:value]
         confidence = prediction[:confidence]
       else
         type = ""
         pred = "Not enough similar compounds in training dataset."
         confidence = ""
       end
-      @csv += "\"#{compound}\",\"#{endpoint}\",\"#{type}\",\"#{pred}\",\"#{confidence}\"\n"
+      @csv += "\"#{compound}\",\"#{endpoint}\",\"#{type}\",\"#{pred}\",\"#{confidence}\"\n" unless prediction[:value].is_a?(Array)
     end
   end
   @csv

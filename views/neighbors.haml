@@ -29,7 +29,20 @@
                 debug: false,
                 theme: "bootstrap",
                 headerTemplate: '{content} {icon}',
-                widgets: ['zebra', 'columns', 'uitheme'],
+                widgets: ['zebra', 'columns', 'uitheme', 'stickyHeaders'],
+                widgetOptions: {
+                  stickyHeaders_attachTo : '.tab-content',
+                  stickyHeaders : '',
+                  stickyHeaders_offset : 0,
+                  stickyHeaders_cloneId : '-sticky',
+                  stickyHeaders_addResizeEvent : true,
+                  stickyHeaders_includeCaption : true,
+                  stickyHeaders_zIndex : 2,
+                  stickyHeaders_attachTo : null,
+                  stickyHeaders_xScroll : null,
+                  stickyHeaders_yScroll : null,
+                  stickyHeaders_filteredToTop: true
+                },
                 headers: {0: {sorter: false}, 3: {sorter: false}},
                 sortList: [[2,1]],
                 widthFixed: false
@@ -65,9 +78,11 @@
                       /%a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor[0].to_s)}/details"), :id=>"link#{j+1}#{count}"}}
                       %p= Compound.find(neighbor[0]).svg
                       %p= Compound.find(neighbor[0]).smiles
+                    - c = Compound.find(neighbor[0])
+                    //- mw = c.molecular_weight
                     / Measured Activity
-                    %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
-                      = (type == "Regression") ? neighbor[2].collect{|n| '%.2e' % n + " (#{@models[j].unit})"}.join("</br>") : neighbor[2].join(", ")
+                    %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;white-space:nowrap;"}
+                      = (type == "Regression") ? neighbor[2].collect{|n| weight = c.mmol_to_mg(n); '%.2e' % n + " (#{@models[j].unit})"+"|#{'%.2e' % weight} (mg/kg_bw/day)"}.join("</br>") : neighbor[2].join(", ")
                     / Similarity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
                       / TODO differentiate between no neighbors found and compound found in dataset, display neighbors for compounds in dataset?
