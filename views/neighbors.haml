@@ -29,7 +29,20 @@
                 debug: false,
                 theme: "bootstrap",
                 headerTemplate: '{content} {icon}',
-                widgets: ['zebra', 'columns', 'uitheme'],
+                widgets: ['zebra', 'columns', 'uitheme', 'stickyHeaders'],
+                widgetOptions: {
+                  stickyHeaders_attachTo : '.tab-content',
+                  stickyHeaders : '',
+                  stickyHeaders_offset : 0,
+                  stickyHeaders_cloneId : '-sticky',
+                  stickyHeaders_addResizeEvent : true,
+                  stickyHeaders_includeCaption : true,
+                  stickyHeaders_zIndex : 2,
+                  stickyHeaders_attachTo : null,
+                  stickyHeaders_xScroll : null,
+                  stickyHeaders_yScroll : null,
+                  stickyHeaders_filteredToTop: true
+                },
                 headers: {0: {sorter: false}, 3: {sorter: false}},
                 sortList: [[2,1]],
                 widthFixed: false
