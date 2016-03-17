@@ -31,6 +31,18 @@ end
 
 get '/predict/modeldetails/:model' do
   model = OpenTox::Model::Prediction.find params[:model]
+  crossvalidations = model.crossvalidations
+  confidence_plots = crossvalidations.collect{|cv| [cv.id, cv.confidence_plot]}
+  confidence_plots.each do |confp|
+    File.open(File.join('public', "confp#{confp[0]}.png"), 'w'){|file| file.write(confp[1])} unless File.exists? File.join('public', "confp#{confp[0]}.png")
+  end
+  if model.regression?
+    correlation_plots = crossvalidations.collect{|cv| [cv.id, cv.correlation_plot]}
+    correlation_plots.each do |corrp|
+      File.open(File.join('public', "corrp#{corrp[0]}.png"), 'w'){|file| file.write(corrp[1])} unless File.exists? File.join('public', "corrp#{corrp[0]}.png")
+    end
+  end
+
   return haml :model_details, :layout=> false, :locals => {:model => model}
 end
 

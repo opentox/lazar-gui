@@ -97,10 +97,9 @@ Source:
                 -#= "Confusion Matrix:\t"
                 -#= cv.confusion_matrix
         %br
-        -#%p
-          = "Confidence plot:"
-        -#%p{:id=>"confp#{cv.id}", :style=>"transform:scale(0.5);margin-left:-30%;margin-top:-30%;padding:0;"}
-          = cv.confidence_plot
+        = "Confidence plot:"
+        %p.plot
+          %img{:src=>"confp#{cv.id}.png"}
       - if model.regression?
         %br
         = "Root mean squared error:\t"
@@ -117,12 +116,13 @@ Source:
         %br 
         = "R square:\t"
         = cv.r_squared.round(3) if cv.r_squared
-        -#%p
-          = "Correlation plot"
-        -#%p{:id=>"corrp#{cv.id}", :style=>"transform:scale(0.5);margin-left:-30%;margin-top:-30%;margin-bottom:0;padding:0;"}
-          =cv.correlation_plot
-        -#%p
-          = "Confidence plot:"
-        -#%p{:id=>"confp#{cv.id}", :style=>"transform:scale(0.5);margin-left:-30%;margin-top:-30%;margin-bottom:0;padding:0;"}
-          = cv.confidence_plot
+        %br
+        = "Confidence plot:"
+        %p.plot
+          %img{:src=>"/confp#{cv.id}.png"}
+        %br
+        = "Correlation plot"
+        %p.plot
+          %img{:src=>"/corrp#{cv.id}.png"}
+        
 %br
