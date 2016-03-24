@@ -36,9 +36,6 @@ Source:
         = "Accuracy:\t"
         = cv.accuracy.round(3) if cv.accuracy
         %br
-        = "Weighted Accuracy:\t"
-        = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
-        %br
         = "True positive rate:\t"
         = cv.true_rate["active"].round(3) if cv.true_rate["active"]
         %br
@@ -97,32 +94,26 @@ Source:
                 -#= "Confusion Matrix:\t"
                 -#= cv.confusion_matrix
         %br
-        = "Confidence plot:"
-        %p.plot
-          %img{:src=>"confp#{cv.id}.png"}
+        /= "Confidence plot:"
+        /%p.plot
+        /  %img{:src=>"confp#{cv.id}.svg"}
       - if model.regression?
         %br
         = "Root mean squared error:\t"
         = cv.rmse.round(3) if cv.rmse
         %br
-        = "Weighted root mean squared error:\t"
-        = cv.weighted_rmse.round(3) if cv.weighted_rmse
-        %br
         = "Mean absolute error:\t"
         = cv.mae.round(3) if cv.mae
-        %br
-        = "Weighted mean absolute error:\t"
-        = cv.weighted_mae.round(3) if cv.weighted_mae
         %br 
         = "R square:\t"
         = cv.r_squared.round(3) if cv.r_squared
         %br
-        = "Confidence plot:"
-        %p.plot
-          %img{:src=>"/confp#{cv.id}.png"}
-        %br
-        = "Correlation plot"
-        %p.plot
-          %img{:src=>"/corrp#{cv.id}.png"}
+        /= "Confidence plot:"
+        /%p.plot
+        /  %img{:src=>"/confp#{cv.id}.svg"}
+        /%br
+        /= "Correlation plot"
+        /%p.plot
+        /  %img{:src=>"/corrp#{cv.id}.svg"}
         
 %br

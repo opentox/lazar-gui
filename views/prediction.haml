@@ -18,7 +18,7 @@
           %td{:id=>"compound", :style=>"vertical-align:top;"}
             %p= @compound.svg
             %p= @compound.smiles
-          -#- mw = @compound.molecular_weight
+          - mw = @compound.molecular_weight
           - @model_types = {}
           - @dbhit = {}
           - @predictions.each_with_index do |prediction,i|
@@ -51,8 +51,13 @@
                 / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", data: {toggle:"popover", placement:"left", html:"true", content:"LAZAR calculates searches the training dataset for similar compounds (neighbors) and calculates the prediction from their measured activities. LAZAR calculates predictions using <ul><li>a majority vote (weighted by compound similarity) for<br /><b>classification</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'>original publication</a>) </li><li>a local QSAR model based on neighbors for<br /><b>regression</b> (<a href='http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract', target='_blank'</h>original publication</a>) </li></ul>Please keep in mind that predictions are based on the measured activities of neighbors."}}
                 %br
                 / TODO probability
-                %b Confidence:
-                = prediction[:confidence].round(2)
+                - if type == "Regression"
+                  %b 95% Prediction interval:
+                  - interval = prediction[:prediction_interval].collect{|i| i.round(2)}
+                  = interval
+                - else
+                  %b Confidence:
+                  = prediction[:confidence].round(2) unless prediction[:confidence].nil?
                 / %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", data: {toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
                 %p
                 /TODO add tooltip for significant ftagments and descriptors
