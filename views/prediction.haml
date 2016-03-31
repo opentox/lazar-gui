@@ -53,7 +53,7 @@
                 / TODO probability
                 - if type == "Regression"
                   %b 95% Prediction interval:
-                  - interval = prediction[:prediction_interval].collect{|i| i.round(2)}
+                  - interval = prediction[:prediction_interval].nil? ? "[ - - ]" : prediction[:prediction_interval].collect{|i| i.round(2)}
                   = interval
                 - else
                   %b Confidence:
