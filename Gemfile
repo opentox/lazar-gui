@@ -3,4 +3,4 @@ gemspec
 gem "sinatra"
 gem "haml"
 gem "sass"
-gem "lazar", :path => "../lazar"
+gem "lazar"#, :path => "../lazar"
