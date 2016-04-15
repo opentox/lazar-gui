@@ -4,7 +4,7 @@
     %meta{'charset'=>"utf-8"}
     %meta{'http-equiv'=>"X-UA-Compatible", :content=>"IE=edge"}
     %meta{'name'=>"viewport", :content=>"width=device-width, initial-scale=1"}
-    %title Lazar Toxicity Predictions
+    %title Lazar GUI FAQ
     %link{:rel=>'icon', :type=>'image/x-icon', :href=>'/images/favicon.ico'}
     %link{:rel=>'stylesheet', :href=>"#{'/css/bootstrap.min.css'}"}
     %link{:rel=>'stylesheet', :href=>"#{'/css/theme.default.min.css'}"}
@@ -13,8 +13,6 @@
     %link{ :href=>"/stylesheets/jquery-ui.css", :rel=>"stylesheet"}
     %script{:src=>"/javascripts/jquery-1.11.2.min.js"}
     %script{:src=>"/javascripts/bootstrap.min.js"}
-    %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
-    %script{:src=>"/javascripts/jquery.tablesorter.widgets.js"}
     %script{ :src=>"/javascripts/lazar-gui.js"}
   %body
     %noscript
@@ -25,11 +23,9 @@
         %div.col-md-2
           %a{:href=> to("/predict")}
             %img.media-object{:src=>"/images/ist_logo.png", :alt=>"logo", :style=>"margin:0 3em 0 2em;"}
-        %div.col-md-8
-          %h1.media-heading{:style=>"margin: 0 0 0 1em;"} Lazar Toxicity Predictions
-        %div.col-md-2
-          %a.btn.btn-info{:href=> to("/faq"), :rel => "external"}
-            FAQ
+        %div.col-md-10
+          %h1.media-heading{:style=>"margin: 0 0 0 1em;display:inline;"} Lazar GUI
+          A Graphical User Interface for the <a href="http://github.com/opentox/lazar">Lazar</a> framework
     
     %div.container-fluid
       :javascript

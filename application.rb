@@ -1,4 +1,5 @@
 require_relative 'helper.rb'
+require 'rdiscount'
 include OpenTox
 #require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
@@ -302,6 +303,11 @@ post '/predict/?' do
     end
     haml :prediction
   end
+end
+
+get '/faq' do
+  @faq = RDiscount.new(File.read("FAQ.md")).to_html
+  haml :faq, :layout => :faq_layout
 end
 
 get '/style.css' do

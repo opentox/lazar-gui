@@ -15,9 +15,9 @@ Gem::Specification.new do |s|
   s.files       = `git ls-files`.split("\n")
   s.required_ruby_version = '>= 1.9.2'
 
-  #s.add_runtime_dependency "opentox-server"
-  s.add_runtime_dependency "lazar"
+  s.add_runtime_dependency "lazar", "~> 0.9.3"
   s.add_runtime_dependency "sinatra"
+  s.add_runtime_dependency "rdiscount"
   s.add_runtime_dependency "haml"
   s.add_runtime_dependency "sass"
   s.add_runtime_dependency "unicorn"
