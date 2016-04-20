@@ -304,12 +304,12 @@ post '/predict/?' do
     haml :prediction
   end
 end
-
+=begin
 get '/faq' do
   @faq = RDiscount.new(File.read("FAQ.md")).to_html
   haml :faq, :layout => :faq_layout
 end
-
+=end
 get '/style.css' do
   headers 'Content-Type' => 'text/css; charset=utf-8'
   scss :style
