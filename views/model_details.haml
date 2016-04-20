@@ -4,21 +4,19 @@ Source:
 %a{:href=>model.source, :target=>"external"}
   = model.source
 %br
-= "Algorithm:\tLAZAR"
-%br
 - model.classification? ? type = "Classification" : type = "Regression"
 = "Type:\t"
 = type
 %br
 - training_dataset = OpenTox::Dataset.find model.training_dataset.id
-= "Training dataset:\t"
-= training_dataset.source.split("/").last
-%br
 = "Training compounds:\t"
 = training_dataset.compounds.size
 
 %p
-%b Crossvalidation (3 independent):
+- if type == "Classification"
+  %b Independent crossvalidations:
+- else
+  %b Independent crossvalidations (-log10 transformed):
 %div.row{:id=>"validations#{model.id}", :style=>"background-color:#f5f5f5;"}
   - model.crossvalidations.each do |crossvalidation|
     %span.col-xs-4.col-sm-4.col-md-4.col-lg-4
