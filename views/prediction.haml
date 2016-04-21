@@ -12,7 +12,7 @@
   / displays all prediction result in first table
   %h3 Prediction Results:
   %div.table-responsive
-    %table.table.table-bordered{:id=>"overview", :style=>"background-color:white;"}
+    %table.table.table-bordered{:id=>"overview"}
       %tbody
         %tr
           %td{:id=>"compound", :style=>"vertical-align:top;"}
@@ -35,9 +35,9 @@
                 %b Measured activity:
                 - p prediction[:value]
                 - if prediction[:value].is_a?(Array)
-                  = (type == "Regression") ? prediction[:value].collect{|v| weight = Compound.from_smiles(@compound.smiles).mmol_to_mg(v); '%.2e' % v + " (#{unit})"+"|#{'%.2e' % weight} #{unit == "mmol/L" ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:value].join(", ")
+                  = (type == "Regression") ? prediction[:value].collect{|v| weight = Compound.from_smiles(@compound.smiles).mmol_to_mg(v); '%.2e' % v + " (#{unit})"+", #{'%.2e' % weight} #{unit == "mmol/L" ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:value].join(", ")
                 - else
-                  = (type == "Regression") ? "#{"%.2e" % prediction[:value]} (#{unit}) | #{'%.2e' % @compound.mmol_to_mg(prediction[:value])} #{(unit == "mmol/L") ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                  = (type == "Regression") ? "#{"%.2e" % prediction[:value]} (#{unit}), #{'%.2e' % @compound.mmol_to_mg(prediction[:value])} #{(unit == "mmol/L") ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                 %p
                   %b Compound is part of the training dataset
               - elsif prediction[:neighbors].size > 0
@@ -50,13 +50,13 @@
                 = (type == "Regression") ? "#{'%.2e' % prediction[:value]} (#{unit}) , #{'%.2e' % @compound.mmol_to_mg(prediction[:value])} #{(unit == "mmol/L") ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                 / tabindex=0 seems the best fix for FF|S browsers on OSX better than trigger="click focus" which ends up in double click for FF.
                 / prediction popover
-                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>Lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>."}}
+                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>."}}
                 %br
                 - if type == "Regression"
                   %b 95% Prediction interval:
                   - interval = prediction[:prediction_interval].nil? ? " - - " : prediction[:prediction_interval].collect{|i| i.round(2)}
                   %br
-                  = "#{interval[0]} - #{interval[1]} (#{unit}), #{'%.2e' % @compound.mmol_to_mg(interval[0])} - #{'%.2e' % @compound.mmol_to_mg(interval[1])} (mg/L)"
+                  = "#{interval[0]} - #{interval[1]} (#{unit}), #{'%.2e' % @compound.mmol_to_mg(interval[0])} - #{'%.2e' % @compound.mmol_to_mg(interval[1])} #{(unit == "mmol/L") ? "(mg/L)" : "(mg/kg_bw/day)"}"
                   / prediction intervall popover
                   %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction intervall", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"An estimate of prediction uncertainty. The \"real\" value should be with 95% probability within the prediction interval."}}
                 - else

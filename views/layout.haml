@@ -4,7 +4,7 @@
     %meta{'charset'=>"utf-8"}
     %meta{'http-equiv'=>"X-UA-Compatible", :content=>"IE=edge"}
     %meta{'name'=>"viewport", :content=>"width=device-width, initial-scale=1"}
-    %title Lazar Toxicity Predictions
+    %title lazar Toxicity Predictions
     %link{:rel=>'icon', :type=>'image/x-icon', :href=>'/images/favicon.ico'}
     %link{:rel=>'stylesheet', :href=>"#{'/css/bootstrap.min.css'}"}
     %link{:rel=>'stylesheet', :href=>"#{'/css/theme.default.min.css'}"}
@@ -20,17 +20,18 @@
     %noscript
       %div{ :style=>"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif"}
       Your web browser must have JavaScript enabled in order for this application to display correctly.
-    %header.page-header
+    %header.page-header{:style=>"margin:20px 0 20px;text-align:justify;display:inline-block;width:100%;"}
       %div.row
         %div.col-md-2
           %a{:href=> to("/predict")}
-            %img.media-object{:src=>"/images/ist_logo.png", :alt=>"logo", :style=>"margin:0 3em 0 2em;"}
+            %img.media-object{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"150px", :heigth=>"150px", :style=>"margin:0 3em 0 2em;"}
         %div.col-md-8
-          %h1.media-heading{:style=>"margin: 0 0 0 1em;"} Lazar Toxicity Predictions
-        /%div.col-md-2
-        /  %a.btn.btn-info{:href=> to("/faq"), :rel => "external"}
-        /    FAQ
-    
+          %h1.media-heading{:style=>"margin: 0 0 0 2em;"}
+            lazar Toxicity Predictions
+        %div.col-md-2
+          %h1.media-heading{:style=>"margin: 0 0 0 1em;"}
+            %small
+              %a{:href=>"https://nano-lazar.in-silico.ch/predict"} nano-lazar
     %div.container-fluid
       :javascript
         $(document).ready(function(){
