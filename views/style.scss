@@ -40,4 +40,29 @@ img {
 .tablesorter-bootstrap thead .sorter-false {
   cursor: default;
 }
-
+ul.share-buttons{
+  list-style: none;
+}
+.dropdown-menu {
+  min-width: 0px !important;
+  width:60px;
+}
+.dropdown-menu a {
+  padding: 0 2px 1px 2px !important;
+}
+.page-header{
+  margin:20px 0 20px;
+  text-align:justify;
+  display:inline-block;
+  width:98.5%;
+}
+.footer .modal img{
+  width: 250px;
+  padding: 1em;
+}
+footer button{
+  padding-bottom: 1em !important;
+}
+.dropdown-menu img{
+  margin-left: 0.7em;
+}

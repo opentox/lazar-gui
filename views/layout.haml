@@ -20,7 +20,7 @@
     %noscript
       %div{ :style=>"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif"}
       Your web browser must have JavaScript enabled in order for this application to display correctly.
-    %header.page-header{:style=>"margin:20px 0 20px;text-align:justify;display:inline-block;width:100%;"}
+    %header.page-header
       %div.row
         %div.col-md-2
           %a{:href=> to("/predict")}
@@ -29,10 +29,14 @@
           %h1.media-heading{:style=>"margin: 0 0 0 2em;"}
             lazar Toxicity Predictions
         %div.col-md-2
-          %h1.media-heading{:style=>"margin: 0 0 0 1em;"}
+          %h1.media-heading
             %small
-              %a{:href=>"https://nano-lazar.in-silico.ch/predict"} nano-lazar
+              %a{:href=>"https://nano-lazar.in-silico.ch"} nano-lazar
+          %a{:href=>"http://lazar-old.in-silico.ch"} lazar-old version
+
     %div.container-fluid
+      Problems, bugs, ideas for improvements ? Please report at our
+      %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker
       :javascript
         $(document).ready(function(){
           $("#back-top").hide();
@@ -40,14 +44,51 @@
             $(this).attr('src', '/images/blind.png');
           });
         });
+        $(document).ready(function(){
+          $('[data-toggle="popover"]').popover();
+          $('.modal').on('hidden.bs.modal', function () {
+            $(this).removeData('bs.modal');
+          });
+        });
           
       = yield
     
     %footer.footer
       %div.container-fluid
-        %p.text-muted
-          &copy; 
-          %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
+        %div.row
+          %div.col-md-8
+            %p.text-muted
+              &copy; 
+              %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
+          %div.col-md-4
+            %button.btn.btn-default{:type=>"button", :data=>{:toggle=>"modal", :target=>"#acknowledgements"}} acknowledgements
+            %div.modal.fade{:id=>"acknowledgements", :role=>"dialog"}
+              %div.modal-dialog
+                %div.modal-content
+                  %div.modal-header
+                    %button{:type=>"button", :class=>"close", :data=>{:dismiss=>"modal"}}
+                      &times;
+                    %h4.modal-title Financial support:
+                  %div.modal-body
+                    %a{:href=>"http://www.bfr.bund.de/de/start.html", :target=>"_blank"}
+                      %img{:src=>"/images/bfr_logo.gif"}
+                    %a{:href=>"http://www.opentox.org/", :target=>"_blank"}
+                      %img{:src=>"/images/ot_logo.png"}
+                    %a{:href=>"https://enanomapper.net/", :target=>"_blank"}
+                      %img{:src=>"/images/enm_logo.png"}
+    
+            %div.btn-group.dropup
+              %button.btn.btn-default.dropdown-toggle{:data=>{:toggle=>"dropdown"}, :aria=>{:haspopup=>"true", :expanded=>"false"}} share
+              %ul.dropdown-menu{:class=>"share-buttons"}
+                %li
+                  %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=:%20http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Tweet"}
+                    %img{:src=>"/images/Twitter.png"}
+                %li
+                  %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Google+"}
+                    %img{:src=>"/images/Google+.png"}
+                %li
+                  %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on LinkedIn"}
+                    %img{:src=>"/images/LinkedIn.png"}
 
     #back-top{:style => "z-index:100;position:fixed;bottom:1%;right:1%;"}
       %a{:href => "", :style=>"text:decoration:none;color:#ccc;"}
