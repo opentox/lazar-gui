@@ -56,13 +56,15 @@ ul.share-buttons{
   display:inline-block;
   width:98.5%;
 }
-.footer .modal img{
-  width: 250px;
-  padding: 1em;
+.share{
+  width: 30px;
+  padding-right: 5px;
 }
-footer button{
-  padding-bottom: 1em !important;
-}
-.dropdown-menu img{
-  margin-left: 0.7em;
+supporters{
+  background-color: white;
+
+  img{
+    width: 200px;
+    margin-right: 1em;
+  }
 }
