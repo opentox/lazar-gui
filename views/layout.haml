@@ -27,7 +27,7 @@
             %img.media-object{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"150px", :heigth=>"150px", :style=>"margin:0 3em 0 2em;"}
         %div.col-md-8
           %h1.media-heading{:style=>"margin: 0 0 0 2em;"}
-            lazar Toxicity Predictions
+            lazar toxicity predictions
         %div.col-md-2
           %h1.media-heading
             %small
@@ -35,19 +35,26 @@
 
     %div.container-fluid
       %topline
-        Problems, bugs, ideas for improvements ? Please report at our
-        %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker.
-        |
-        %a{:href=>"http://lazar-old.in-silico.ch"} lazar-old version
-        |
-        %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=:%20http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Tweet"}
-          %img.share{:src=>"/images/Twitter.png"}
-        %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Google+"}
-          %img.share{:src=>"/images/Google+.png"}
-        %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on LinkedIn"}
-          %img.share{:src=>"/images/LinkedIn.png"}
-        %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Facebook"}
-          %img.share{:src=>"/images/Facebook.png"}
+        %div.row
+          %div.col-md-8
+            Problems, bugs, ideas for improvements ? Please report at our
+            %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker.
+            or send us an email:
+            %a{ :href=>"mailto:info@in-silico.ch", :target=>"_top"}
+              %img.share{:src=>"/images/Email.png"}
+          %div.col-md-2
+          %div.col-md-2
+            %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=:%20http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Tweet"}
+              %img.share{:src=>"/images/Twitter.png"}
+            %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Google+"}
+              %img.share{:src=>"/images/Google+.png"}
+            %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on LinkedIn"}
+              %img.share{:src=>"/images/LinkedIn.png"}
+            %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Facebook"}
+              %img.share{:src=>"/images/Facebook.png"}
+        %div.row
+        Previous version:
+        %a{:href=>"http://lazar-old.in-silico.ch"} lazar-old
       :javascript
         $(document).ready(function(){
           $("#back-top").hide();
