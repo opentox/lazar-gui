@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{lazar-gui}
   s.description = %q{Graphical User Interface for Lazar Toxicology Predictions}
   s.license     = 'GPL-3.0'
-  s.executables = 'lazar'
+  s.executables = "lazar"
   s.rubyforge_project = "lazar-gui"
   s.files       = `git ls-files`.split("\n")
 
