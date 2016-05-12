@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{lazar-gui}
   s.description = %q{Graphical User Interface for Lazar Toxicology Predictions}
   s.license     = 'GPL-3.0'
-  s.executables = "lazar"
+  s.executables = ["lazar-start", "lazar-stop"]
   s.rubyforge_project = "lazar-gui"
   s.files       = `git ls-files`.split("\n")
 
@@ -21,6 +21,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "unicorn", "~> 5.1.0"
 
   s.post_install_message = %q{
-  To run the service execute `lazar &`.
+  Service cmds:
+    lazar-start &
+    lazar-stop
   }
 end
