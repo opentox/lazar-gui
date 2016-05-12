@@ -15,8 +15,12 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "lazar", "~> 0.9.3"
   s.add_runtime_dependency "sinatra", "~> 1.4.0"
-  s.add_runtime_dependency "rdiscount", "~> 2.1.0" 
+  s.add_runtime_dependency "rdiscount", "~> 2.1.0"
   s.add_runtime_dependency "haml", "~> 4.0.0"
   s.add_runtime_dependency "sass", "~> 3.4.0"
   s.add_runtime_dependency "unicorn", "~> 5.1.0"
+
+  s.post_install_message = %q{
+  To run the service execute `lazar &`.
+  }
 end

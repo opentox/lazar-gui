@@ -1,5 +1,5 @@
-require_relative 'helper.rb'
-require 'rdiscount'
+#require_relative 'helper.rb'
+#require 'rdiscount'
 include OpenTox
 #require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
