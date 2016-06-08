@@ -25,6 +25,7 @@ get '/?' do
 end
 
 get '/predict/?' do
+  @version = File.read("VERSION").chomp
   @models = OpenTox::Model::Prediction.all
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
   @models.count <= 0 ? (haml :info) : (haml :predict)
