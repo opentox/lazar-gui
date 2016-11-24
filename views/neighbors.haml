@@ -79,20 +79,19 @@
                 - prediction[:neighbors].uniq.each_with_index do |neighbor,count|
                   %tr
                     / Compound
-                    - c = Compound.find(neighbor["_id"])
+                    - c = Compound.find(neighbor)
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:50%;"}
                       /%a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor["_id"])}/details"), :id=>"link#{j+1}#{count}"}}
                       %p= c.svg
                       %p= c.smiles
-                    - mw = c.molecular_weight
-                    / Measured Activity = compound.features
+                    / Measured Activity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;white-space:nowrap;"}
-                      - features = c.features.collect{|k,v| v if k == predictionFeature[j]["id"] }.compact.flatten
-                      = (predictionFeature[j]["type"] == "numeric") ? features.collect{|v| weight = c.mmol_to_mg(v); '%.2e' % v + " (#{@models[j].unit})"+" , #{'%.2e' % weight} #{(unit == "mmol/L") ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : features.join("</br>")
+                      = (type == "Regression" ? "#{neighbor[:measurement].delog10}" + " (#{unit})" : neighbor[:measurement])
+                      %br
+                      = "#{c.mmol_to_mg(neighbor[:measurement].delog10)}" + " (#{(unit =~ /\b(mol\/L)\b/) ? "mg/L" : "mg/kg_bw/day"})" if type == "Regression"
                     / Similarity = tanimoto
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
-                      / TODO differentiate between no neighbors found and compound found in dataset, display neighbors for compounds in dataset?
-                      = neighbor[:tanimoto] != nil ? neighbor[:tanimoto].to_f.round(3) : "Not enough similar compounds </br>in training dataset."
+                      = neighbor[:similarity].round(3)
 
           - else
             %span.btn.btn-default.disabled
