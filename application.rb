@@ -1,4 +1,5 @@
-require_relative 'helper.rb'
+#require_relative 'helper.rb'
+require 'rdiscount'
 include OpenTox
 #require File.join(ENV["HOME"],".opentox","config","lazar-gui.rb") # until added to ot-tools
 
@@ -19,19 +20,36 @@ helpers do
 
 end
 
+before do
+  @version = File.read("VERSION").chomp
+end
+
 get '/?' do
   redirect to('/predict') 
 end
 
 get '/predict/?' do
   @models = OpenTox::Model::Prediction.all
+  @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
   @models.count <= 0 ? (haml :info) : (haml :predict)
 end
 
 get '/predict/modeldetails/:model' do
   model = OpenTox::Model::Prediction.find params[:model]
-  return haml :model_details, :layout=> false, :locals => {:model => model}
+  crossvalidations = OpenTox::Validation::RepeatedCrossValidation.find(model.repeated_crossvalidation_id).crossvalidations
+  #confidence_plots = crossvalidations.collect{|cv| [cv.id, cv.confidence_plot]}
+  #confidence_plots.each do |confp|
+  #  File.open(File.join('public', "confp#{confp[0]}.svg"), 'w'){|file| file.write(confp[1])} unless File.exists? File.join('public', "confp#{confp[0]}.svg")
+  #end
+  #if model.regression?
+  #  correlation_plots = crossvalidations.collect{|cv| [cv.id, cv.correlation_plot]}
+  #  correlation_plots.each do |corrp|
+  #    File.open(File.join('public', "corrp#{corrp[0]}.svg"), 'w'){|file| file.write(corrp[1])} unless File.exists? File.join('public', "corrp#{corrp[0]}.svg")
+  #  end
+  #end
+
+  return haml :model_details, :layout=> false, :locals => {:model => model, :crossvalidations => crossvalidations}
 end
 
 get '/jme_help/?' do
@@ -292,6 +310,17 @@ post '/predict/?' do
   end
 end
 
+get '/license' do
+  @license = RDiscount.new(File.read("LICENSE.md")).to_html
+  haml :license, :layout => false
+end
+
+=begin
+get '/faq' do
+  @faq = RDiscount.new(File.read("FAQ.md")).to_html
+  haml :faq, :layout => :faq_layout
+end
+=end
 get '/style.css' do
   headers 'Content-Type' => 'text/css; charset=utf-8'
   scss :style

@@ -8,17 +8,22 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/opentox/lazar-gui"
   s.summary     = %q{lazar-gui}
   s.description = %q{Graphical User Interface for Lazar Toxicology Predictions}
-  s.license     = 'GPL-3'
-
+  s.license     = 'GPL-3.0'
+  s.executables = ["lazar-start", "lazar-stop"]
   s.rubyforge_project = "lazar-gui"
-
   s.files       = `git ls-files`.split("\n")
-  s.required_ruby_version = '>= 1.9.2'
 
-  #s.add_runtime_dependency "opentox-server"
-  s.add_runtime_dependency "lazar"
-  s.add_runtime_dependency "sinatra"
-  s.add_runtime_dependency "haml"
-  s.add_runtime_dependency "sass"
-  s.add_runtime_dependency "unicorn"
+  s.add_runtime_dependency "lazar", "~> 0.9.3", '>= 0.9.3'
+  s.add_runtime_dependency "gem-path", "~> 0.6.1", '>= 0.6.1'
+  s.add_runtime_dependency "sinatra", "~> 1.4.0", '>= 1.4.0'
+  s.add_runtime_dependency "rdiscount", "~> 2.1.0", '>= 2.1.0'
+  s.add_runtime_dependency "haml", "~> 4.0.0", '>= 4.0.0'
+  s.add_runtime_dependency "sass", "~> 3.4.0", '>= 3.4.0'
+  s.add_runtime_dependency "unicorn", "~> 5.1.0", '>= 5.1.0'
+
+  s.post_install_message = %q{
+  Service cmds:
+    lazar-start &
+    lazar-stop
+  }
 end

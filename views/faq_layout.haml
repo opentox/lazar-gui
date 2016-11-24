@@ -1,0 +1,67 @@
+!!!
+%html{:xmlns => "http://www.w3.org/1999/xhtml", "xml:lang" => "en", :lang => "en"}
+  %head
+    %meta{'charset'=>"utf-8"}
+    %meta{'http-equiv'=>"X-UA-Compatible", :content=>"IE=edge"}
+    %meta{'name'=>"viewport", :content=>"width=device-width, initial-scale=1"}
+    %title Lazar GUI FAQ
+    %link{:rel=>'icon', :type=>'image/x-icon', :href=>'/images/favicon.ico'}
+    %link{:rel=>'stylesheet', :href=>"#{'/css/bootstrap.min.css'}"}
+    %link{:rel=>'stylesheet', :href=>"#{'/css/theme.default.min.css'}"}
+    %link{:rel=>'stylesheet', :href=>"#{'/css/theme.bootstrap.min.css'}"}
+    %link{ :href=>"/style.css", :rel=>"stylesheet"}
+    %link{ :href=>"/stylesheets/jquery-ui.css", :rel=>"stylesheet"}
+    %script{:src=>"/javascripts/jquery-1.11.2.min.js"}
+    %script{:src=>"/javascripts/bootstrap.min.js"}
+    %script{ :src=>"/javascripts/lazar-gui.js"}
+  %body
+    %noscript
+      %div{ :style=>"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif"}
+      Your web browser must have JavaScript enabled in order for this application to display correctly.
+    %header.page-header
+      %div.row
+        %div.col-md-2
+          %a{:href=> to("/predict")}
+            %img.media-object{:src=>"/images/ist_logo.png", :alt=>"logo", :style=>"margin:0 3em 0 2em;"}
+        %div.col-md-10
+          %h1.media-heading{:style=>"margin: 0 0 0 1em;display:inline;"} Lazar GUI
+          A Graphical User Interface for the <a href="http://github.com/opentox/lazar">Lazar</a> framework
+    
+    %div.container-fluid
+      :javascript
+        $(document).ready(function(){
+          $("#back-top").hide();
+          $(".blind").error(function(){
+            $(this).attr('src', '/images/blind.png');
+          });
+        });
+          
+      = yield
+    
+    %footer.footer
+      %div.container-fluid
+        %p.text-muted
+          &copy; 
+          %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
+
+    #back-top{:style => "z-index:100;position:fixed;bottom:1%;right:1%;"}
+      %a{:href => "", :style=>"text:decoration:none;color:#ccc;"}
+        %span.glyphicon.glyphicon-circle-arrow-up{:style => "font-size:3em;color:black;"}
+    :javascript
+      $("#back-top").hide();
+      $(function () {
+        $(window).scroll(function () {
+          if ($(this).scrollTop() > 600) {
+            $('#back-top').fadeIn();
+          } else {
+            $('#back-top').fadeOut();
+          }
+        });
+        // scroll body to 0px on click
+        $('#back-top a').click(function () {
+          $('body,html').animate({
+            scrollTop: 0
+          }, 500);
+          return false;
+        });
+      });

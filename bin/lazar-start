@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+bin_dir = File.expand_path(File.dirname(__FILE__))
+shell_script_path = File.join(bin_dir, 'lazar-start.sh')
+app_dir = File.expand_path('..')
+unicorn_conf = File.join(app_dir, 'unicorn.rb')
+
+`#{shell_script_path}`
+`#{unicorn_conf}`
