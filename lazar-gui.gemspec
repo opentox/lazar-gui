@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "lazar-gui"
   s.files       = `git ls-files`.split("\n")
 
-  s.add_runtime_dependency "lazar", "~> 0.9.3", '>= 0.9.3'
+  s.add_runtime_dependency "lazar"
   s.add_runtime_dependency "gem-path", "~> 0.6.1", '>= 0.6.1'
   s.add_runtime_dependency "sinatra", "~> 1.4.0", '>= 1.4.0'
   s.add_runtime_dependency "rdiscount", "~> 2.1.0", '>= 2.1.0'

@@ -18,7 +18,6 @@
           %td{:id=>"compound", :style=>"vertical-align:top;"}
             %p= @compound.svg
             %p= @compound.smiles
-          -#- mw = @compound.molecular_weight
           - @model_types = {}
           - @dbhit = {}
           - @predictions.each_with_index do |prediction,i|
@@ -28,62 +27,66 @@
             %td{:style=>"vertical-align:top;white-space:nowrap;"}
               %b{:class => "title"}
                 = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
-              %p
-              - if prediction[:warning] =~ /\b(identical)\b/i
-                - @dbhit[i] = true
+              
+              / check for prediction
+              - if prediction[:neighbors].size > 0
                 %p
-                /TODO combine with regular view, if prediction value is present
-                %b Measured activity:
-                - p prediction[:value]
-                - if prediction[:value].is_a?(Array)
-                  = (type == "Regression") ? prediction[:value].collect{|value| "#{value} (#{unit}) , #{@compound.mmol_to_mg(value.delog10)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:value].join(", ")
-                - else
-                  = (type == "Regression") ? "#{prediction[:value]} (#{unit}), #{@compound.mmol_to_mg(prediction[:value].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
-                %p
-                  %b Compound is part of the training dataset
-                  / warning popover
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Warnings", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"#{prediction[:warning]}"}}
-              - elsif prediction[:neighbors].size > 0
-                %p
-                / model type (classification|regression)
+                / show model type (classification|regression)
                 %b Type:
                 = type
-                %br
-                %b Prediction:
-                / prediction popover
-                %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>."}}
-                %br
-                = (type == "Regression") ? "#{prediction[:value].delog10} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
-                / tabindex=0 seems the best fix for FF|S browsers on OSX better than trigger="click focus" which ends up in double click for FF.
-                %br
-                - if type == "Regression"
-                  %b 95% Prediction interval:
-                  - interval = (prediction[:prediction_interval].nil? ? ["- -","- -"] : prediction[:prediction_interval])
-                  / prediction intervall popover
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction intervall", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"An estimate of prediction uncertainty. The \"real\" value should be with 95% probability within the prediction interval."}}
-                  %br
-                  = "#{interval[0].delog10} - #{interval[1].delog10} (#{unit})"
-                  %br
-                  = "#{@compound.mmol_to_mg(interval[0].delog10)} - #{@compound.mmol_to_mg(interval[1].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
+                %p 
+                / check for database hit
+                - if prediction[:warning] =~ /\b(identical)\b/i
+                  - @dbhit[i] = true
+                  
+                  / show message about dbhit and measurements
+                  %p
+                    %b Compound is part of the training dataset
+                    %p
+                    %b Measured activity:
+                    %br
+                    - if prediction[:measurements].is_a?(Array)
+                      = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                    - else
+                      = (type == "Regression") ? "#{prediction[:measurements].delog10} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                
                 - else
-                  %b Probability:
-                  - unless prediction[:probabilities].nil?
-                    %br
-                    = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0]}"
-                    %br
-                    = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1]}"
-                  / probability popover
-                  -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
+                  - @dbhit[i] = false
+                
+                / show prediction
                 %p
-                /TODO add tooltip for significant ftagments and descriptors
-                / - if @model_type[i] =~ /classification/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
-                / Significant fragments:
-                / %a.btn.btn-default.btn-sm{:id=>"linkSigFragments", :href => "#detailsTop", :tabindex=>"0", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[i]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Significant fragments
-                / - if @model_type[i] =~ /regression/i && (p.data_entries[0][1] != nil && p.data_entries[0][1] != 0.0)
-                / Descriptors
-                / %a.btn.btn-default.btn-sm{:id=>"linkDescriptors", :href => "#detailsTop", :tabindex=>"0", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@model_uri)}/#{@model_type[i]}/#{CGI.escape(@compound.uri)}/fingerprints")}} Descriptors
-                / %p
+                  %b Prediction:
+                  / prediction popover
+                  -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>."}}
+                  %br
+                  = (type == "Regression") ? "#{prediction[:value].delog10} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                  
+                  / show prediction interval or probability
+                  %p
+                  - if type == "Regression"
+                    %b 95% Prediction interval:
+                    - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
+                    / prediction interval popover
+                    -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction intervall", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"An estimate of prediction uncertainty. The \"real\" value should be with 95% probability within the prediction interval."}}
+                    %br
+                    = interval.nil? ? "--" : "#{interval[1].delog10} - #{interval[0].delog10} (#{unit})"
+                    %br
+                    = "#{@compound.mmol_to_mg(interval[1].delog10)} - #{@compound.mmol_to_mg(interval[0].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
+                  - else
+                    %b Probability:
+                    - unless prediction[:probabilities].nil?
+                      %br
+                      = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0]}"
+                      %br
+                      = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1]}"
+                    / probability popover
+                    -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
+                
+                / show warnings
                 %p
+                - if !prediction[:warning].nil?
+                  %b Warnings:
+                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Warnings", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"#{prediction[:warning]}"}}
               - else
                 - @dbhit[i] = false
                 %p
