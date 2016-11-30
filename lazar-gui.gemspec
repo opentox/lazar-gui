@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "rdiscount", "~> 2.1.0", '>= 2.1.0'
   s.add_runtime_dependency "haml", "~> 4.0.0", '>= 4.0.0'
   s.add_runtime_dependency "sass", "~> 3.4.0", '>= 3.4.0'
-  s.add_runtime_dependency "unicorn", "~> 5.1.0", '>= 5.1.0'
+  s.add_runtime_dependency "unicorn"
 
   s.post_install_message = %q{
   Service cmds:
