@@ -24,17 +24,31 @@ get '/?' do
 end
 
 get '/predict/?' do
-  @models = OpenTox::Model::Prediction.all
+  @models = OpenTox::Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
   @models.count <= 0 ? (haml :info) : (haml :predict)
 end
 
 get '/predict/modeldetails/:model' do
-  model = OpenTox::Model::Prediction.find params[:model]
+  model = OpenTox::Model::Validation.find params[:model]
   crossvalidations = OpenTox::Validation::RepeatedCrossValidation.find(model.repeated_crossvalidation_id).crossvalidations
 
   return haml :model_details, :layout=> false, :locals => {:model => model, :crossvalidations => crossvalidations}
+end
+
+# get individual compound details
+get '/prediction/:neighbor/details/?' do
+  @compound = OpenTox::Compound.find params[:neighbor]
+  @smiles = @compound.smiles
+  begin
+    @names = @compound.names.nil? ? "No names for this compound available." : @compound.names
+  rescue
+    @names = "No names for this compound available."
+  end
+  @inchi = @compound.inchi.gsub("InChI=", "")
+
+  haml :details, :layout => false
 end
 
 get '/jme_help/?' do
@@ -121,7 +135,7 @@ post '/predict/?' do
     @compounds.each do |compound|
       @batch[compound] = []
       params[:selection].keys.each do |model_id|
-        model = Model::Prediction.find model_id
+        model = OpenTox::Model::Validation.find model_id
         prediction = model.predict(compound)
         @batch[compound] << [model, prediction]
       end
@@ -148,12 +162,17 @@ post '/predict/?' do
     @models = []
     @predictions = []
     params[:selection].keys.each do |model_id|
-      model = Model::Prediction.find model_id
+      model = OpenTox::Model::Validation.find model_id
       @models << model
       @predictions << model.predict(@compound)
     end
     haml :prediction
   end
+end
+
+get '/license' do
+  @license = RDiscount.new(File.read("LICENSE.md")).to_html
+  haml :license, :layout => false
 end
 
 get '/style.css' do

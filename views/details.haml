@@ -1,8 +1,12 @@
+:javascript
+  $(document).ready(function(){
+    addExternalLinks();
+  });
 %div.modal-body{:style=>"padding:10px;"}
   %button.close{ :type=>" button", data: { dismiss:"modal"}} &times;
   %h3
     Names and synonyms:
-  %img.img-responsive{:src=>"#{@compound.uri}/image", :alt=>"Compound image not available", :width=>"300px", :heigth=>"300px", :style=>"float:left;"}
+  %p= @compound.svg
   %p
   %b="SMILES:"
   %p= @smiles

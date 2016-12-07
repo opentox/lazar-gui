@@ -125,12 +125,12 @@
       %br
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
       %p
-      %label{:for=>"fileselect"}
-        or upload a CSV file for batch predictions
-      %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
-      %br
-      %span.btn.btn-default.btn-file
-        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
+      -#%label{:for=>"fileselect"}
+        or upload a CSV file for batch predictions (disabled in public version)
+      -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
+      -#%br
+      -#%span.btn.btn-default.btn-file
+        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled"}
 
   %fieldset#middle.well
     %h2 2. Select one or more endpoints

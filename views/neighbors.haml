@@ -81,8 +81,8 @@
                     / Compound
                     - c = Compound.find(neighbor)
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:50%;"}
-                      /%a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(neighbor["_id"])}/details"), :id=>"link#{j+1}#{count}"}}
-                      %p= c.svg
+                      %a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(c.id.to_s)}/details"), :id=>"link#{j+1}#{count}"}}
+                        = c.svg
                       %p= c.smiles
                     
                     / Measured Activity

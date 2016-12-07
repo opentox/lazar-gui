@@ -1,4 +1,4 @@
-ENV["LAZAR_ENV"] = "production"
+ENV["LAZAR_ENV"] = "development"#"production"
 require 'bundler'
 Bundler.require
 require File.expand_path './application.rb'
