@@ -12,6 +12,10 @@ Source:
 = "Training compounds:\t"
 = training_dataset.compounds.size
 %br
+= "Training dataset:\t"
+%a{:href=>"#{to("/predict/dataset/#{training_dataset.name}")}"}
+  = training_dataset.name
+%br
 %b Algorithms:
 %br
 Similarity:

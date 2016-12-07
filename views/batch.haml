@@ -2,57 +2,99 @@
   %a.btn.btn-warning{:href => to('/predict')}
     %span.glyphicon.glyphicon-menu-left{:aria=>{:hidden=>"true"}}
     New Prediction
-  / displays all prediction result in first table
+  %a.btn.btn-success{:href=>"#{to("/predict/#{@filename}")}", :title=>"download"}
+    %span.glyphicon.glyphicon-download-alt
+    download CSV
+
+  / show processed file name
+  %topline
+    %div.row
+      %div.col-md-4
+        %h3 Batch Prediction Results:
+      %div.col-md-8
+        %h3= @filename
+  
+  / displays all prediction result in one table
   %div.table-responsive
     %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
-      %thead
-        %tr
-          %h3.col-md-4{:style=>"padding-left:0;"} Batch Prediction Results:
-          %h3.col-md-8= @filename
-        %tr
-          %span.btn.btn-default
-            %a{:href=>"#{to("/predict/#{@filename}")}", :title=>"download"}
-              %span.glyphicon.glyphicon-download-alt{:aria=>{:hidden=>"true"}}
-                CSV
       %tbody
-      / key = compound, values = array of arrays with model, prediction
+      - if @warnings
+        - @warnings.each do |warning|
+          %tr
+            %td
+              %b Warning
+            %td
+              = warning.sub(/\b(tmp\/)\b/,"")
+      / key = compound, values = [model,prediction]
       - @batch.each do |key, values|
         - compound = key
-        - mw = compound.molecular_weight
         %tr
           %td{:style=>"vertical-align:top;"}
             %p= compound.svg
             %p= compound.smiles
-          / array = single prediction [endpoint, result]
+          
+          / array[0] = model, array[1] = prediction
           - values.each_with_index do |array,i|
             %td{:style=>"vertical-align:top;white-space:nowrap;"}
               - model = array[0]
+              / model type (classification|regression)
+              - model.model.class.to_s.match("Classification") ? type = "Classification" : type = "Regression"
+              - unit = model.unit
               - prediction = array[1]
+              
               %b{:class => "title"}
                 = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
-              %p
-              - if prediction[:confidence] == "measured"
+                  
+              / check for prediction
+              - if prediction[:neighbors].size > 0
                 %p
-                  %b Measured activity:
-                - if prediction[:value].is_a?(Array)
-                  = prediction[:value][0].numeric? ? prediction[:value].collect{|v| weight = compound.mmol_to_mg(v, mw); '%.2e' % v + " (#{model.unit})"+" | #{'%.2e' % weight} (mg/kg_bw/day)"}.join("</br>") : prediction[:value].join(", ")
-                - else
-                  = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
-                %p 
-                %b Compound is part of the training dataset
-              - elsif prediction[:neighbors].size > 0
-                %p
-                / model type (classification|regression)
+                / show model type (classification|regression)
                 %b Type:
-                = model.model.class.to_s.match("Classification") ? "Classification" : "Regression"
-                %br
-                %b Prediction:
-                = prediction[:value].numeric? ? "#{'%.2e' % prediction[:value]} (#{model.unit}) | #{'%.2e' % compound.mmol_to_mg(prediction[:value], mw)} (mg/kg_bw/day)" : prediction[:value]
-                %br
-                / TODO probability
-                %b Confidence:
-                = prediction[:confidence].round(3)
+                = type
+                %p 
+                / check for database hit
+                - if prediction[:warning] =~ /\b(identical)\b/i
+                  
+                  / show message about dbhit and measurements
+                  %p
+                    %b Compound is part of the training dataset
+                    %p
+                    %b Measured activity:
+                    %br
+                    - if prediction[:measurements].is_a?(Array)
+                      = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10} (#{unit})</br>#{compound.mmol_to_mg(value.delog10)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                    - else
+                      = (type == "Regression") ? "#{prediction[:measurements].delog10} (#{unit})</br>#{compound.mmol_to_mg(prediction[:measurements].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                
+                
+                / show prediction
                 %p
+                  %b Prediction:
+                  %br
+                  = (type == "Regression") ? "#{prediction[:value].delog10} (#{unit})</br>#{compound.mmol_to_mg(prediction[:value].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                  
+                  / show prediction interval or probability
+                  %p
+                  - if type == "Regression"
+                    %b 95% Prediction interval:
+                    - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
+                    %br
+                    = interval.nil? ? "--" : "#{interval[1].delog10} - #{interval[0].delog10} (#{unit})"
+                    %br
+                    = "#{compound.mmol_to_mg(interval[1].delog10)} - #{compound.mmol_to_mg(interval[0].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
+                  - else
+                    %b Probability:
+                    - unless prediction[:probabilities].nil?
+                      %br
+                      = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0]}"
+                      %br
+                / show warnings
+                %p
+                - if !prediction[:warning].nil?
+                  %b Warnings:
+                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Warnings", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"#{prediction[:warning]}"}}
+                    
+                / no prediction  
               - else
                 %p
                   = "Not enough similar compounds </br>in training dataset."
