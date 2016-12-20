@@ -88,9 +88,9 @@
                     / Measured Activity
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;white-space:nowrap;"}
                       - if neighbor[:measurement].is_a?(Array)
-                        = (type == "Regression") ? neighbor[:measurement].collect{|value| "#{value.delog10} (#{unit})</br>#{c.mmol_to_mg(value.delog10)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : neighbor[:measurement].join(", ")
+                        = (type == "Regression") ? neighbor[:measurement].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{c.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : neighbor[:measurement].join(", ")
                       - else
-                        = (type == "Regression") ? "#{neighbor[:measurement].delog10} (#{unit})</br>#{c.mmol_to_mg(neighbor[:measurement].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : neighbor[:measurement]
+                        = (type == "Regression") ? "#{neighbor[:measurement].delog10.signif(3)} (#{unit})</br>#{c.mmol_to_mg(neighbor[:measurement].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : neighbor[:measurement]
                     
                     / Similarity = tanimoto
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}

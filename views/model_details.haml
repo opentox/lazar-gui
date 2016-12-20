@@ -10,7 +10,7 @@ Source:
 %br
 - training_dataset = OpenTox::Dataset.find model.model.training_dataset_id
 = "Training compounds:\t"
-= training_dataset.compounds.size
+= training_dataset.data_entries.size
 %br
 = "Training dataset:\t"
 %a{:href=>"#{to("/predict/dataset/#{training_dataset.name}")}"}
@@ -53,18 +53,20 @@ Descriptors:
         %br
         = "Weighted accuracy:\t"
         = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
-        %br
-        = "True positive rate:\t"
-        = cv.true_rate["active"].round(3) if cv.true_rate
-        %br
-        = "True negative rate:\t"
-        = cv.true_rate["inactive"].round(3) if cv.true_rate
-        %br 
-        = "Positive predictive value:\t"
-        = cv.predictivity["active"].round(3) if cv.predictivity
-        %br
-        = "Negative predictive value:\t"
-        = cv.predictivity["inactive"].round(3) if cv.predictivity
+        - if cv.true_rate
+          %br
+          = "True positive rate:\t"
+          = cv.true_rate[cv.accept_values[0]].round(3)
+          %br
+          = "True negative rate:\t"
+          = cv.true_rate[cv.accept_values[1]].round(3)
+        - if cv.predictivity
+          %br 
+          = "Positive predictive value:\t"
+          = cv.predictivity[cv.accept_values[0]].round(3)
+          %br
+          = "Negative predictive value:\t"
+          = cv.predictivity[cv.accept_values[1]].round(3)
         %p
         - ["confusion_matrix", "weighted_confusion_matrix"].each_with_index do |matrix,idx|
           %b= (idx == 0 ? "Confusion Matrix" : "Weighted Confusion Matrix")
@@ -136,4 +138,4 @@ Descriptors:
         /%p.plot
         /  %img{:src=>"/corrp#{cv.id}.svg"}
           
-%br
+%br 
