@@ -3,6 +3,11 @@
 / align single prediction to endpoint ;
 / display preordered in table view ;
 
+:javascript
+  $(document).ready(function(){
+    addExternalLinks();
+  });
+
 %div.results
   %h3 Neighbors:
   / tabs div
@@ -35,6 +40,7 @@
           / presort by similarity ;
           :javascript
             $(document).ready(function(){
+              addExternalLinks();
               $("table##{j+1}").tablesorter({
                 debug: false,
                 theme: "bootstrap",
@@ -70,7 +76,7 @@
                       %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Measured Activity", :tabindex=>"0", data: {trigger:"focus", container:"body", toggle:"popover", placement:"auto", html:"true", content:"Experimental result(s) from the training dataset."}, :style=>"z-index:auto+10;"}
                     %th.sorter-false{:style =>"vertical-align:middle;"}
                       Similarity
-                      %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Similarity", :tabindex=>"0", data: {trigger:"focus", container:"body", toggle:"popover", placement:"auto", html:"true", content:"<a href=\"https://en.wikipedia.org/wiki/Jaccard_index\">Tanimoto/Jaccard</a> similarity based on <a href=\"https://openbabel.org/docs/dev/FileFormats/MolPrint2D_format.html\">Molprint2D</a> fingerprints."}, :style=>"z-index:auto+10;"}
+                      %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Similarity", :tabindex=>"0", data: {trigger:"focus", container:"body", toggle:"popover", placement:"auto", html:"true", content:"<a alt=\"Link opens in new window.\" title=\"Link opens in new window.\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Jaccard_index\">Tanimoto/Jaccard</a> similarity based on <a alt=\"Link opens in new window.\" title=\"Link opens in new window.\" target=\"_blank\" href=\"https://openbabel.org/docs/dev/FileFormats/MolPrint2D_format.html\">Molprint2D</a> fingerprints."}, :style=>"z-index:auto+10;"}
                     / %th{:style =>"vertical-align:middle;"}
                     / Supporting Information
                 %tbody

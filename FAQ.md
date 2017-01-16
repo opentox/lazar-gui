@@ -1,29 +1,18 @@
-Frequently Asked Questions
-==========================
-<br>
-####How does this prediction works?
->
+## lazar Frequently Asked Questions
 
-####You talk about significant fragments. Where can I find them?
-> We will show up those significant fragments in a further version.
+####The LAZAR program's interface has changed, and I am not sure how to use the information given with regard to its confidence. In the former version, I would consider a confidence value higher than 0.025 as reliable. But now, there is no such parameter in the prediction results. How can I consider a prediction as presenting high or low confidence?
 
-####What is endpoint details about?
-> You get the source from where we took compounds for the endpoint. The type and the number of compounds we used.
+In the past many users had problems to interpret the confidence level,
+for this reason we provide now the probabilities that the prediction
+belongs to one of the two classes. In contrast to the confidence level,
+these numbers can be interpreted as real probabilities ranging from 0 to
+1.
 
-####What is three times independent validation about?
->
+Reliable prediction have a high probability for the predicted class and
+a low probability for the other one. Unreliable predictions have similar
+values for both classes, and are caused by a lot of contradictory
+activities of similar compounds.
 
-####Do you consider providing plots for the validation results?
-> In a further version we will show up confidence and correlation plots.
-
-####What does 'Not enough similar compounds in training dataset' mean?
-> Lazar uses neighbors from the training dataset of the endpoint to predict your compound. If there are not enough neighbors for Lazar it is not possible to make a prediction.
-
-####Is there a minimum number of necessary neighbors to make a prediction?
->  
-
-####How can I activate the 'batch prediction' option?
-> Please contact us directly via [mail](mailto:support@in-silico.ch).
-
-####Not the right answers for me. Is there a way to contact you or report problems.
-> You can always ask your questions via [mail](mailto:support@in-silico.ch). If you run into problems with the GUI please post your issue [here](https://github.com/opentox/lazar-gui/issues). If you would like to post any other issue e.g. about an expected prediction result please use this [form](https://github.com/opentox/lazar/issues).
+Probabilities are calculated from the activities and similarities of
+neighbors, please make sure to inspect the neighbors list for any
+inconsistencies that might affect the prediction.
