@@ -15,7 +15,7 @@
     %script{:src=>"/javascripts/bootstrap.min.js"}
     %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
     %script{:src=>"/javascripts/jquery.tablesorter.widgets.js"}
-    %script{ :src=>"/javascripts/lazar-gui.js"}
+    %script{:src=>"/javascripts/lazar-gui.js"}
   %body
     %noscript
       %div{ :style=>"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif"}
@@ -26,34 +26,35 @@
           %a{:href=> to("/predict")}
             %img.media-object{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"150px", :heigth=>"150px", :style=>"margin:0 3em 0 2em;"}
         %div.col-md-8
-          %h1.media-heading{:style=>"margin: 0 0 0 2em;"}
+          %h1.media-heading
             lazar toxicity predictions
         %div.col-md-2
           %h1.media-heading
             %small
-              %a{:href=>"https://nano-lazar.in-silico.ch"} nano-lazar
+              %a{:href=>"https://nano-lazar.in-silico.ch", :rel=>"external"} nano-lazar
 
     %div.container-fluid
       %topline
         %div.row
-          %div.col-md-8
+          %div.col-md-10
             Problems, bugs, ideas for improvements ? Please report at our
             %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker
-            or send us an email
-            %a{ :href=>"mailto:info@in-silico.ch", :target=>"_top"}
+            , check out the 
+            %a{:href=> to("/faq"), :rel => "external"} FAQ
+            page or send us an email.
+            %a{ :href=>"mailto:info@in-silico.ch?subject=[lazar v#{@version}]", :target=>"_top"}
               %img.share{:src=>"/images/Email.png"}
-            (version #{@version}).
-          %div.col-md-2
-          %div.col-md-2
-            %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=:%20http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Tweet"}
+            [version: #{@version}]
+          %div.col-md-2{:style=>"text-align:right;"}
+            %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Tweet"}
               %img.share{:src=>"/images/Twitter.png"}
-            %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Google+"}
+            %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Google+"}
               %img.share{:src=>"/images/Google+.png"}
-            %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on LinkedIn"}
+            %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on LinkedIn"}
               %img.share{:src=>"/images/LinkedIn.png"}
-            %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :target=>"_blank", :title=>"Share on Facebook"}
+            %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Facebook"}
               %img.share{:src=>"/images/Facebook.png"}
-              
+      
       :javascript
         $(document).ready(function(){
           $("#back-top").hide();
@@ -77,17 +78,19 @@
             %p.text-muted
               &copy; 
               %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
+              |
+              %a{:href => to("/license"), :rel => "external"} GPL3 License
           %supporters.col-md-12
-            %p Financial support:
-            %a{:href=>"http://www.bfr.bund.de/de/start.html", :target=>"_blank"}
+            %p Financial support by
+            %a{:href=>"http://www.bfr.bund.de/de/start.html", :rel=>"external"}
               %img{:src=>"/images/bfr_logo.gif"}
-            %a{:href=>"http://www.opentox.org/", :target=>"_blank"}
+            %a{:href=>"http://www.opentox.org/", :rel=>"external"}
               %img{:src=>"/images/ot_logo.png"}
-            %a{:href=>"https://enanomapper.net/", :target=>"_blank"}
+            %a{:href=>"https://enanomapper.net/", :rel=>"external"}
               %img{:src=>"/images/enm_logo.png"}
-            %a{:href=>"https://www.researchgate.net/institution/Nestle_SA/department/Nestle_Research_Center", :target=>"_blank"}
+            %a{:href=>"https://www.researchgate.net/institution/Nestle_SA/department/Nestle_Research_Center", :rel=>"external"}
               %img{:src=>"/images/nestec.jpg"}
-    
+ 
 
     #back-top{:style => "z-index:100;position:fixed;bottom:1%;right:1%;"}
       %a{:href => "", :style=>"text:decoration:none;color:#ccc;"}

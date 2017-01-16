@@ -1,26 +1,43 @@
 %b Model:
 %br
 Source:
-%a{:href=>model.source, :target=>"external"}
+%a{:href=>model.source, :rel=>"external"}
   = model.source
 %br
 - model.classification? ? type = "Classification" : type = "Regression"
 = "Type:\t"
 = type
 %br
-- training_dataset = OpenTox::Dataset.find model.training_dataset.id
+- training_dataset = OpenTox::Dataset.find model.model.training_dataset_id
 = "Training compounds:\t"
-= training_dataset.compounds.size
-
+= training_dataset.data_entries.size
+%br
+= "Training dataset:\t"
+%a{:href=>"#{to("/predict/dataset/#{training_dataset.name}")}"}
+  = training_dataset.name
+%br
+%b Algorithms:
+%br
+Similarity:
+%a{:href=> "http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["similarity"]["method"].sub("::", "%2F")}", :rel=>"external"}
+  = model.model.algorithms["similarity"]["method"]
+= ", min: #{model.model.algorithms["similarity"]["min"]}"
+%br
+Prediction:
+%a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
+  = model.model.algorithms["prediction"]["method"]
+%br
+Descriptors:
+= model.model.algorithms["descriptors"]["method"]+","
+= model.model.algorithms["descriptors"]["type"]
 %p
 - if type == "Classification"
   %b Independent crossvalidations:
 - else
   %b Independent crossvalidations (-log10 transformed):
 %div.row{:id=>"validations#{model.id}", :style=>"background-color:#f5f5f5;"}
-  - model.crossvalidations.each do |crossvalidation|
+  - crossvalidations.each do |cv|
     %span.col-xs-4.col-sm-4.col-md-4.col-lg-4
-      - cv = OpenTox::CrossValidation.find crossvalidation.id
       = "Num folds:\t"
       = cv.folds
       %br
@@ -34,76 +51,83 @@ Source:
         = "Accuracy:\t"
         = cv.accuracy.round(3) if cv.accuracy
         %br
-        = "True positive rate:\t"
-        = cv.true_rate["active"].round(3) if cv.true_rate["active"]
-        %br
-        = "True negative rate:\t"
-        = cv.true_rate["inactive"].round(3) if cv.true_rate["inactive"]
-        %br 
-        = "Positive predictive value:\t"
-        = cv.predictivity["active"].round(3) if cv.predictivity["active"]
-        %br
-        = "Negative predictive value:\t"
-        = cv.predictivity["inactive"].round(3) if cv.predictivity["inactive"]
+        = "Weighted accuracy:\t"
+        = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
+        - if cv.true_rate
+          %br
+          = "True positive rate:\t"
+          = cv.true_rate[cv.accept_values[0]].round(3)
+          %br
+          = "True negative rate:\t"
+          = cv.true_rate[cv.accept_values[1]].round(3)
+        - if cv.predictivity
+          %br 
+          = "Positive predictive value:\t"
+          = cv.predictivity[cv.accept_values[0]].round(3)
+          %br
+          = "Negative predictive value:\t"
+          = cv.predictivity[cv.accept_values[1]].round(3)
         %p
-        %b Confusion Matrix:
-        %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
-          %tbody
-            %tr
-              %td
-              %td
-              %td 
-                %b actual
-              %td
-              %td
-            %tr
-              %td
-              %td
-              %td active
-              %td inactive
-              -#%td total
-            %tr
-              %td 
-                %b predicted
-              %td active
-              %td 
-                =cv.confusion_matrix[0][0]
-              %td 
-                =cv.confusion_matrix[0][1]
-              -#%td 
-                =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
-            %tr
-              %td
-              %td inactive
-              %td 
-                =cv.confusion_matrix[1][0]
-              %td 
-                =cv.confusion_matrix[1][1]
-              -#%td 
-                =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
-            -#%tr
-              %td
-              %td total
-              %td
-                =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
-              %td
-                =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
-              %td
-                -#= "Confusion Matrix:\t"
-                -#= cv.confusion_matrix
+        - ["confusion_matrix", "weighted_confusion_matrix"].each_with_index do |matrix,idx|
+          %b= (idx == 0 ? "Confusion Matrix" : "Weighted Confusion Matrix")
+          %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
+            %tbody
+              %tr
+                %td
+                %td
+                %td 
+                  %b actual
+                %td
+                %td
+              %tr
+                %td
+                %td
+                %td active
+                %td inactive
+                -#%td total
+              %tr
+                %td 
+                  %b predicted
+                %td active
+                %td 
+                  =( idx == 1 ? cv.send(matrix)[0][0].round(3) : cv.send(matrix)[0][0])
+                %td 
+                  =( idx == 1 ? cv.send(matrix)[0][1].round(3) : cv.send(matrix)[0][1])
+                -#%td 
+                  =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
+              %tr
+                %td
+                %td inactive
+                %td 
+                  =( idx == 1 ? cv.send(matrix)[1][0].round(3) : cv.send(matrix)[1][0])
+                %td 
+                  =( idx == 1 ? cv.send(matrix)[1][1].round(3) : cv.send(matrix)[1][1])
+                -#%td 
+                  =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
+              -#%tr
+                %td
+                %td total
+                %td
+                  =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
+                %td
+                  =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
+                %td
+                  -#= "Confusion Matrix:\t"
+                  -#= cv.confusion_matrix
+              %br
         %br
         /= "Confidence plot:"
         /%p.plot
         /  %img{:src=>"confp#{cv.id}.svg"}
       - if model.regression?
         %br
-        = "Root mean squared error:\t"
+        %a.ht5{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"} RMSE:
         = cv.rmse.round(3) if cv.rmse
         %br
-        = "Mean absolute error:\t"
+        %a.ht5{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"} MAE:
         = cv.mae.round(3) if cv.mae
         %br 
-        = "R square:\t"
+        %a.ht5{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
         = cv.r_squared.round(3) if cv.r_squared
         %br
         /= "Confidence plot:"
@@ -113,5 +137,5 @@ Source:
         /= "Correlation plot"
         /%p.plot
         /  %img{:src=>"/corrp#{cv.id}.svg"}
-        
-%br
+          
+%br 

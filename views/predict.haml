@@ -111,7 +111,7 @@
   };
 
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
-%form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return  !!(showcircle())" }
+%form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
   %fieldset#top.well
     %h2 1. Draw a chemical structure
     #insert
@@ -125,11 +125,13 @@
       %br
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
       %p
-      %label{:for=>"fileselect"}
+      -#%label{:for=>"fileselect"}
         or upload a CSV file for batch predictions (disabled in public version)
-      %br
-      %span.btn.btn-default.btn-file
-        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled"}
+      -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
+      -#%br
+      -#%span.btn.btn-default.btn-file
+        -#%input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled"}
+      %input{:type=>"hidden", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled"}
 
   %fieldset#middle.well
     %h2 2. Select one or more endpoints
@@ -162,6 +164,7 @@
                     document.getElementById("details#{model.id}").appendChild(details);
                     $(button).show();
                     $(image).hide();
+                    addExternalLinks();
                   });
                 }
               }
