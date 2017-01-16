@@ -3,11 +3,6 @@
 / align single prediction to endpoint ;
 / display preordered in table view ;
 
-:javascript
-  $(document).ready(function(){
-    addExternalLinks();
-  });
-
 %div.results
   %h3 Neighbors:
   / tabs div
@@ -40,7 +35,6 @@
           / presort by similarity ;
           :javascript
             $(document).ready(function(){
-              addExternalLinks();
               $("table##{j+1}").tablesorter({
                 debug: false,
                 theme: "bootstrap",
