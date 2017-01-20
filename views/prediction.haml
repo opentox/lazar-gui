@@ -73,8 +73,9 @@
                     - unless prediction[:probabilities].nil?
                       %br
                       = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0].signif(3)}"
-                      %br
-                      = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
+                      - if prediction[:probabilities].size == 2
+                        %br
+                        = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                 
                 / show warnings
                 %p
