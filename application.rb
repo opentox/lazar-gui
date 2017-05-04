@@ -19,6 +19,10 @@ before do
   @version = File.read("VERSION").chomp
 end
 
+not_found do
+  redirect to('/predict')
+end
+
 get '/?' do
   redirect to('/predict') 
 end

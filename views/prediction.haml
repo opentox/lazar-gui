@@ -23,14 +23,15 @@
                 = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
               
               / check for prediction
-              - if prediction[:neighbors].size > 0
+              /- if prediction[:neighbors].size > 0
+              - if prediction[:neighbors] and !prediction[:value].nil?
                 %p
                 / show model type (classification|regression)
                 %b Type:
                 = type
                 %p 
                 / check for database hit
-                - if prediction[:warning] =~ /\b(identical)\b/i
+                - if prediction[:info] =~ /\b(identical)\b/i
                   - @dbhit[i] = true
                   
                   / show message about dbhit and measurements
@@ -73,18 +74,34 @@
                     - unless prediction[:probabilities].nil?
                       %br
                       = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0].signif(3)}"
-                      %br
-                      = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
+                      - if prediction[:probabilities].size == 2
+                        %br
+                        = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                 
-                / show warnings
+                / show warnings and info
                 %p
-                - if !prediction[:warning].nil?
-                  %b Warnings:
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Warnings", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"#{prediction[:warning]}"}}
+                - if !prediction[:info].blank?
+                  %b info:
+                  %br
+                  %p=prediction[:info].sub(/excluded/, "excluded<br>")
+                - if !prediction[:warnings].blank?
+                  %b warnings:
+                  - prediction[:warnings].each do |warning|
+                    %br
+                    %p=warning
+                    %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
               - else
+                %br
                 - @dbhit[i] = false
-                %p
-                  = "Not enough similar compounds </br>in training dataset."
+                - if !prediction[:info].blank?
+                  %b info:
+                  %br
+                  %p=prediction[:info].sub(/excluded/, "excluded<br>")
+                - if !prediction[:warnings].blank?
+                  %b warnings:
+                  - prediction[:warnings].each do |warning|
+                    %br
+                    %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
 
   / always show the neighbors table, message is given there  
   = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit

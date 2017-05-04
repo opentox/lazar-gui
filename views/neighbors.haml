@@ -1,38 +1,17 @@
-/ unpacks multi prediction array ;
-/ prepare it for neighbors ;
-/ align single prediction to endpoint ;
-/ display preordered in table view ;
-
 %div.results
   %h3 Neighbors:
   / tabs div
   #tabs
     %ul.nav.nav-tabs.nav-justified{:id=>"neighborTabs", :role=>"tablist"}
-      / each model a tab head ;
-      / hash for predictionFeature
-      - predictionFeature = {}
       - @models.each_with_index do |model,i|
         / get predictionFeature type
         - m = Model::Lazar.find model.model_id.to_s
-        - predFeature = Feature.find m.prediction_feature_id.to_s
-        / define feature type (numeric : nominal)
-        - predFeatureType = (predFeature.numeric? ? "numeric" : "nominal")
-        / use prediction feature id for neighbor compound features
-        - predFeatureId = m.prediction_feature_id.to_s
-        - predictionFeature[i] = {"id" => predFeatureId, "type" => predFeatureType}
         %li{:class => ("active" if i == 0)}
           %a{:href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}}
             = "#{model.endpoint} (#{model.species})"
     %div.tab-content
-      / unpack to single arrays
       - @predictions.each_with_index do |prediction,j|
-        / pass model type for significant fragments view
         #results.tab-pane{:id=>"#{j+1}", :class => ("active" if j == 0)}
-          / prepare dataset for neighbors table ;
-          / delete first array which contains prediction ;
-          / following arrays are the neighbor predictions ;
-          / call the tablesorter plugin ;
-          / presort by similarity ;
           :javascript
             $(document).ready(function(){
               $("table##{j+1}").tablesorter({
@@ -58,7 +37,7 @@
                 widthFixed: false
               });
             });
-          - if prediction[:neighbors].size > 0
+          - if prediction[:neighbors]
             %div.table-responsive
               %table{:id=>"#{j+1}", :style=>"border-style: solid;"}
                 %thead
@@ -71,8 +50,6 @@
                     %th.sorter-false{:style =>"vertical-align:middle;"}
                       Similarity
                       %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Similarity", :tabindex=>"0", data: {trigger:"focus", container:"body", toggle:"popover", placement:"auto", html:"true", content:"<a alt=\"Link opens in new window.\" title=\"Link opens in new window.\" target=\"_blank\" href=\"https://en.wikipedia.org/wiki/Jaccard_index\">Tanimoto/Jaccard</a> similarity based on <a alt=\"Link opens in new window.\" title=\"Link opens in new window.\" target=\"_blank\" href=\"https://openbabel.org/docs/dev/FileFormats/MolPrint2D_format.html\">Molprint2D</a> fingerprints."}, :style=>"z-index:auto+10;"}
-                    / %th{:style =>"vertical-align:middle;"}
-                    / Supporting Information
                 %tbody
                   - type = @model_types[j]
                   - unit = @models[j].unit
@@ -90,8 +67,8 @@
                       - if neighbor[:measurement].is_a?(Array)
                         = (type == "Regression") ? neighbor[:measurement].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{c.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : neighbor[:measurement].join(", ")
                       - else
-                        = (type == "Regression") ? "#{neighbor[:measurement].delog10.signif(3)} (#{unit})</br>#{c.mmol_to_mg(neighbor[:measurement].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : neighbor[:measurement]
-                    
+                        - if !neighbor[:measurement].nil?
+                          = (type == "Regression") ? "#{neighbor[:measurement].delog10.signif(3)} (#{unit})</br>#{c.mmol_to_mg(neighbor[:measurement].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : neighbor[:measurement]
                     / Similarity = tanimoto
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:20%;"}
                       = neighbor[:similarity].round(3)

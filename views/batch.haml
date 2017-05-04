@@ -53,7 +53,7 @@
                 = type
                 %p 
                 / check for database hit
-                - if prediction[:warning] =~ /\b(identical)\b/i
+                - if prediction[:info] =~ /\b(identical)\b/i
                   
                   / show message about dbhit and measurements
                   %p
