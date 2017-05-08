@@ -52,7 +52,7 @@
                 %p
                   %b Prediction:
                   / prediction popover
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>."}}
+                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>.<hr></hr><a href=\"https://doi.org/10.3389/fphar.2013.00038\", target=\"_blank\"><img src=\"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg\" alt=\"DOI\"></a>"}}
                   %br
                   = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                   
@@ -86,7 +86,7 @@
                   %p=prediction[:info].sub(/excluded/, "excluded<br>")
                 - if !prediction[:warnings].blank?
                   %b warnings:
-                  - prediction[:warnings].each do |warning|
+                  - prediction[:warnings].uniq.each do |warning|
                     %br
                     %p=warning
                     %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
@@ -99,7 +99,7 @@
                   %p=prediction[:info].sub(/excluded/, "excluded<br>")
                 - if !prediction[:warnings].blank?
                   %b warnings:
-                  - prediction[:warnings].each do |warning|
+                  - prediction[:warnings].uniq.each do |warning|
                     %br
                     %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
 

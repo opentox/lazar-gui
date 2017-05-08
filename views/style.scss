@@ -1,3 +1,29 @@
+@media (min-width: 320px){
+  .page-header{
+    img.media-object{
+      margin-left:0;
+    }
+    background-color: #fff;
+    padding:10px 0 10px 0;
+    margin: 0;
+    text-align:left;
+    //display:inline-block;
+    width:100%;
+  }
+}
+@media (min-width: 480px){
+  .page-header{
+    img.media-object{
+      margin-left:1em;
+    }
+    background-color: #fff;
+    padding:20px 0 20px 0;
+    margin: 0;
+    text-align:center;
+    //display:inline-block;
+    width:100%;
+  }
+}
 body {
   background-color:#E7E7E7;
 }
@@ -52,14 +78,6 @@ ul.share-buttons{
 }
 .dropdown-menu a {
   padding: 0 2px 1px 2px !important;
-}
-.page-header{
-  background-color: #fff;
-  padding:20px 0 20px 0;
-  margin: 0;
-  text-align:center;
-  display:inline-block;
-  width:100%;
 }
 .share{
   width: 30px;

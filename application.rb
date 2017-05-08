@@ -4,6 +4,7 @@ include OpenTox
 
 configure :development do
   $logger = Logger.new(STDOUT)
+  enable :reloader
 end
 
 helpers do

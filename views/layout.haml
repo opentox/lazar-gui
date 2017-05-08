@@ -22,19 +22,19 @@
       Your web browser must have JavaScript enabled in order for this application to display correctly.
     %header.page-header
       %div.row
-        %div.col-md-2
+        %div.col-md-3
           %a{:href=> to("/predict")}
-            %img.media-object{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"150px", :heigth=>"150px", :style=>"margin:0 3em 0 2em;"}
-        %div.col-md-8
+            %img.media-object{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"150px", :heigth=>"150px"}
+        %div.col-md-6
           %h1.media-heading
             lazar toxicity predictions
-        %div.col-md-2
+        %div.col-md-3
           %h1.media-heading
             %small
               %a{:href=>"https://nano-lazar.in-silico.ch", :rel=>"external"} nano-lazar
 
     %div.container-fluid
-      %topline
+      %topline.alert
         %div.row
           %div.col-md-10
             Problems, bugs, ideas for improvements ? Please report at our
@@ -54,6 +54,12 @@
               %img.share{:src=>"/images/LinkedIn.png"}
             %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Facebook"}
               %img.share{:src=>"/images/Facebook.png"}
+        %div.row
+          %div.col-md-12
+            Please refer this 
+            %a{ :href=>"https://doi.org/10.3389/fphar.2013.00038", :rel=>"external"}
+              %img{ :src=>"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg", :alt=>"DOI"}
+            for any citations.
       
       :javascript
         $(document).ready(function(){
