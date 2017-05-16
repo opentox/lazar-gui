@@ -2,6 +2,12 @@
 require 'rdiscount'
 include OpenTox
 
+
+configure :production do
+  $logger = Logger.new(STDOUT)
+  enable :reloader
+end
+
 configure :development do
   $logger = Logger.new(STDOUT)
   enable :reloader
