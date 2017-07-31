@@ -125,13 +125,12 @@
       %br
       %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
       %p
-      -#%label{:for=>"fileselect"}
-        or upload a CSV file for batch predictions (disabled in public version)
-      -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
-      -#%br
-      -#%span.btn.btn-default.btn-file
-        -#%input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled"}
-      %input{:type=>"hidden", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled"}
+      %label{:for=>"fileselect"}
+        or upload a CSV file for batch predictions:
+      %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
+      %br
+      %span.btn.btn-default.btn-file
+        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
 
   %fieldset#middle.well
     %h2 2. Select one or more endpoints
@@ -140,19 +139,26 @@
         %div{:id=>endpoint.gsub(/\s+/, "_")}
           %h4.head-back=endpoint
           - @models.select{|m| m.endpoint == endpoint}.each do |model|
-            %div.row{:id => model.id}
-              %span.col-sm-4
+            %div.row{:id => model.id,:style=>"margin-bottom:1em;"}
+              %span.col-lg-4.col-md-4.col-sm-4.col-xs-4
                 %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species.gsub(/\s+/, "_")}]", :value => true, :disabled => false}
                 %label{:for => "selection[#{model.species.gsub(/\s+/, "_")}]"}
                   = model.species
-              %span.col-sm-8
+              %span.col-lg-8.col-md-8.col-sm-8.col-xs-8
                 %a.btn.btn-default.btn-xs{:data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :onclick=>"load#{model.id}Details('#{model}')", :id => "link#{model.id}", :style=>"font-size:small;"}
+                  %span.glyphicon.glyphicon-menu-right
                   Details | Validation
                 %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle#{model.id}", :class=>"circle#{model.id}", :alt=>"wait", :style=>"display:none;"}
             %div.panel-collapse.collapse{:id=>"details#{model.id}", :style=>"margin-left:1em;"}
             :javascript
               function load#{model.id}Details(model) {
                 button = document.getElementById("link#{model.id}");
+                span = button.childNodes[1];
+                if (span.className == "glyphicon glyphicon-menu-right"){
+                  span.className = "glyphicon glyphicon-menu-down";
+                } else if (span.className = "glyphicon glyphicon-menu-down"){
+                  span.className = "glyphicon glyphicon-menu-right";
+                };
                 image = document.getElementById("circle#{model.id}");
                 if ($('modeldetails#{model.id}').length == 0) {
                   $(button).hide();
@@ -170,9 +176,9 @@
               }
   %fieldset#bottom.well
     %div.row
-      %div.col-md-2
+      %div.col-lg-2.col-md-2.col-sm-2.col-xs-2
         %h2
           3. Predict
-      %div.col-md-10
+      %div.col-lg-10.col-md-10.col-sm-10.col-xs-10
         %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
         %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}

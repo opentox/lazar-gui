@@ -31,7 +31,9 @@
         %div.col-md-3
           %h1.media-heading
             %small
-              %a{:href=>"https://nano-lazar.in-silico.ch", :rel=>"external"} nano-lazar
+              %a.btn{:href=>"https://nano-lazar.in-silico.ch", :rel=>"external"}
+                nano-lazar
+                %span.glyphicon.glyphicon-new-window
 
     %div.container-fluid
       %topline.alert
@@ -86,16 +88,18 @@
               %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
               |
               %a{:href => to("/license"), :rel => "external"} GPL3 License
-          %supporters.col-md-12
-            %p Financial support by
-            %a{:href=>"http://www.bfr.bund.de/de/start.html", :rel=>"external"}
-              %img{:src=>"/images/bfr_logo.gif"}
-            %a{:href=>"http://www.opentox.org/", :rel=>"external"}
-              %img{:src=>"/images/ot_logo.png"}
-            %a{:href=>"https://enanomapper.net/", :rel=>"external"}
-              %img{:src=>"/images/enm_logo.png"}
-            %a{:href=>"https://www.researchgate.net/institution/Nestle_SA/department/Nestle_Research_Center", :rel=>"external"}
-              %img{:src=>"/images/nestec.jpg"}
+          %supporters
+            %div.panel.panel-default
+              Financial support by
+              %div.panel-body
+                %a{:href=>"http://www.bfr.bund.de/de/start.html", :rel=>"external"}
+                  %img{:src=>"/images/bfr_logo.gif"}
+                %a{:href=>"http://www.opentox.org/", :rel=>"external"}
+                  %img{:src=>"/images/ot_logo.png"}
+                %a{:href=>"https://enanomapper.net/", :rel=>"external"}
+                  %img{:src=>"/images/enm_logo.png"}
+                %a{:href=>"https://www.researchgate.net/institution/Nestle_SA/department/Nestle_Research_Center", :rel=>"external"}
+                  %img{:src=>"/images/nestec.jpg"}
  
 
     #back-top{:style => "z-index:100;position:fixed;bottom:1%;right:1%;"}

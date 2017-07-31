@@ -81,11 +81,11 @@
                 / show warnings and info
                 %p
                 - if !prediction[:info].blank?
-                  %b info:
+                  %b Info:
                   %br
                   %p=prediction[:info].sub(/excluded/, "excluded<br>")
                 - if !prediction[:warnings].blank?
-                  %b warnings:
+                  %b Warnings:
                   - prediction[:warnings].uniq.each do |warning|
                     %br
                     %p=warning
@@ -94,11 +94,11 @@
                 %br
                 - @dbhit[i] = false
                 - if !prediction[:info].blank?
-                  %b info:
+                  %b Info:
                   %br
                   %p=prediction[:info].sub(/excluded/, "excluded<br>")
                 - if !prediction[:warnings].blank?
-                  %b warnings:
+                  %b Warnings:
                   - prediction[:warnings].uniq.each do |warning|
                     %br
                     %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
