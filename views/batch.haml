@@ -55,19 +55,16 @@
                       %b Measured activity:
                       %br
                       - if prediction[:measurements].is_a?(Array)
-                        = (type == "Regression") ? prediction[:measurements].collect{|value| $logger.debug value ; "#{value.delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(value.delog10.signif(3))} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                        = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
                       - else
-                        - $logger.debug prediction[:measurements]
-                        - $logger.debug prediction[:measurements].delog10
-                        - $logger.debug prediction[:measurements].delog10.signif(3)
-                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(prediction[:measurements].delog10.signif(3))} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
                     
                     
                   / show prediction
                   %p
                     %b Prediction:
                     %br
-                    = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(prediction[:value].delog10.signif(3))} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                    = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                     
                     / show prediction interval or probability
                     %p
@@ -77,7 +74,7 @@
                       %br
                       = interval.nil? ? "" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
                       %br
-                      = "#{compound.mmol_to_mg(interval[1].delog10.signif(3))} - #{compound.mmol_to_mg(interval[0].delog10.signif(3))} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
+                      = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
                     - else
                       %b Probability:
                       - unless prediction[:probabilities].nil?

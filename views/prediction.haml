@@ -23,7 +23,6 @@
                 = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
               
               / check for prediction
-              /- if prediction[:neighbors].size > 0
               - if prediction[:neighbors] and !prediction[:value].nil?
                 %p
                 / show model type (classification|regression)
@@ -43,7 +42,7 @@
                     - if prediction[:measurements].is_a?(Array)
                       = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
                     - else
-                      = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                      = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
                 
                 - else
                   - @dbhit[i] = false
@@ -54,7 +53,7 @@
                   / prediction popover
                   %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>.<hr></hr><a href=\"https://doi.org/10.3389/fphar.2013.00038\", target=\"_blank\"><img src=\"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg\" alt=\"DOI\"></a>"}}
                   %br
-                  = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                  = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                   
                   / show prediction interval or probability
                   %p
@@ -66,7 +65,7 @@
                     %br
                     = interval.nil? ? "--" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
                     %br
-                    = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
+                    = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !interval.nil?
                   - else
                     %b Probability:
                     / probability popover
@@ -83,25 +82,24 @@
                 - if !prediction[:info].blank?
                   %b Info:
                   %br
-                  %p=prediction[:info].sub(/excluded/, "excluded<br>")
+                  %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
                 - if !prediction[:warnings].blank?
                   %b Warnings:
                   - prediction[:warnings].uniq.each do |warning|
                     %br
-                    %p=warning
-                    %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
+                    %p=warning.sub(/,/, ",<br>")
+                    /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
               - else
                 %br
-                - @dbhit[i] = false
                 - if !prediction[:info].blank?
                   %b Info:
                   %br
-                  %p=prediction[:info].sub(/excluded/, "excluded<br>")
+                  %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
                 - if !prediction[:warnings].blank?
                   %b Warnings:
                   - prediction[:warnings].uniq.each do |warning|
                     %br
-                    %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
+                    %p=warning.sub(/,/, ",<br>")
 
   / always show the neighbors table, message is given there  
   = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
