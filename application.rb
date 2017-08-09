@@ -13,15 +13,6 @@ configure :development do
   enable :reloader
 end
 
-helpers do
-  class Numeric
-    def percent_of(n)
-      self.to_f / n.to_f * 100.0
-    end
-  end
-
-end
-
 before do
   @version = File.read("VERSION").chomp
 end
@@ -89,8 +80,7 @@ post '/predict/?' do
   # process batch prediction
   if !params[:fileselect].blank?
     if params[:fileselect][:filename] !~ /\.csv$/
-      @error = "Please submit a csv file."
-      return haml :error
+      bad_request_error "Please submit a csv file."
     end
     File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
@@ -101,18 +91,16 @@ post '/predict/?' do
       if input.class == OpenTox::Dataset
         dataset = OpenTox::Dataset.find input
       else
-        @error = "Could not serialize file '#{@filename}' ."
-        return haml :error
+        bad_request_error "Could not serialize file '#{@filename}'."
       end
     rescue
-      @error = "Could not serialize file '#{@filename}' ."
-      return haml :error
+      bad_request_error "Could not serialize file '#{@filename}'."
     end
     @compounds = dataset.compounds
     if @compounds.size == 0
-      @error = dataset[:warnings]
+      message = dataset[:warnings]
       dataset.delete
-      return haml :error
+      bad_request_error message
     end
 
     # for csv export
@@ -249,10 +237,7 @@ post '/predict/?' do
     $logger.debug "input:#{@identifier}"
     # get compound from SMILES
     @compound = Compound.from_smiles @identifier
-    if @compound.blank?
-      @error = "'#{@identifier}' is not a valid SMILES string."
-      return haml :error
-    end
+    bad_request_error "'#{@identifier}' is not a valid SMILES string." if @compound.blank?
 
     @models = []
     @predictions = []
