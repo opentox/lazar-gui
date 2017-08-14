@@ -7,7 +7,6 @@ def qmrf_report id
   qmrfpath = File.dirname qmrfpath
   prediction_model = Model::Validation.find id
 	model = prediction_model.model
-  #validation_template = "./views/model_details.haml"
 
   if File.directory?(lazarpath)
     lazar_commit = `cd #{lazarpath}; git rev-parse HEAD`.strip
@@ -40,11 +39,13 @@ def qmrf_report id
   report.value "model_date", "#{Time.parse(model.created_at.to_s).strftime('%Y')}"
 
   # Reference(s) to main scientific papers and/or software package 2.7
-  report.change_catalog :publications_catalog, :publications_catalog_1, {:title => "Maunz A., Guetlein M., Rautenberg M., Vorgrimmler D., Gebele D. and Helma C. (2013), lazar: a modular predictive toxicology framework  ", :number => "1", :url => "http://dx.doi.org/10.3389/fphar.2013.00038"}
+  report.change_catalog :publications_catalog, :publications_catalog_4, {:title => "Maunz A., Guetlein M., Rautenberg M., Vorgrimmler D., Gebele D. and Helma C. (2013), lazar: a modular predictive toxicology framework  ", :url => "http://dx.doi.org/10.3389/fphar.2013.00038"}
+  
+  report.ref_catalog :references, :publications_catalog, :publications_catalog_4
+  
+  report.change_catalog :publications_catalog, :publications_catalog_1, {:title => "Helma C., Gebele D., Rautenberg M. (2017) lazar, software available at https://lazar.in-silico.ch,source code available at #{lazar_commit}", :url => "https://doi.org/10.5281/zenodo.215483"}
+  
   report.ref_catalog :references, :publications_catalog, :publications_catalog_1
-
-  report.change_catalog :publications_catalog, :publications_catalog_2, {:title => "Helma C, Gebele D, Rautenberg M (2017) lazar, software available at https://lazar.in-silico.ch,source code available at #{lazar_commit}", :number => "2", :url => "https://doi.org/10.5281/zenodo.215483"}
-  report.ref_catalog :references, :publications_catalog, :publications_catalog_2
 
   # Availability of information about the model 2.8
   report.value "info_availability", "Prediction interface and validation results available at https://lazar.in-silico.ch"
@@ -60,7 +61,7 @@ def qmrf_report id
   report.value "endpoint_units", "#{prediction_model.unit}"
 
   # Dependent variable 3.5
-  report.value "endpoint_variable", "#{prediction_model.endpoint} #{prediction_model.regression? ? "regression" : "classification"}"
+  report.value "endpoint_variable", "#{prediction_model.endpoint}"
 
   # Type of model 4.1
   model_type = model.class.to_s.gsub('OpenTox::Model::Lazar','')
@@ -72,7 +73,7 @@ def qmrf_report id
 
   # Descriptors in the model 4.3
   if model.algorithms["descriptors"][:type]
-    report.change_catalog :descriptors_catalog, :descriptors_catalog_1, {:description => "Molprint 2D (Bender et al. 2004)", :name => "#{model.algorithms["descriptors"][:type]} fingerprints", :publication_ref => "", :units => ""}
+    report.change_catalog :descriptors_catalog, :descriptors_catalog_1, {:description => "(Bender et al. 2004)", :name => "#{model.algorithms["descriptors"][:type]} fingerprints", :publication_ref => "", :units => ""}
     report.ref_catalog :algorithms_descriptors, :descriptors_catalog, :descriptors_catalog_1
   end
 
@@ -198,7 +199,7 @@ def qmrf_report id
     </p>
     <p>
       Please note that lazar predictions are based on neighbors.
-			Descriptors are only used for the calculation of similarities.
+      Descriptors are only used for the calculation of similarities.
     </p>
   </body>
 </html>"
@@ -218,15 +219,22 @@ def qmrf_report id
 </html>"
 
 	# Bibliography 9.2
-  report.change_catalog :publications_catalog, :publications_catalog_1, {:title => "Helma (2017), Nano-Lazar: Read across Predictions for Nanoparticle Toxicities with Calculated and Measured Properties", :url => "https://dx.doi.org/10.3389%2Ffphar.2017.00377"}
-  report.change_catalog :publications_catalog, :publications_catalog_2, {:title => "Lo Piparo (2014), Automated and reproducible read-across like models for predicting carcinogenic potency", :url => "https://doi.org/10.1016/j.yrtph.2014.07.010"}
-  report.change_catalog :publications_catalog, :publications_catalog_3, {:title => "Helma (2006), Lazy structure-activity relationships (lazar) for the prediction of rodent carcinogenicity and Salmonella mutagenicity.", :url => "http://dx.doi.org/10.1007/s11030-005-9001-5"}
-  report.change_catalog :publications_catalog, :publications_catalog_4, {:title => "Bender et al. (2004), Molecular similarity searching using atom environments, information-based feature selection, and a nave bayesian classifier.", :url => "https://doi.org/10.1021/ci034207y"}
+  
+  report.change_catalog :publications_catalog, :publications_catalog_2, {:title => "Helma C., Rautenberg M. and Gebele D. (2017), Nano-Lazar: Read across Predictions for Nanoparticle Toxicities with Calculated and Measured Properties", :url => "https://dx.doi.org/10.3389%2Ffphar.2017.00377"}
+  
+  report.change_catalog :publications_catalog, :publications_catalog_3, {:title => "Lo Piparo et al. (2014), Automated and reproducible read-across like models for predicting carcinogenic potency", :url => "https://doi.org/10.1016/j.yrtph.2014.07.010"}
+  
+  report.change_catalog :publications_catalog, :publications_catalog_5, {:title => "Maunz A. and Helma C. (2008), Prediction of chemical toxicity with local support vector regression and activity-specific kernels", :url => "http://dx.doi.org/10.1080/10629360802358430"}
+  
+  report.change_catalog :publications_catalog, :publications_catalog_6, {:title => "Helma C. (2006), Lazy structure-activity relationships (lazar) for the prediction of rodent carcinogenicity and Salmonella mutagenicity.", :url => "http://dx.doi.org/10.1007/s11030-005-9001-5"}
+  
+  report.change_catalog :publications_catalog, :publications_catalog_7, {:title => "Bender et al. (2004), Molecular similarity searching using atom environments, information-based feature selection, and a nave bayesian classifier.", :url => "https://doi.org/10.1021/ci034207y"}
 
-  report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_1
   report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_2
   report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_3
-  report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_4
+  report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_5
+  report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_6
+  report.ref_catalog :bibliography, :publications_catalog, :publications_catalog_7
 	
 	report
 
