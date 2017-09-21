@@ -34,7 +34,12 @@ get '/predict/?' do
   @models = OpenTox::Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
-  @models.count <= 0 ? (haml :info) : (haml :predict)
+  if @models.count > 0
+    rodent_index = 0
+    @models.each_with_index{|model,idx| rodent_index = idx if model.species =~ /Rodent/}
+    @models.insert(rodent_index-1,@models.delete_at(rodent_index))
+  end
+  @models.count > 0 ? (haml :predict) : (haml :info)
 end
 
 get '/predict/modeldetails/:model' do
