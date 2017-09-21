@@ -31,6 +31,20 @@ def qmrf_report id
   report.change_catalog :authors_catalog, :firstauthor, {:name => "Christoph Helma", :affiliation => "in silico toxicology gmbh", :contact => "Rastatterstr. 41, CH-4057 Basel", :email => "info@in-silico.ch", :number => "1", :url => "www.in-silico.ch"}
   report.ref_catalog :qmrf_authors, :authors_catalog, :firstauthor
 
+  if prediction_model.species =~ /TD50/
+    # Date of QMRF update(s) 2.3
+    report.value "qmrf_date_revision", "#{Time.parse("2014-12-05").strftime('%d %B %Y')}"
+    # QMRF update(s) 2.4
+    report.value "qmrf_revision", "Q29-44-39-423"
+  end
+
+  if prediction_model.species =~ /Rodent/
+    # Date of QMRF update(s) 2.3
+    report.value "qmrf_date_revision", "#{Time.parse("2014-12-05").strftime('%d %B %Y')}"
+    # QMRF update(s) 2.4
+    report.value "qmrf_revision", "Q28-43-38-420"
+  end
+
   # Model developer(s) and contact details 2.5
   report.change_catalog :authors_catalog, :modelauthor, {:name => "Christoph Helma", :affiliation => "in silico toxicology gmbh", :contact => "Rastatterstr. 41, CH-4057 Basel", :email => "info@in-silico.ch", :number => "1", :url => "www.in-silico.ch"}
   report.ref_catalog :model_authors, :authors_catalog, :modelauthor

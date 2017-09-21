@@ -35,7 +35,10 @@
                   
                   / show message about dbhit and measurements
                   %p
-                    %b Compound is part of the training dataset
+                    :plain
+                      This compound was part of the training dataset. <i>All</i> information </br>
+                      from this compound was removed from the training data before the </br>
+                      prediction, to obtain unbiased results.
                     %p
                     %b Measured activity:
                     %br
@@ -78,17 +81,17 @@
                         = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                 
                 / show warnings and info
-                %p
-                - if !prediction[:info].blank?
-                  %b Info:
-                  %br
-                  %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                - if !prediction[:warnings].blank?
-                  %b Warnings:
-                  - prediction[:warnings].uniq.each do |warning|
+                -#%p
+                  - if !prediction[:info].blank?
+                    %b Info:
                     %br
-                    %p=warning.sub(/,/, ",<br>")
-                    /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
+                    %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
+                  - if !prediction[:warnings].blank?
+                    %b Warnings:
+                    - prediction[:warnings].uniq.each do |warning|
+                      %br
+                      %p=warning.sub(/,/, ",<br>")
+                      /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
               - else
                 %br
                 - if !prediction[:info].blank?
