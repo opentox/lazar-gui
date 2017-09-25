@@ -14,6 +14,8 @@ Gem::Specification.new do |s|
   s.files       = `git ls-files`.split("\n")
 
   s.add_runtime_dependency "lazar"
+  s.add_runtime_dependency "toxtree"
+  s.add_runtime_dependency "kazius-alerts"
   s.add_runtime_dependency "gem-path", "~> 0.6.1", '>= 0.6.1'
   s.add_runtime_dependency "sinatra", "~> 1.4.0", '>= 1.4.0'
   s.add_runtime_dependency "rdiscount", "~> 2.1.0", '>= 2.1.0'

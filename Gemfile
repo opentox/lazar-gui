@@ -1,6 +1,8 @@
 source "https://rubygems.org"
 gemspec
 gem "lazar", :path => "../lazar"
+gem "toxtree", :path => "../toxtree"
+gem "kazius-alerts", :path => "../kazius-alerts"
 gem "gem-path"
 gem "sinatra"
 gem "sinatra-reloader"

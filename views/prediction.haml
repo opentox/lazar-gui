@@ -4,7 +4,14 @@
     $('.modal').on('hidden.bs.modal', function () {
       $(this).removeData('bs.modal');
     });
+    /*TableExport.prototype.bootstrap = ["btn", "btn-default", "btn-toolbar"];
+    var BootstrapTable = document.getElementById('overview');
+    new TableExport(BootstrapTable, {
+      ignoreCSS: ".ignore",
+      bootstrap: true,
+    });*/
   });
+
 %div.well
   %a.btn.btn-warning{:href => to('/predict')}
     %i.glyphicon.glyphicon-menu-left
@@ -15,83 +22,132 @@
     %table.table.table-bordered{:id=>"overview"}
       %tbody
         %tr
-          %td{:id=>"compound", :style=>"vertical-align:top;"}
-            %p= @compound.svg
+          %td{:id=>"compound"}
+            %b.title Compound
+            %p= embedded_svg @compound.svg, class: '.ignore', title: "#{@compound.smiles}"
             %p= @compound.smiles
           - @model_types = {}
           - @dbhit = {}
-          - @predictions.each_with_index do |prediction,i|
-            - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
-            - @model_types[i] = type
-            - unit = @models[i].unit
-            %td{:style=>"vertical-align:top;white-space:nowrap;"}
-              %b{:class => "title"}
-                = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
-              
-              / check for prediction
-              - if prediction[:neighbors].size > 0
-                %p
-                / show model type (classification|regression)
-                %b Type:
-                = type
-                %p 
-                / check for database hit
-                - if prediction[:warning] =~ /\b(identical)\b/i
-                  - @dbhit[i] = true
-                  
-                  / show message about dbhit and measurements
+          - toxtree = @predictions.pop if @toxtree == true
+          - unless @predictions.blank?
+            - @predictions.each_with_index do |prediction,i|
+              - if prediction.dimension > 0
+                - sa_prediction = prediction[1]
+                - prediction = prediction[0]
+              - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+              - @model_types[i] = type
+              - unit = @models[i].unit
+              %td{:style=>"vertical-align:top;white-space:nowrap;"}
+                %b.title
+                  = (sa_prediction ? "Consensus mutagenicity" : "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})")
+                / check kazius
+                - if sa_prediction
+                  - hash = sa_prediction[:prediction]
+                  - confidence = sa_prediction[:confidence]
                   %p
-                    %b Compound is part of the training dataset
-                    %p
-                    %b Measured activity:
-                    %br
-                    - if prediction[:measurements].is_a?(Array)
-                      = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
-                    - else
-                      = (type == "Regression") ? "#{prediction[:measurements].delog10} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
-                
-                - else
-                  - @dbhit[i] = false
-                
-                / show prediction
-                %p
+                  %b Structural alerts:
+                  %p
                   %b Prediction:
-                  / prediction popover
-                  -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>."}}
                   %br
-                  = (type == "Regression") ? "#{prediction[:value].delog10} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
-                  
-                  / show prediction interval or probability
+                  =(hash[:prediction] == true ? "mutagenic" : "non-mutagenic")
                   %p
-                  - if type == "Regression"
-                    %b 95% Prediction interval:
-                    - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
-                    / prediction interval popover
-                    -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Prediction intervall", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"An estimate of prediction uncertainty. The \"real\" value should be with 95% probability within the prediction interval."}}
-                    %br
-                    = interval.nil? ? "--" : "#{interval[1].delog10} - #{interval[0].delog10} (#{unit})"
-                    %br
-                    = "#{@compound.mmol_to_mg(interval[1].delog10)} - #{@compound.mmol_to_mg(interval[0].delog10)} #{(unit =~ /\b(mol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
+                  %b Confidence:
+                  %br
+                  =confidence.to_f.signif(3)
+                  %p
+                  %b Structural alerts for mutagenicity:
+                  %br
+                  =hash[:matches].flatten.first
+                  %p
+                / check for prediction
+                - if prediction[:neighbors] and !prediction[:value].nil?
+                  %b.title= ("Lazar #{@models[i].endpoint.gsub('_', ' ').downcase} (#{@models[i].species}):" if sa_prediction)
+                  %p
+                  / show model type (classification|regression)
+                  %b Type:
+                  = type
+                  %p 
+                  / check for database hit
+                  - if prediction[:info] =~ /\b(identical)\b/i
+                    - @dbhit[i] = true
+                    / show message about dbhit and measurements
+                    %p
+                      :plain
+                        This compound was part of the training dataset. <i>All</i> information </br>
+                        from this compound was removed from the training data before the </br>
+                        prediction, to obtain unbiased results.
+                      %p
+                      %b Measured activity:
+                      %br
+                      - if prediction[:measurements].is_a?(Array)
+                        = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                      - else
+                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                  
                   - else
-                    %b Probability:
-                    - unless prediction[:probabilities].nil?
+                    - @dbhit[i] = false
+                  
+                  / show prediction
+                  %p
+                    %b Prediction:
+                    %br
+                    = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                    
+                    / show prediction interval or probability
+                    %p
+                    - if type == "Regression"
+                      %b 95% Prediction interval:
+                      - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
                       %br
-                      = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0]}"
+                      = interval.nil? ? "--" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
                       %br
-                      = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1]}"
-                    / probability popover
-                    -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"#", :title=>"Confidence", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Indicates the applicability domain of a model. Predictions with a high confidence can be expected to be more reliable than predictions with low confidence. Confidence values may take any value between 0 and 1. For most models confidence > 0.025 is a sensible (hard) cutoff to distinguish between reliable and unreliable predictions."}}
-                
-                / show warnings
-                %p
-                - if !prediction[:warning].nil?
-                  %b Warnings:
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Warnings", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"#{prediction[:warning]}"}}
-              - else
-                - @dbhit[i] = false
-                %p
-                  = "Not enough similar compounds </br>in training dataset."
+                      = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !interval.nil?
+                    - else
+                      %b Probability:
+                      - unless prediction[:probabilities].nil?
+                        %br
+                        = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0].signif(3)}"
+                        - if prediction[:probabilities].size == 2
+                          %br
+                          = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
+                  
+                  / show warnings and info
+                  -#%p
+                    - if !prediction[:info].blank?
+                      %b Info:
+                      %br
+                      %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
+                    - if !prediction[:warnings].blank?
+                      %b Warnings:
+                      - prediction[:warnings].uniq.each do |warning|
+                        %br
+                        %p=warning.sub(/,/, ",<br>")
+                - else
+                  %p
+                  - if !prediction[:info].blank?
+                    %b Info:
+                    %br
+                    %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
+                  - if !prediction[:warnings].blank?
+                    %b Warnings:
+                    - prediction[:warnings].uniq.each do |warning|
+                      %p=warning.sub(/,/, ",<br>")
 
-  / always show the neighbors table, message is given there  
-  = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
+          / show Cramer rules if checked
+          - if @toxtree == true
+            %td{:style=>"vertical-align:top;white-space:nowrap;"}
+              %b.title Oral toxicity (Cramer rules)
+              %p
+              %b Cramer rules:
+              %br
+              =toxtree.first["Cramer rules"]
+              %p
+              %b Cramer rules, with extensions:
+              %br
+              =toxtree.last["Cramer rules, with extensions"]
+
+  / always show the neighbors table, message is given there. Except only Cramer is selected.
+  - unless @predictions.blank?
+    = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
+    
 

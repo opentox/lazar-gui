@@ -1,3 +1,29 @@
+@media (min-width: 320px){
+  .page-header{
+    img.media-object{
+      margin-left:0;
+    }
+    background-color: #fff;
+    padding:10px 0 10px 0;
+    margin: 0;
+    text-align:left;
+    //display:inline-block;
+    width:100%;
+  }
+}
+@media (min-width: 480px){
+  .page-header{
+    img.media-object{
+      margin-left:1em;
+    }
+    background-color: #fff;
+    padding:20px 0 20px 0;
+    margin: 0;
+    text-align:center;
+    //display:inline-block;
+    width:100%;
+  }
+}
 body {
   background-color:#E7E7E7;
 }
@@ -9,14 +35,13 @@ h4.head-back, h5.head-back{
 }
 .nav-tabs {
   background-color: #E7E7E7;
-  margin-bottom: 0;
 
   li.active a:hover {
     background-color: #f5f5f5;
   }
 
   li a {
-    height: 5em;
+    height: 7em;
   }
 }
 img {
@@ -40,6 +65,9 @@ img {
 .tablesorter-bootstrap thead .sorter-false {
   cursor: default;
 }
+.tablesorter-bootstrap thead {
+  background-color: #E7E7E7;
+}
 ul.share-buttons{
   list-style: none;
 }
@@ -50,24 +78,15 @@ ul.share-buttons{
 .dropdown-menu a {
   padding: 0 2px 1px 2px !important;
 }
-.page-header{
-  background-color: #fff;
-  padding:20px 0 20px 0;
-  margin: 0;
-  text-align:center;
-  display:inline-block;
-  width:100%;
-}
 .share{
   width: 30px;
   padding-right: 5px;
 }
 supporters{
-  background-color: white;
   text-align:center;
   img{
     width: 200px;
-    margin-right: 1em;
+    margin: 1em;
   }
 }
 
