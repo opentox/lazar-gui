@@ -71,10 +71,173 @@ get '/predict/dataset/:name' do
   csv
 end
 
-get '/predict/:tmppath/:filename/?' do
+get '/predict/:tmppath/:model/:filename?' do
   response['Content-Type'] = "text/csv"
-  path = "/tmp/#{params[:tmppath]}"
-  send_file path, :filename => "lazar_batch_prediction_#{params[:filename]}", :type => "text/csv", :disposition => "attachment"
+  path = File.join("tmp", params[:tmppath])
+  `sort -gk1 #{path} -o #{path}`
+
+  send_file path, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{params[:model]}_#{params[:filename]}", :type => "text/csv", :disposition => "attachment"
+end
+
+get '/batch/:model/' do
+
+  if params[:model] == "Cramer"
+    dataset = Dataset.find params[:dataset]
+    compounds = dataset.compounds.collect{|c| c.smiles}
+    
+    prediction = [Toxtree.predict(compounds, "Cramer rules"), Toxtree.predict(compounds, "Cramer rules with extensions")]
+    output = {}
+    output["model_name"] = "Oral toxicity (Cramer rules)"
+    output["model_type"] = false
+    output["model_unit"] = false
+    ["measurements", "converted_measurements", "prediction_value", "converted_value", "interval", "converted_interval", "probability", "db_hit", "warnings", "info", "toxtree", "sa_prediction", "sa_matches", "confidence"].each do |key|
+      output["#{key}"] = false
+    end
+    output["toxtree"] = true
+    output["cramer_rules"] = prediction.collect{|array| array.collect{|hash| hash["Cramer rules"]}}.flatten.compact
+    output["cramer_rules_extensions"] = prediction.collect{|array| array.collect{|hash| hash["Cramer rules, with extensions"]}}.flatten.compact
+
+    # td paths to insert results in GUI
+    compound_ids = dataset.compounds.collect{|c| c.id}
+    output["tds"] = compound_ids.each_with_index.map{|cid,idx| "prediction_#{cid}_Cramer_#{idx}"}
+    
+    # write to file
+    # header
+    csv = "ID,Endpoint,Unique SMILES,Cramer rules,Cramer rules with extensions\n"
+    
+    compounds.each_with_index do |smiles, idx|
+      csv << "#{idx+1},#{output["model_name"]},#{smiles},"\
+        "#{output["cramer_rules"][idx] != "nil" ? output["cramer_rules"][idx] : "none" },"\
+        "#{output["cramer_rules_extensions"][idx] != "nil" ? output["cramer_rules_extensions"][idx] : "none"}\n"
+    end
+    File.open(File.join("tmp", params[:tmppath]),"a+"){|file| file.write(csv)}
+
+    # cleanup
+    dataset.delete
+
+    # return output
+    response['Content-Type'] = "application/json"
+    return JSON.pretty_generate output
+
+  else
+    idx = params[:idx].to_i
+    compound = Compound.find params[:compound]
+
+    model = Model::Validation.find params[:model]
+    prediction = model.predict(compound)
+    output = {}
+    output["model_name"] = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
+    output["model_type"] = model.model.class.to_s.match("Classification") ? type = "Classification" : type = "Regression"
+    output["model_unit"] = (type == "Regression") ? "(#{model.unit})" : ""
+    output["converted_model_unit"] = (type == "Regression") ? "#{model.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
+    ["measurements", "converted_measurements", "prediction_value", "converted_value", "interval", "converted_interval", "probability", "db_hit", "warnings", "info", "toxtree", "sa_prediction", "sa_matches", "confidence"].each do |key|
+      output["#{key}"] = false
+    end
+
+    if prediction[:value]
+      inApp = prediction[:neighbors] ? "yes" : "no"
+      inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
+      if prediction[:info] =~ /\b(identical)\b/i
+        prediction[:info] = "This compound was part of the training dataset. All information "\
+          "from this compound was removed from the training data before the "\
+          "prediction, to obtain unbiased results."
+      end
+      note = "\"#{prediction[:warnings].uniq.join(" ")}" + ( prediction[:info] ? "#{prediction[:info]}\"" : "\"" )
+
+      output["prediction_value"] = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)}" : "#{prediction[:value]}"
+      output["converted_value"] = "#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)}" if type == "Regression"
+
+      output["db_hit"] = prediction[:info] if prediction[:info]
+      
+      if prediction[:measurements].is_a?(Array)
+        output["measurements"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{model.unit})"} : prediction[:measurements].collect{|value| "#{value}"}
+        output["converted_measurements"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)} #{model.unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"} : false
+      else
+        output["measurements"] = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{model.unit})}" : "#{prediction[:measurements]}"
+        output["converted_measurements"] = (type == "Regression") ? "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(model.unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : false
+
+      end #db_hit
+
+      if type == "Regression"
+
+        if !prediction[:prediction_interval].nil?
+          interval = prediction[:prediction_interval]
+          output['interval'] = "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)}"
+          output['converted_interval'] = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)}"
+        end #prediction interval
+
+        csv = "#{idx+1},#{output['model_name']},#{output['model_type']},#{compound.smiles},"\
+          "#{output['prediction_value'] != false ? output['prediction_value'] : "-"},"\
+          "#{output['converted_value'] != false ? output['converted_value'] : "-"},"\
+          "#{output['interval'].split(" - ").first.strip unless output['interval'] == false},"\
+          "#{output['interval'].split(" - ").last.strip unless output['interval'] == false},"\
+          "#{output['converted_interval'].split(" - ").first.strip unless output['converted_interval'] == false},"\
+          "#{output['converted_interval'].split(" - ").last.strip unless output['converted_interval'] == false},"\
+          "#{inApp},#{inT},#{note.nil? ? "" : note.chomp}\n"
+      else # Classification
+
+        # consensus mutagenicity
+          
+        sa_prediction = KaziusAlerts.predict(compound.smiles)
+        lazar_mutagenicity = prediction
+        confidence = 0
+        lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
+        if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
+          confidence = 0.85
+        elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
+          confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
+        elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
+          confidence = 0.11
+        elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
+          confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
+        end
+        output["sa_prediction"] = sa_prediction
+        output["sa_matches"] = sa_prediction[:matches].flatten.first unless sa_prediction[:matches].blank?
+        output["confidence"] = confidence.signif(3)
+        output["model_name"] = "Lazar #{model.endpoint.gsub('_', ' ').downcase} (#{model.species}):"
+        output["probability"] = prediction[:probabilities] ? prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"} : false
+
+        csv = "#{idx+1},Consensus mutagenicity,#{compound.smiles},"\
+          "#{output['sa_prediction']['prediction'] == false ? "non-mutagenic" : "mutagenic"},"\
+          "#{output['confidence']},#{output['sa_matches'] != false ? "\"#{output['sa_matches']}\"" : "none"}, ,"\
+          "#{output['model_type']},#{output['prediction_value']},"\
+          "#{output['probability'][0] != false ? output['probability'][0].split(":").last : ""},"\
+          "#{output['probability'][1] != false ? output['probability'][1].split(":").last : ""},"\
+          "#{inApp},#{inT},#{note.nil? ? "" : note}\n"
+
+      end
+      
+      output["warnings"] = prediction[:warnings] if prediction[:warnings]
+
+    else #no prediction value
+      inApp = "no"
+      inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
+      if prediction[:info] =~ /\b(identical)\b/i
+        prediction[:info] = "This compound was part of the training dataset. All information "\
+          "from this compound was removed from the training data before the "\
+          "prediction, to obtain unbiased results."
+      end
+      note = "\"#{prediction[:warnings].join(" ")}\"" + ( prediction[:info] ? "\"#{prediction[:info]}\"" : "" )
+
+      output["warnings"] = prediction[:warnings]
+      output["info"] = prediction[:info] if prediction[:info]
+
+      if type == "Regression"
+        csv = "#{idx+1},#{output['model_name']},#{output['model_type']},#{compound.smiles},,,,,,,"+ [inApp,inT,note].join(",")+"\n"
+      else
+        csv = "#{idx+1},Consensus mutagenicity,#{compound.smiles},,,,,#{output['model_type']},,,,"+ [inApp,inT,note].join(",")+"\n"
+      end
+
+    end #prediction value
+
+    # write to file
+    File.open(File.join("tmp", params[:tmppath]),"a"){|file| file.write(csv)}
+
+    # return output
+    response['Content-Type'] = "application/json"
+    return JSON.pretty_generate output
+
+  end# if Cramer
 end
 
 post '/predict/?' do
@@ -90,152 +253,56 @@ post '/predict/?' do
     @filename = params[:fileselect][:filename]
     begin
       input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename]), true
+      $logger.debug "save dataset #{params[:fileselect][:filename]}"
       if input.class == OpenTox::Dataset
-        dataset = Dataset.find input
+        @dataset = Dataset.find input
+        @compounds = @dataset.compounds
       else
         bad_request_error "Could not serialize file '#{@filename}'."
       end
     rescue
       bad_request_error "Could not serialize file '#{@filename}'."
     end
-    @compounds = dataset.compounds
+
     if @compounds.size == 0
       message = dataset[:warnings]
-      dataset.delete
+      @dataset.delete
       bad_request_error message
     end
-
-    # for csv export
-    @batch = {}
-    # for haml table
-    @view = {}
-
-    @compounds.each{|c| @view[c] = []}
-    params[:selection].keys.each do |model_id|
-      model = Model::Validation.find model_id
-      @batch[model] = []
-      @compounds.each_with_index do |compound,idx|
-        prediction = model.predict(compound)
-        @batch[model] << [compound, prediction]
-        @view[compound] << [model,prediction]
-      end
-    end
-
-    @csvhash = {}
-    @warnings = dataset[:warnings]
-    dupEntries = {}
-    delEntries = ""
     
-    # split duplicates and deleted entries
-    @warnings.each do |w|
-      substring = w.match(/line .* of/)
-      unless substring.nil?
-        delEntries += "\"#{w.sub(/\b(tmp\/)\b/,"")}\"\n"
+    @models = params[:selection].keys
+    @tmppaths = {}
+    @models.each do |model|
+      m = Model::Validation.find model
+      type = (m.regression? ? "Regression" : "Classification") unless model == "Cramer"
+      # add header for regression
+      if type == "Regression"
+        unit = (type == "Regression") ? "(#{m.unit})" : ""
+        converted_unit = (type == "Regression") ? "#{m.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
+        header = "ID,Endpoint,Type,Unique SMILES,Prediction #{unit},Prediction #{converted_unit},"\
+          "Interval Low #{unit},Interval High #{unit},Interval Low #{converted_unit},Interval High #{converted_unit},"\
+          "inApplicabilityDomain,inTrainningSet,Note\n"
       end
-      substring = w.match(/rows .* Entries/)
-      unless substring.nil?
-        lines = []
-        substring[0].split(",").each{|s| lines << s[/\d+/]}
-        lines.shift
-        lines.each{|l| dupEntries[l.to_i] = w.split(".").first}
+      # add header for classification
+      if type == "Classification"
+        av = m.prediction_feature.accept_values
+        header = "ID,Endpoint,Unique SMILES,Structural alerts prediction,Structural alerts confidence,"\
+          "Structural alerts for mutagenicity,Lazar mutagenicity (Salmonella typhimurium),Type,Prediction,"\
+          "predProbability #{av[0]},predProbability #{av[1]},inApplicabilityDomain,inTrainningSet,Note\n"
       end
+      path = File.join("tmp", "#{Time.now.strftime("%Y-%m-%d")}_#{SecureRandom.urlsafe_base64(5)}")
+      File.open(path, "w"){|f| f.write(header) if header}
+      @tmppaths[model] = path.split("/").last
     end
 
-    @batch.each_with_index do |hash, idx|
-      @csvhash[idx] = ""
-      model = hash[0]
-      # create header
-      if model.regression?
-        predAunit = "(#{model.unit})"
-        predBunit = "(#{model.unit =~ /mmol\/L/ ? "(mol/L)" : "(mg/kg_bw/day)"})"
-        @csvhash[idx] = "\"ID\",\"Endpoint\",\"Type\",\"Unique SMILES\",\"Prediction #{predAunit}\",\"Prediction #{predBunit}\",\"95% Prediction interval (low) #{predAunit}\",\"95% Prediction interval (high) #{predAunit}\",\"95% Prediction interval (low) #{predBunit}\",\"95% Prediction interval (high) #{predBunit}\",\"inApplicabilityDomain\",\"inTrainningSet\",\"Note\"\n"
-      else #classification
-        av = model.prediction_feature.accept_values
-        probFirst = av[0].capitalize
-        probLast = av[1].capitalize
-        @csvhash[idx] = "\"ID\",\"Endpoint\",\"Type\",\"Unique SMILES\",\"Prediction\",\"predProbability#{probFirst}\",\"predProbability#{probLast}\",\"inApplicabilityDomain\",\"inTrainningSet\",\"Note\"\n"
-      end
-      values = hash[1]
-      dupEntries.keys.each{|k| values.insert(k-1, dupEntries[k])}.compact!
-      
-      values.each_with_index do |array, id|
-        type = (model.regression? ? "Regression" : "Classification")
-        endpoint = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
-      
-        if id == 0
-          @csvhash[idx] += delEntries unless delEntries.blank?
-        end
-        unless array.kind_of? String
-          compound = array[0]
-          prediction = array[1]
-          smiles = compound.smiles
-          
-          if prediction[:neighbors]
-            if prediction[:value]
-              pred = prediction[:value].numeric? ? "#{prediction[:value].delog10.signif(3)}" : prediction[:value]
-              predA = prediction[:value].numeric? ? "#{prediction[:value].delog10.signif(3)}" : prediction[:value]
-              predAunit = prediction[:value].numeric? ? "(#{model.unit})" : ""
-              predB = prediction[:value].numeric? ? "#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)}" : prediction[:value]
-              predBunit = prediction[:value].numeric? ? "#{model.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
-              int = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
-              intervalLow = (int.nil? ? "" : "#{int[1].delog10.signif(3)}")
-              intervalHigh = (int.nil? ? "" : "#{int[0].delog10.signif(3)}")
-              intervalLowMg = (int.nil? ? "" : "#{compound.mmol_to_mg(int[1].delog10).signif(3)}")
-              intervalHighMg = (int.nil? ? "" : "#{compound.mmol_to_mg(int[0].delog10).signif(3)}")
-              inApp = "yes"
-              inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
-              note = prediction[:warnings].join("\n") + ( prediction[:info] ? prediction[:info].sub(/\'.*\'/,"") : "\n" )
-              
-              unless prediction[:probabilities].nil?
-                av = model.prediction_feature.accept_values
-                propA = "#{prediction[:probabilities][av[0]].to_f.signif(3)}"
-                propB = "#{prediction[:probabilities][av[1]].to_f.signif(3)}"
-              end
-            else
-              # no prediction value only one neighbor
-              inApp = "no"
-              inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
-              note = prediction[:warnings].join("\n") + ( prediction[:info] ? prediction[:info].sub(/\'.*\'/,"") : "\n" )
-            end
-          else
-            # no prediction value
-            inApp = "no"
-            inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
-            note = prediction[:warnings].join("\n") + ( prediction[:info] ? prediction[:info].sub(/\'.*\'/,"") : "\n" )
-          end
-          if @warnings
-            @warnings.each do |w|
-              note += (w.split(".").first + ".") if /\b(#{Regexp.escape(smiles)})\b/ === w
-            end
-          end
-        else
-          # string note for duplicates
-          endpoint = type = smiles = pred = predA = predB = propA = propB = intervalLow = intervalHigh = intervalLowMg = intervalHighMg = inApp = inT = ""
-          note = array
-        end
-        if model.regression?
-          @csvhash[idx] += "\"#{id+1}\",\"#{endpoint}\",\"#{type}\",\"#{smiles}\",\"#{predA}\",\"#{predB}\",\"#{intervalLow}\",\"#{intervalHigh}\",\"#{intervalLowMg}\",\"#{intervalHighMg}\",\"#{inApp}\",\"#{inT}\",\"#{note.chomp}\"\n"
-        else
-          @csvhash[idx] += "\"#{id+1}\",\"#{endpoint}\",\"#{type}\",\"#{smiles}\",\"#{pred}\",\"#{propA}\",\"#{propB}\",\"#{inApp}\",\"#{inT}\",\"#{note.chomp}\"\n"
-        end
-      end
-    end
-    t = Tempfile.new
-    @csvhash.each do |model, csv|
-      t.write(csv)
-      t.write("\n")
-    end
-    t.rewind
-    @tmppath = t.path.split("/").last
-
-    dataset.delete
     File.delete File.join("tmp", params[:fileselect][:filename])
     return haml :batch
   end
 
+  # single compound prediction
   # validate identifier input
   if !params[:identifier].blank?
-    @identifier = params[:identifier]
+    @identifier = params[:identifier].strip
     $logger.debug "input:#{@identifier}"
     # get compound from SMILES
     @compound = Compound.from_smiles @identifier

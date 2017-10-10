@@ -4,12 +4,6 @@
     $('.modal').on('hidden.bs.modal', function () {
       $(this).removeData('bs.modal');
     });
-    /*TableExport.prototype.bootstrap = ["btn", "btn-default", "btn-toolbar"];
-    var BootstrapTable = document.getElementById('overview');
-    new TableExport(BootstrapTable, {
-      ignoreCSS: ".ignore",
-      bootstrap: true,
-    });*/
   });
 
 %div.well
@@ -24,7 +18,7 @@
         %tr
           %td{:id=>"compound"}
             %b.title Compound
-            %p= embedded_svg @compound.svg, class: '.ignore', title: "#{@compound.smiles}"
+            %p= embedded_svg(@compound.svg, title: @compound.smiles)
             %p= @compound.smiles
           - @model_types = {}
           - @dbhit = {}
@@ -47,6 +41,16 @@
                   %p
                   %b Structural alerts:
                   %p
+                  / check for database hit
+                  - if prediction[:info] =~ /\b(identical)\b/i
+                    - @dbhit[i] = true
+                    / show message about dbhit and measurements
+                    %p
+                      :plain
+                        This compound was part of the training dataset. <i>All</i> information </br>
+                        from this compound was removed from the training data before the </br>
+                        prediction, to obtain unbiased results.
+                      %p
                   %b Prediction:
                   %br
                   =(hash[:prediction] == true ? "mutagenic" : "non-mutagenic")
@@ -71,19 +75,20 @@
                   - if prediction[:info] =~ /\b(identical)\b/i
                     - @dbhit[i] = true
                     / show message about dbhit and measurements
-                    %p
-                      :plain
-                        This compound was part of the training dataset. <i>All</i> information </br>
-                        from this compound was removed from the training data before the </br>
-                        prediction, to obtain unbiased results.
+                    - unless sa_prediction
                       %p
-                      %b Measured activity:
-                      %br
-                      - if prediction[:measurements].is_a?(Array)
-                        = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
-                      - else
-                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
-                  
+                        :plain
+                          This compound was part of the training dataset. <i>All</i> information </br>
+                          from this compound was removed from the training data before the </br>
+                          prediction, to obtain unbiased results.
+                        %p
+                        %b Measured activity:
+                        %br
+                        - if prediction[:measurements].is_a?(Array)
+                          = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                        - else
+                          = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                    
                   - else
                     - @dbhit[i] = false
                   
@@ -111,17 +116,6 @@
                           %br
                           = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                   
-                  / show warnings and info
-                  -#%p
-                    - if !prediction[:info].blank?
-                      %b Info:
-                      %br
-                      %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                    - if !prediction[:warnings].blank?
-                      %b Warnings:
-                      - prediction[:warnings].uniq.each do |warning|
-                        %br
-                        %p=warning.sub(/,/, ",<br>")
                 - else
                   %p
                   - if !prediction[:info].blank?
@@ -148,6 +142,6 @@
 
   / always show the neighbors table, message is given there. Except only Cramer is selected.
   - unless @predictions.blank?
-    = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
+    = haml :neighbors, :layout => false
     
 

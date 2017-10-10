@@ -60,7 +60,7 @@
                     / Compound
                     - c = Compound.find(neighbor)
                     %td{:style =>"vertical-align:middle;padding-left:1em;width:50%;"}
-                      = c.svg
+                      = embedded_svg(c.svg, title: c.smiles)
                       %p= c.smiles
                     
                     / Measured Activity
