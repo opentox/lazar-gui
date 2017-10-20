@@ -192,7 +192,7 @@ get '/batch/:model/' do
           confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
         end
         output['sa_prediction'] = sa_prediction
-        output['sa_matches'] = sa_prediction[:matches].flatten unless sa_prediction[:matches].blank?
+        output['sa_matches'] = sa_prediction[:matches].flatten.first unless sa_prediction[:matches].blank?
         output['confidence'] = confidence.signif(3)
         output['model_name'] = "Lazar #{model.endpoint.gsub('_', ' ').downcase} (#{model.species}):"
         output['probability'] = prediction[:probabilities] ? prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"} : false
@@ -258,9 +258,7 @@ post '/predict/?' do
       $logger.debug "save dataset #{params[:fileselect][:filename]}"
       if input.class == OpenTox::Dataset
         @dataset = Dataset.find input
-        $logger.debug "get compounds"
         @compounds = @dataset.compounds
-        $logger.debug "get compounds finish"
       else
         bad_request_error "Could not serialize file '#{@filename}'."
       end
@@ -276,7 +274,6 @@ post '/predict/?' do
     
     @models = params[:selection].keys
     @tmppaths = {}
-    $logger.debug "get endpoint"
     @models.each do |model|
       m = Model::Validation.find model
       type = (m.regression? ? "Regression" : "Classification") unless model == "Cramer"
@@ -300,7 +297,6 @@ post '/predict/?' do
       File.open(path, "w"){|f| f.write(header) if header}
       @tmppaths[model] = path.split("/").last
     end
-    $logger.debug "get endpoint finished"
 
     File.delete File.join("tmp", params[:fileselect][:filename])
     return haml :batch
