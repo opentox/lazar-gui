@@ -200,7 +200,7 @@ get '/batch/:model/' do
         csv = "#{idx+1},Consensus mutagenicity,#{compound.smiles},"\
           "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{prediction[:measurements].join("; ") if prediction[:info]}\","\
           "#{sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"},"\
-          "#{output['confidence']},#{output['sa_matches'] != false ? "\"#{output['sa_matches'].join("; ")}\"" : "none"},"\
+          "#{output['confidence']},#{output['sa_matches'] != false ? "\"#{output['sa_matches']}\"" : "none"},"\
           "#{output['prediction_value']},"\
           "#{output['probability'][0] != false ? output['probability'][0].split(":").last : ""},"\
           "#{output['probability'][1] != false ? output['probability'][1].split(":").last : ""},"\
