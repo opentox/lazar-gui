@@ -38,39 +38,34 @@
                 - if sa_prediction
                   - hash = sa_prediction[:prediction]
                   - confidence = sa_prediction[:confidence]
-                  %p
-                  %b Structural alerts:
-                  %p
                   / check for database hit
                   - if prediction[:info] =~ /\b(identical)\b/i
                     - @dbhit[i] = true
-                    / show message about dbhit and measurements
                     %p
                       :plain
                         This compound was part of the training dataset. <i>All</i> information </br>
                         from this compound was removed from the training data before the </br>
                         prediction, to obtain unbiased results.
                       %p
-                  %b Prediction:
+                      %b Measured activity:
+                      %br
+                      = prediction[:measurements].join("; ")
+                  %b Consensus prediction:
                   %br
                   =(hash[:prediction] == true ? "mutagenic" : "non-mutagenic")
                   %p
-                  %b Confidence:
+                  %b Consensus confidence:
                   %br
                   =confidence.to_f.signif(3)
                   %p
                   %b Structural alerts for mutagenicity:
                   %br
-                  =hash[:matches].flatten.first
-                  %p
+                  =hash[:matches].blank? ? "none" : hash[:matches].join("; ")
                 / check for prediction
+                %p
                 - if prediction[:neighbors] and !prediction[:value].nil?
                   %b.title= ("Lazar #{@models[i].endpoint.gsub('_', ' ').downcase} (#{@models[i].species}):" if sa_prediction)
                   %p
-                  / show model type (classification|regression)
-                  %b Type:
-                  = type
-                  %p 
                   / check for database hit
                   - if prediction[:info] =~ /\b(identical)\b/i
                     - @dbhit[i] = true
@@ -81,14 +76,14 @@
                           This compound was part of the training dataset. <i>All</i> information </br>
                           from this compound was removed from the training data before the </br>
                           prediction, to obtain unbiased results.
-                        %p
+                      %p
                         %b Measured activity:
                         %br
                         - if prediction[:measurements].is_a?(Array)
                           = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
                         - else
                           = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
-                    
+                  
                   - else
                     - @dbhit[i] = false
                   
@@ -116,16 +111,23 @@
                           %br
                           = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                   
+                    %p
+                    - if !prediction[:warnings].blank?
+                      %b Warnings:
+                      %br
+                      =prediction[:warnings].join("</br>")
+
                 - else
                   %p
                   - if !prediction[:info].blank?
-                    %b Info:
-                    %br
-                    %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
+                    :plain
+                      This compound was part of the training dataset. <i>All</i> information </br>
+                      from this compound was removed from the training data before the </br>
+                      prediction, to obtain unbiased results.
                   - if !prediction[:warnings].blank?
                     %b Warnings:
-                    - prediction[:warnings].uniq.each do |warning|
-                      %p=warning.sub(/,/, ",<br>")
+                    %br
+                    =prediction[:warnings].join("</br>")
 
           / show Cramer rules if checked
           - if @toxtree == true
@@ -143,5 +145,3 @@
   / always show the neighbors table, message is given there. Except only Cramer is selected.
   - unless @predictions.blank?
     = haml :neighbors, :layout => false
-    
-

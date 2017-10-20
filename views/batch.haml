@@ -26,10 +26,10 @@
     // create request
     if (model == "Cramer"){
       var dataset = '#{@dataset.id}';
-      var uri = "#{to("/batch/")}" + model + '/?dataset=' + escape(dataset) + '&tmppath=' + tmppath + '&last=' + last;
+      var uri = "#{to("/batch/")}" + model + '/?dataset=' + escape(dataset) + '&tmppath=' + tmppath;
     } else {
       var dataset = '#{@dataset.id}';
-      var uri = "#{to("/batch/")}" + model + '/?compound=' + escape(compound) + '&dataset=' + dataset + '&idx=' + idx + '&tmppath=' + tmppath + '&last=' + last;
+      var uri = "#{to("/batch/")}" + model + '/?compound=' + escape(compound) + '&dataset=' + dataset + '&idx=' + idx + '&tmppath=' + tmppath;
     };
     var aClient = new HttpClient();
     aClient.get(uri, function(res) {
@@ -56,15 +56,20 @@
           if (response['db_hit'] != false){
             var value = document.createTextNode(response['db_hit']);
             p.appendChild(value);
+            var h2 = document.createElement("h5");
+            var t = document.createTextNode("Measurements:");
+            h2.appendChild(t);
+            p.appendChild(h2);
+            for (var i=0; i<response['measurements'].length; i++){
+              var value = document.createTextNode(response['measurements'][i]);
+              var br = document.createElement("br");
+              p.appendChild(value);
+              p.appendChild(br);
+            };
           };
-          // Structural alerts
-          var h2 = document.createElement("h5");
-          var t = document.createTextNode("Structural alerts:");
-          h2.appendChild(t);
-          p.appendChild(h2);
-          // prediction
+          // Consensus prediction
           var h3 = document.createElement("h5");
-          var t = document.createTextNode("Prediction:");
+          var t = document.createTextNode("Consensus prediction:");
           if (response['sa_prediction']['prediction'] == false){
             var value = document.createTextNode("non-mutagenic");
           };
@@ -74,9 +79,9 @@
           h3.appendChild(t);
           p.appendChild(h3);
           p.appendChild(value);
-          // confidence
+          // Consensus confidence
           var h4 = document.createElement("h5");
-          var t = document.createTextNode("Confidence:");
+          var t = document.createTextNode("Consensus confidence:");
           var value = document.createTextNode(response['confidence']);
           h4.appendChild(t);
           p.appendChild(h4);
@@ -110,13 +115,6 @@
             var value = document.createTextNode(response['model_name']);
             h.appendChild(value);
             p.appendChild(h);
-          } else if (val == "type") {
-            var t = document.createTextNode("Type: ");
-            var value = document.createTextNode(response['model_type']);
-            h.appendChild(t);
-            p.appendChild(h);
-            p.appendChild(value);
-            h.style.display = "inline";
           } else if (val == "db_hit" && response['db_hit'] != false && response['sa_prediction'] == false) {
             var value = document.createTextNode(response['db_hit']);
             p.appendChild(value);

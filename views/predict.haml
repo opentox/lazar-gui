@@ -130,7 +130,7 @@
       %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
       %br
       %span.btn.btn-default.btn-file
-        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
+        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :autocomplete=>"off", :accept=>"text/csv"}
 
   %fieldset#middle.well
     %h2 2. Select one or more endpoints

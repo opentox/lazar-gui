@@ -135,14 +135,13 @@ get '/batch/:model/' do
     end
 
     if prediction[:value]
-      inApp = prediction[:neighbors] ? "yes" : "no"
-      inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
+      inApp = (prediction[:warnings].join(" ") =~ /Cannot/ ? "no" : (prediction[:warnings].join(" ") =~ /may|Insufficient/ ? "maybe" : "yes"))
       if prediction[:info] =~ /\b(identical)\b/i
         prediction[:info] = "This compound was part of the training dataset. All information "\
           "from this compound was removed from the training data before the "\
           "prediction, to obtain unbiased results."
       end
-      note = "\"#{prediction[:warnings].uniq.join(" ")}" + ( prediction[:info] ? "#{prediction[:info]}\"" : "\"" )
+      note = "\"#{prediction[:warnings].uniq.join(" ")}\""
 
       output["prediction_value"] = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)}" : "#{prediction[:value]}"
       output["converted_value"] = "#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)}" if type == "Regression"
@@ -166,14 +165,15 @@ get '/batch/:model/' do
           output['converted_interval'] = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)}"
         end #prediction interval
 
-        csv = "#{idx+1},#{output['model_name']},#{output['model_type']},#{compound.smiles},"\
-          "#{output['prediction_value'] != false ? output['prediction_value'] : "-"},"\
-          "#{output['converted_value'] != false ? output['converted_value'] : "-"},"\
+        csv = "#{idx+1},#{output['model_name']},#{compound.smiles},"\
+          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{prediction[:measurements].join("; ") if prediction[:info]}\","\
+          "#{output['prediction_value'] != false ? output['prediction_value'] : ""},"\
+          "#{output['converted_value'] != false ? output['converted_value'] : ""},"\
           "#{output['interval'].split(" - ").first.strip unless output['interval'] == false},"\
           "#{output['interval'].split(" - ").last.strip unless output['interval'] == false},"\
           "#{output['converted_interval'].split(" - ").first.strip unless output['converted_interval'] == false},"\
           "#{output['converted_interval'].split(" - ").last.strip unless output['converted_interval'] == false},"\
-          "#{inApp},#{inT},#{note.nil? ? "" : note.chomp}\n"
+          "#{inApp},#{note.nil? ? "" : note.chomp}\n"
       else # Classification
 
         # consensus mutagenicity
@@ -191,19 +191,20 @@ get '/batch/:model/' do
         elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
           confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
         end
-        output["sa_prediction"] = sa_prediction
-        output["sa_matches"] = sa_prediction[:matches].flatten.first unless sa_prediction[:matches].blank?
-        output["confidence"] = confidence.signif(3)
-        output["model_name"] = "Lazar #{model.endpoint.gsub('_', ' ').downcase} (#{model.species}):"
-        output["probability"] = prediction[:probabilities] ? prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"} : false
+        output['sa_prediction'] = sa_prediction
+        output['sa_matches'] = sa_prediction[:matches].flatten unless sa_prediction[:matches].blank?
+        output['confidence'] = confidence.signif(3)
+        output['model_name'] = "Lazar #{model.endpoint.gsub('_', ' ').downcase} (#{model.species}):"
+        output['probability'] = prediction[:probabilities] ? prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"} : false
 
         csv = "#{idx+1},Consensus mutagenicity,#{compound.smiles},"\
-          "#{output['sa_prediction']['prediction'] == false ? "non-mutagenic" : "mutagenic"},"\
-          "#{output['confidence']},#{output['sa_matches'] != false ? "\"#{output['sa_matches']}\"" : "none"}, ,"\
-          "#{output['model_type']},#{output['prediction_value']},"\
+          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{prediction[:measurements].join("; ") if prediction[:info]}\","\
+          "#{sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"},"\
+          "#{output['confidence']},#{output['sa_matches'] != false ? "\"#{output['sa_matches'].join("; ")}\"" : "none"},"\
+          "#{output['prediction_value']},"\
           "#{output['probability'][0] != false ? output['probability'][0].split(":").last : ""},"\
           "#{output['probability'][1] != false ? output['probability'][1].split(":").last : ""},"\
-          "#{inApp},#{inT},#{note.nil? ? "" : note}\n"
+          "#{inApp},#{note.nil? ? "" : note}\n"
 
       end
       
@@ -211,21 +212,22 @@ get '/batch/:model/' do
 
     else #no prediction value
       inApp = "no"
-      inT = prediction[:info] =~ /\b(identical)\b/i ? "yes" : "no"
       if prediction[:info] =~ /\b(identical)\b/i
         prediction[:info] = "This compound was part of the training dataset. All information "\
           "from this compound was removed from the training data before the "\
           "prediction, to obtain unbiased results."
       end
-      note = "\"#{prediction[:warnings].join(" ")}\"" + ( prediction[:info] ? "\"#{prediction[:info]}\"" : "" )
+      note = "\"#{prediction[:warnings].join(" ")}\""
 
       output["warnings"] = prediction[:warnings]
       output["info"] = prediction[:info] if prediction[:info]
 
       if type == "Regression"
-        csv = "#{idx+1},#{output['model_name']},#{output['model_type']},#{compound.smiles},,,,,,,"+ [inApp,inT,note].join(",")+"\n"
+        csv = "#{idx+1},#{output['model_name']},#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
+          "#{prediction[:measurements] if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
       else
-        csv = "#{idx+1},Consensus mutagenicity,#{compound.smiles},,,,,#{output['model_type']},,,,"+ [inApp,inT,note].join(",")+"\n"
+        csv = "#{idx+1},Consensus mutagenicity,#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
+          "#{prediction[:measurements] if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
       end
 
     end #prediction value
@@ -256,7 +258,9 @@ post '/predict/?' do
       $logger.debug "save dataset #{params[:fileselect][:filename]}"
       if input.class == OpenTox::Dataset
         @dataset = Dataset.find input
+        $logger.debug "get compounds"
         @compounds = @dataset.compounds
+        $logger.debug "get compounds finish"
       else
         bad_request_error "Could not serialize file '#{@filename}'."
       end
@@ -272,6 +276,7 @@ post '/predict/?' do
     
     @models = params[:selection].keys
     @tmppaths = {}
+    $logger.debug "get endpoint"
     @models.each do |model|
       m = Model::Validation.find model
       type = (m.regression? ? "Regression" : "Classification") unless model == "Cramer"
@@ -279,21 +284,23 @@ post '/predict/?' do
       if type == "Regression"
         unit = (type == "Regression") ? "(#{m.unit})" : ""
         converted_unit = (type == "Regression") ? "#{m.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
-        header = "ID,Endpoint,Type,Unique SMILES,Prediction #{unit},Prediction #{converted_unit},"\
-          "Interval Low #{unit},Interval High #{unit},Interval Low #{converted_unit},Interval High #{converted_unit},"\
-          "inApplicabilityDomain,inTrainningSet,Note\n"
+        header = "ID,Endpoint,Unique SMILES,inTrainingSet,Measurements,Prediction #{unit},Prediction #{converted_unit},"\
+          "Prediction Interval Low #{unit},Prediction Interval High #{unit},"\
+          "Prediction Interval Low #{converted_unit},Prediction Interval High #{converted_unit},"\
+          "inApplicabilityDomain,Note\n"
       end
       # add header for classification
       if type == "Classification"
         av = m.prediction_feature.accept_values
-        header = "ID,Endpoint,Unique SMILES,Structural alerts prediction,Structural alerts confidence,"\
-          "Structural alerts for mutagenicity,Lazar mutagenicity (Salmonella typhimurium),Type,Prediction,"\
-          "predProbability #{av[0]},predProbability #{av[1]},inApplicabilityDomain,inTrainningSet,Note\n"
+        header = "ID,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
+          "Structural alerts for mutagenicity,Lazar Prediction,"\
+          "Lazar predProbability #{av[0]},Lazar predProbability #{av[1]},inApplicabilityDomain,Note\n"
       end
       path = File.join("tmp", "#{Time.now.strftime("%Y-%m-%d")}_#{SecureRandom.urlsafe_base64(5)}")
       File.open(path, "w"){|f| f.write(header) if header}
       @tmppaths[model] = path.split("/").last
     end
+    $logger.debug "get endpoint finished"
 
     File.delete File.join("tmp", params[:fileselect][:filename])
     return haml :batch
