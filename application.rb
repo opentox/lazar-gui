@@ -207,49 +207,61 @@ get '/task/?' do
     smiles = compound.smiles
     task = Task.find(params[:predictions].to_s)
     unless task.predictions[params[:model]].nil?
-      html = "<table class=\"table table-bordered single-batch\"><tr>"
-      html += "<td>#{image}</br>#{smiles}</br></td>"
-      string = "<td><table class=\"table\">"
-      prediction = task.predictions[params[:model]][pageNumber.to_i]
-      sorter = []
-      if prediction[:info]
-        sorter << {"Info" => prediction[:info]}
-        if prediction[:measurements_string].kind_of?(Array)
-          sorter << {"Measured activity" => "#{prediction[:measurements_string].join(";")}</br>#{prediction[:converted_measurements].join(";")}"}
-        else
-          sorter << {"Measured activity" => "#{prediction[:measurements_string]}</br>#{prediction[:converted_measurements]}"}
-        end
-      end
-
-      # regression
-      if prediction[:prediction_interval]
-        sorter << {"Prediction" => "#{prediction[:prediction_value]}</br>#{prediction[:converted_prediction_value]}"}
-        sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction[:converted_interval]}"}
-        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
-      # classification
-      elsif prediction[:probabilities]
-        sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
-        sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
-        sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}
-        sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
-        sorter << {"Prediction" => prediction[:value]}
-        sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
+      if params[:model] == "Cramer"
+        prediction = task.predictions[params[:model]]
+        html = "<table class=\"table table-bordered single-batch\"><tr>"
+        html += "<td>#{image}</br>#{smiles}</br></td>"
+        string = "<td><table class=\"table\">"
+        string += "<tr class=\"hide-top\"><td>Cramer rules:</td><td>#{prediction["Cramer rules"][pageNumber.to_i]}</td>"
+        string += "<tr><td>Cramer rules, with extensions:</td><td>#{prediction["Cramer rules, with extensions"][pageNumber.to_i]}</td>"
+        string += "</table></td>"
+        html += "#{string}</tr></table>"
       else
-        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+        html = "<table class=\"table table-bordered single-batch\"><tr>"
+        html += "<td>#{image}</br>#{smiles}</br></td>"
+        string = "<td><table class=\"table\">"
+        prediction = task.predictions[params[:model]][pageNumber.to_i]
+        sorter = []
+        $logger.debug prediction
+        if prediction[:info]
+          sorter << {"Info" => prediction[:info]}
+          if prediction[:measurements_string].kind_of?(Array)
+            sorter << {"Measured activity" => "#{prediction[:measurements_string].join(";")}</br>#{prediction[:converted_measurements].join(";")}"}
+          else
+            sorter << {"Measured activity" => "#{prediction[:measurements_string]}</br>#{prediction[:converted_measurements]}"}
+          end
+        end
+
+        # regression
+        if prediction[:prediction_interval]
+          sorter << {"Prediction" => "#{prediction[:prediction_value]}</br>#{prediction[:converted_prediction_value]}"}
+          sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction[:converted_interval]}"}
+          sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+        # classification
+        elsif prediction[:probabilities]
+          sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
+          sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
+          sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}
+          sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
+          sorter << {"Prediction" => prediction[:value]}
+          sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
+        else
+          sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+        end
+        sorter.each_with_index do |hash,idx|
+          k = hash.keys[0]
+          v = hash.values[0]
+          string += (idx == 0 ? "<tr class=\"hide-top\">" : "<tr>")+(k =~ /lazar/i ? "<td colspan=\"2\">" : "<td>")
+          # keyword
+          string += "#{k}:"
+          string += "</td><td>"
+          # values
+          string += "#{v}"
+          string += "</td></tr>"
+        end
+        string += "</table></td>"
+        html += "#{string}</tr></table>"
       end
-      sorter.each_with_index do |hash,idx|
-        k = hash.keys[0]
-        v = hash.values[0]
-        string += (idx == 0 ? "<tr class=\"hide-top\">" : "<tr>")+(k =~ /lazar/i ? "<td colspan=\"2\">" : "<td>")
-        # keyword
-        string += "#{k}:"
-        string += "</td><td>"
-        # values
-        string += "#{v}"
-        string += "</td></tr>"
-      end
-      string += "</table></td>"
-      html += "#{string}</tr></table>"
     end
     return JSON.pretty_generate(:predictions => [html])
   end
@@ -409,6 +421,13 @@ post '/predict/?' do
               "#{output["cramer_rules"][idx] != "nil" ? output["cramer_rules"][idx] : "none" },"\
               "#{output["cramer_rules_extensions"][idx] != "nil" ? output["cramer_rules_extensions"][idx] : "none"}\n"
           end
+          #predictions = []
+          #predictions << {"Cramer rules" => output["cramer_rules"]}
+          #predictions << {"Cramer rules, with extensions" => output["cramer_rules_extensions"]}
+          predictions = {}
+          predictions["Cramer rules"] = output["cramer_rules"].collect{|rule| rule != "nil" ? rule : "none"}
+          predictions["Cramer rules, with extensions"] = output["cramer_rules_extensions"].collect{|rule| rule != "nil" ? rule : "none"}
+
           # write csv
           t[:csv] = csv
           # write predictions
