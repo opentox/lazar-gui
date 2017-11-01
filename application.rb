@@ -207,27 +207,51 @@ get '/task/?' do
     smiles = compound.smiles
     task = Task.find(params[:predictions].to_s)
     unless task.predictions[params[:model]].nil?
-      array = []
       html = "<table class=\"table table-bordered single-batch\"><tr>"
       html += "<td>#{image}</br>#{smiles}</br></td>"
       string = "<td><table class=\"table\">"
       prediction = task.predictions[params[:model]][pageNumber.to_i]
-      sort = []
+      sorter = []
       if prediction[:info]
-        sort << {"info" => prediction[:info]}
-        sort << {"measurements" => prediction[:measurements].join("</br>")}
-        prediction.delete("info")
-        prediction.delete("measurements")
+        sorter << {"Info" => prediction[:info]}
+        if prediction[:measurements_string].kind_of?(Array)
+          sorter << {"Measured activity" => "#{prediction[:measurements_string].join(";")}</br>#{prediction[:converted_measurements].join(";")}"}
+        else
+          sorter << {"Measured activity" => "#{prediction[:measurements_string]}</br>#{prediction[:converted_measurements]}"}
+        end
       end
-      task.predictions[params[:model]][pageNumber.to_i].each do |k,v|
-       string += "<tr><td>#{(k=="value" ? "prediction" : k).capitalize}:</td> "\
-          "<td>#{v.blank? ? "none" : (v.kind_of?(Array) ? v.join("\</br>") : v)}</td></tr>"
+
+      # regression
+      if prediction[:prediction_interval]
+        sorter << {"Prediction" => "#{prediction[:prediction_value]}</br>#{prediction[:converted_prediction_value]}"}
+        sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction[:converted_interval]}"}
+        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      # classification
+      elsif prediction[:probabilities]
+        sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
+        sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
+        sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}
+        sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
+        sorter << {"Prediction" => prediction[:value]}
+        sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
+      else
+        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      end
+      sorter.each_with_index do |hash,idx|
+        k = hash.keys[0]
+        v = hash.values[0]
+        string += (idx == 0 ? "<tr class=\"hide-top\">" : "<tr>")+(k =~ /lazar/i ? "<td colspan=\"2\">" : "<td>")
+        # keyword
+        string += "#{k}:"
+        string += "</td><td>"
+        # values
+        string += "#{v}"
+        string += "</td></tr>"
       end
       string += "</table></td>"
       html += "#{string}</tr></table>"
-      array << [html]
     end
-    return JSON.pretty_generate(:predictions => array)
+    return JSON.pretty_generate(:predictions => [html])
   end
 end
 
@@ -338,9 +362,30 @@ post '/predict/?' do
               end
               prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
               prediction["Consensus confidence"] = confidence.signif(3)
-              prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches] ? sa_prediction[:matches].collect{|a| a.first}.join("; ") : "none"
+              prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
             end
-            predictions << prediction.delete_if{|k,v| k =~ /neighbors|prediction_feature_id/i}
+            # regression
+            unless prediction[:value].blank?
+              if type == "Regression"
+                prediction[:prediction_value] = "#{prediction[:value].delog10.signif(3)} #{unit}"
+                prediction["converted_prediction_value"] = "#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{converted_unit}"
+              end
+            end
+            unless prediction[:prediction_interval].blank?
+              interval = prediction[:prediction_interval]
+              prediction[:interval] = "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} #{unit}"
+              prediction[:converted_interval] = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)} #{converted_unit}"
+            end
+            prediction["unit"] = unit
+            prediction["converted_unit"] = converted_unit
+            if prediction[:measurements].is_a?(Array)
+              prediction["measurements_string"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} #{unit}"} : prediction[:measurements].join("</br>")
+              prediction["converted_measurements"] = prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"} if type == "Regression"
+            else
+              output["measurements_string"] = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} #{unit}}" : prediction[:measurements]
+              output["converted_measurements"] = "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if type == "Regression"
+            end
+            predictions << prediction.delete_if{|k,v| k =~ /neighbors|prediction_feature_id|r_squared|rmse/i}
             t.update_percent((counter*p).ceil)
             counter += 1
           end

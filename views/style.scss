@@ -105,6 +105,9 @@ supporters{
   table-layout: fixed;
   width: 100%;
 }
+tr.hide-top > td {
+  border-top: 0px !important;
+}
 .footer{
   margin-top:3em;
 }
