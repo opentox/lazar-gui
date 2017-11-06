@@ -50,6 +50,8 @@ get '/task/?' do
     smiles = compound.smiles
     task = Task.find(params[:predictions].to_s)
     unless task.predictions[params[:model]].nil?
+      model = Model::Validation.find params[:model].to_s
+      type = (model.regression? ? "Regression" : "Classification")
       if params[:model] == "Cramer"
         prediction = task.predictions[params[:model]]
         html = "<table class=\"table table-bordered single-batch\"><tr>"
@@ -67,20 +69,20 @@ get '/task/?' do
         sorter = []
         if prediction[:info]
           sorter << {"Info" => prediction[:info]}
-          if prediction[:measurements_string].kind_of?(Array)
-            sorter << {"Measured activity" => "#{prediction[:measurements_string].join(";")}</br>#{prediction[:converted_measurements].join(";")}"}
+          if prediction["measurements_string"].kind_of?(Array)
+            sorter << {"Measured activity" => "#{prediction["measurements_string"].join(";")}</br>#{prediction["converted_measurements"].join(";")}"}
           else
-            sorter << {"Measured activity" => "#{prediction[:measurements_string]}</br>#{prediction[:converted_measurements]}"}
+            sorter << {"Measured activity" => "#{prediction["measurements_string"]}</br>#{prediction["converted_measurements"]}"}
           end
         end
 
         # regression
-        if prediction[:prediction_interval]
-          sorter << {"Prediction" => "#{prediction[:prediction_value]}</br>#{prediction[:converted_prediction_value]}"}
-          sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction[:converted_interval]}"}
+        if prediction[:value] && type == "Regression"
+          sorter << {"Prediction" => "#{prediction["prediction_value"]}</br>#{prediction["converted_prediction_value"]}"}
+          sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction["converted_interval"]}"}
           sorter << {"Warnings" => prediction[:warnings].join("</br>")}
         # classification
-        elsif prediction[:probabilities]
+        elsif prediction[:value] && type == "Classification"
           sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
           sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
           sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}

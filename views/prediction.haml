@@ -63,7 +63,8 @@
                   =hash[:matches].blank? ? "none" : hash[:matches].join("; ")
                 / check for prediction
                 %p
-                - if prediction[:neighbors] and !prediction[:value].nil?
+                / regression
+                - if prediction[:value]
                   %b.title= ("Lazar #{@models[i].endpoint.gsub('_', ' ').downcase} (#{@models[i].species}):" if sa_prediction)
                   %p
                   / check for database hit
@@ -118,16 +119,24 @@
                       =prediction[:warnings].join("</br>")
 
                 - else
-                  %p
                   - if !prediction[:info].blank?
-                    :plain
-                      This compound was part of the training dataset. <i>All</i> information </br>
-                      from this compound was removed from the training data before the </br>
-                      prediction, to obtain unbiased results.
+                    %p
+                      :plain
+                        This compound was part of the training dataset. <i>All</i> information </br>
+                        from this compound was removed from the training data before the </br>
+                        prediction, to obtain unbiased results.
+                    %p
+                      %b Measured activity:
+                      %br
+                      - if prediction[:measurements].is_a?(Array)
+                        = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                      - else
+                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
                   - if !prediction[:warnings].blank?
-                    %b Warnings:
-                    %br
-                    =prediction[:warnings].join("</br>")
+                    %p
+                      %b Warnings:
+                      %br
+                      =prediction[:warnings].join("</br>")
 
           / show Cramer rules if checked
           - if @toxtree == true
