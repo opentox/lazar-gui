@@ -97,7 +97,6 @@ helpers do
           else # Classification
 
             # consensus mutagenicity
-              
             sa_prediction = KaziusAlerts.predict(compound.smiles)
             lazar_mutagenicity = prediction
             confidence = 0
@@ -153,7 +152,6 @@ helpers do
         end
         csv += line
       end
-      $logger.debug csv
       csv
     end
   end

@@ -1,14 +1,14 @@
 :javascript
-  function progress(model,idx,total) {
-    var p = 100/total;
-    var percent = Math.round((idx+1)*p);
-    var bar = document.getElementById("bar_"+model);
-    var prog = document.getElementById("progress_"+model);
-    bar.style.width = percent + '%';
+
+  function progress(value,id) {
+    var percent = Math.round(value);
+    var bar = document.getElementById("bar_"+id);
+    var prog = document.getElementById("progress_"+id);
+    bar.style.width = value + '%';
     if (percent == 100){
       prog.style.display = "none";
     };
-  }
+  };
 
   var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
@@ -22,248 +22,66 @@
     }
   };  
 
-  function renderResponse(model,idx,compound,last,total,tmppath) {
-    // create request
-    if (model == "Cramer"){
-      var dataset = '#{@dataset.id}';
-      var uri = "#{to("/batch/")}" + model + '/?dataset=' + escape(dataset) + '&tmppath=' + tmppath;
-    } else {
-      var dataset = '#{@dataset.id}';
-      var uri = "#{to("/batch/")}" + model + '/?compound=' + escape(compound) + '&dataset=' + dataset + '&idx=' + idx + '&tmppath=' + tmppath;
-    };
+  var markers = [];
+
+  function renderTask(task_id,model_id,id) {
+    var uri = "#{to("/")}" + 'task/?turi=' + task_id;
     var aClient = new HttpClient();
     aClient.get(uri, function(res) {
-      // progress bar function
-      progress(model,idx,total);
-
       var response = JSON.parse(res);
-      var td = document.getElementById("prediction_"+compound+'_'+model+'_'+idx);
-      //td.innerHTML = "";
-      if (model != "Cramer"){
-        // init general structure
-        a = ["title", "type", "db_hit", "measurements", "prediction", "interval", "probability", "warnings", "info"];
-        
-        // handles consesus mutagenicity
-        if (response['sa_prediction'] != false){
-          var p = document.createElement("p");
-          var h = document.createElement("h5");
-          p.id = "sa";
-          // Consensus mutagenicity
-          var t = document.createTextNode("Consensus mutagenicity");
-          h.appendChild(t);
-          p.appendChild(h);
-          // handle db_hit first
-          if (response['db_hit'] != false){
-            var value = document.createTextNode(response['db_hit']);
-            p.appendChild(value);
-            var h2 = document.createElement("h5");
-            var t = document.createTextNode("Measurements:");
-            h2.appendChild(t);
-            p.appendChild(h2);
-            for (var i=0; i<response['measurements'].length; i++){
-              var value = document.createTextNode(response['measurements'][i]);
-              var br = document.createElement("br");
-              p.appendChild(value);
-              p.appendChild(br);
-            };
-          };
-          // Consensus prediction
-          var h3 = document.createElement("h5");
-          var t = document.createTextNode("Consensus prediction:");
-          if (response['sa_prediction']['prediction'] == false){
-            var value = document.createTextNode("non-mutagenic");
-          };
-          if (response['sa_prediction']['prediction'] == true){
-            var value = document.createTextNode("mutagenic");
-          };
-          h3.appendChild(t);
-          p.appendChild(h3);
-          p.appendChild(value);
-          // Consensus confidence
-          var h4 = document.createElement("h5");
-          var t = document.createTextNode("Consensus confidence:");
-          var value = document.createTextNode(response['confidence']);
-          h4.appendChild(t);
-          p.appendChild(h4);
-          p.appendChild(value);
-          // Structural alerts for mutagenicity
-          var h5 = document.createElement("h5");
-          var t = document.createTextNode("Structural alerts for mutagenicity:");
-          h5.appendChild(t);
-          p.appendChild(h5);
-          if (response['sa_matches'] != false){
-            var value = document.createTextNode(response['sa_matches']);
-            p.appendChild(value);
-          } else {
-            var span = document.createElement("span");
-            var value = document.createTextNode("none");
-            span.style.fontStyle = "italic";
-            span.appendChild(value);
-            p.appendChild(span);
-          };
-          
-          // append to td
-          td.appendChild(p);
-        };
-
-        // proceed to general structure
-        for (val of a){
-          var p = document.createElement("p");
-          var h = document.createElement("h5");
-          p.id = val;
-          if (val == "title") {
-            var value = document.createTextNode(response['model_name']);
-            h.appendChild(value);
-            p.appendChild(h);
-          } else if (val == "db_hit" && response['db_hit'] != false && response['sa_prediction'] == false) {
-            var value = document.createTextNode(response['db_hit']);
-            p.appendChild(value);
-          } else if (val == "measurements" && response['measurements'] != false) {
-            var t = document.createTextNode("Measurements:");
-            h.appendChild(t);
-            p.appendChild(h);
-            if (response['model_type'] == "Regression"){
-              for (var i=0; i<response['measurements'].length; i++){
-                var value = document.createTextNode(response['measurements'][i]);
-                var br = document.createElement("br");
-                p.appendChild(value);
-                p.appendChild(br);
-                if (response['converted_measurements'] != false) {
-                  var value = document.createTextNode(response['converted_measurements'][i]);
-                  var br = document.createElement("br");
-                  p.appendChild(value);
-                  p.appendChild(br);
-                  if (i+1 != response['measurements'].length){
-                    var br2 = document.createElement("br");
-                    p.appendChild(br2);
-                  };
-                };
-              };
-            } else if (response['model_type'] == "Classification"){
-              for (var i=0; i<response['measurements'].length; i++){
-                var value = document.createTextNode(response['measurements'][i]);
-                var br = document.createElement("br");
-                p.appendChild(value);
-                p.appendChild(br);
-              };
-            };
-          } else if (val == "prediction" && response['prediction_value'] != false) {
-            var t = document.createTextNode("Prediction:");
-            var value = document.createTextNode(response['prediction_value']+" "+response['model_unit']);
-            h.appendChild(t);
-            p.appendChild(h);
-            p.appendChild(value);
-            if (response['converted_value'] != false) {
-              var br = document.createElement("br");
-              var value = document.createTextNode(response['converted_value']+" "+response['converted_model_unit']);
-              p.appendChild(br);
-              p.appendChild(value);
-            };
-            if (response['model_type'] == "Classification" && response['probability'] != false){
-              var h = document.createElement("h5");
-              var t = document.createTextNode("Probability:");
-              h.appendChild(t);
-              p.appendChild(h);
-              for (var i=0; i<response['probability'].length; i++){
-                var value = document.createTextNode(response['probability'][i]);
-                var br = document.createElement("br");
-                p.appendChild(value);
-                p.appendChild(br);
-              };
-            };
-          } else if (val == "interval" && response['interval'] != false) {
-            var t = document.createTextNode("95% Prediction interval:");
-            var value = document.createTextNode(response['interval']+" "+response['model_unit']);
-            h.appendChild(t);
-            p.appendChild(h);
-            p.appendChild(value);
-            if (response['converted_interval'] != false) {
-              var br = document.createElement("br");
-              var value = document.createTextNode(response['converted_interval']+" "+response['converted_model_unit']);
-              p.appendChild(br);
-              p.appendChild(value);
-            };
-          } else if (val == "warnings" && response['warnings'] != false && response['db_hit'] == false) {
-            var t = document.createTextNode("Warnings: ");
-            h.appendChild(t);
-            p.appendChild(h);
-            for (var i=0; i<response['warnings'].length; i++){
-              var value = document.createTextNode(response['warnings'][i]);
-              var br = document.createElement("br");
-              p.appendChild(value);
-              p.appendChild(br);
-            };
-          } else if (val == "info" && response['info'] != false) {
-            var t = document.createTextNode("Info: ");
-            var value = document.createTextNode(response['info']);
-            h.appendChild(t);
-            p.appendChild(h);
-            p.appendChild(value);
-          };
-
-          // append to td
-          td.appendChild(p);
-        };
-      };// if model != Cramer
-      if (model == "Cramer"){
-        for(i=0; i < response['tds'].length; i++){
-          progress('Cramer',i,response['tds'].length);
-          var td = document.getElementById(response['tds'][i]);
-          var p = document.createElement("p");
-          var h = document.createElement("h5");
-          var t = document.createTextNode("Oral toxicity (Cramer rules)");
-          p.id = "cramer";
-          h.appendChild(t);
-          p.appendChild(h);
-          var h2 = document.createElement("h5");
-          var t = document.createTextNode("Cramer rules:");
-          h2.appendChild(t);
-          p.appendChild(h2);
-          if (response['cramer_rules'][i] != "nil"){
-            var value = document.createTextNode(response['cramer_rules'][i]);
-            p.appendChild(value);
-          } else {
-            var span = document.createElement("span");
-            var value = document.createTextNode("none");
-            span.style.fontStyle = "italic";
-            span.appendChild(value);
-            p.appendChild(span);
-          };
-          var h3 = document.createElement("h5");
-          var t = document.createTextNode("Cramer rules, with extensions:");
-          h3.appendChild(t);
-          p.appendChild(h3);
-          if (response['cramer_rules_extensions'][i] != "nil"){
-            var value = document.createTextNode(response['cramer_rules_extensions'][i]);
-            p.appendChild(value);
-          } else {
-            var span = document.createElement("span");
-            var value = document.createTextNode("none");
-            span.style.fontStyle = "italic";
-            span.appendChild(value);
-            p.appendChild(span);
-          };
-
-          // append to td
-          td.appendChild(p);
-          if (i === response['tds'].length-1) {
-            $("img#circle_Cramer").hide();
-            $("a#downbutton_Cramer").show();
-          };
-
-        };
-      };// if model == Cramer
-      // if last compound change progress to download;
-      if (last == true) {
-        $("img#circle_"+model).hide();
-        $("a#downbutton_"+model).show();
+      progress(response['percent'],id);
+      if (response['percent'] == 100){
+        window.clearInterval(markers[id]);
+        $("a#downbutton_"+id).removeClass("disabled");
+        $("a#detailsbutton_"+id).removeClass("disabled");
       };
     });
   };
-
-
+  function simpleTemplating(data) {
+    var html = '<ul class=pagination>';
+    $.each(data, function(index, item){
+      html += '<li>'+ item +'</li>'+'</br>';
+    });
+    html += '</ul>';
+    return html;
+  };
+  function pagePredictions(task_id,model_id,id){
+    button = document.getElementById("detailsbutton_"+id);
+    span = button.childNodes[1];
+    if (span.className == "glyphicon glyphicon-menu-right"){
+      span.className = "glyphicon glyphicon-menu-down";
+      $('#data-container_'+id).show();
+      $('#pager_'+id).show();
+      $('#pager_'+id).pagination({
+        dataSource: '#{to("/")}' + 'task/?predictions=' + task_id + '&model=' + model_id ,
+        locator: 'predictions',
+        totalNumber: #{@compounds.size},
+        pageSize: 1,
+        showPageNumbers: true,
+        showGoInput: true,
+        formatGoInput: 'go to <%= input %>',
+        formatAjaxError: function(jqXHR, textStatus, errorThrown) {
+          $('#data-container_'+id).html(errorThrown);
+        },
+        /*ajax: {
+          beforeSend: function() {
+            $('#data-container_'+id).html('Loading content ...');
+          }
+        },*/
+        callback: function(data, pagination) {
+          var html = simpleTemplating(data);
+          $('#data-container_'+id).html(html);
+          $('#data-container_'+id).css("min-height", $(window).height() + "px" );
+        }
+      });
+    } else if (span.className = "glyphicon glyphicon-menu-down"){
+      span.className = "glyphicon glyphicon-menu-right";
+      $('#data-container_'+id).hide();
+      $('#pager_'+id).hide();
+    };
+  };
 %div.well
-  %a.btn.btn-warning{:href => to('/predict')}
+  %a.btn.btn-warning{:href => to("/predict?tpid=#{@pid}")}
     %span.glyphicon.glyphicon-menu-left{:aria=>{:hidden=>"true"}}
     New Prediction
 
@@ -274,63 +92,34 @@
         %h3 Batch Prediction Results:
       %div.col-md-8
         %h3= @filename
-  
-  / displays prediction result in table tabs
-  #tabs
-    %ul.nav.nav-tabs.nav-justified{:id=>"batchTabs", :role=>"tablist"}
-      - @models.each_with_index do |model,i|
-        - m = Model::Validation.find model unless model == "Cramer"
-        %li{:class => ("active" if i == 0)}
-          %a{:href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}}
-            = (model == "Cramer") ? "Oral toxicity (Cramer rules)" : "#{m.endpoint} (#{m.species})"
-          %img.dlwait{:src=>"/images/wait30trans.gif", :id=>"circle_#{model}", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
-          %a.csv.btn{:id => "downbutton_#{model}", :href=>"#{to("/predict/#{@tmppaths[model]}/#{model}/#{@filename}")}", :title=>"download", :style=>"display:none;"}
+
+
+  - @models.each_with_index do |model,idx|
+    - m = Model::Validation.find model unless model == "Cramer"
+    - task = @tasks[idx].id
+    - predictions = @tasks[idx].predictions["#{model}"]
+    #result.panel{:id=>idx}
+      %div.row
+        %div.col-md-6
+          %h5= (model == "Cramer") ? "Oral toxicity (Cramer rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus mutagenicity" : "#{m.endpoint} (#{m.species})")
+          #pager{:id=>idx}
+        %div.col-md-6.h5
+          %a.btn.btn-default.btn-xs.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('#{task}','#{model}','#{idx}')", :style=>"font-size:small;"}
+            %span.glyphicon.glyphicon-menu-right
+            Details
+          %a.btn.btn-default.btn-xs.disabled{:id => "downbutton_#{idx}", :href=>"#{to("/predict/csv/#{task}/#{model}/#{@filename}")}", :title=>"download", :style=>"font-size:small;"}
             %span.glyphicon.glyphicon-download-alt
             CSV
-
-    %div.tab-content
-      - csize = @compounds.size
-      - msize = @models.size
-      - timer = 0
-      - @models.each_with_index do |model,j|
-        #results.tab-pane{:id=>"#{j+1}", :class => ("active" if j == 0)}
-          %div{:id=>"progress_"+model, :style=>"width:100%;height:2px;position:relative;background-color:#ccc;"}
-            %div{:id=>"bar_"+model, :style=>"background-color: #4CAF50;width:10px;height:2px;position:absolute;"}
-          %table.table.table-bordered
-            %tbody
-              - @compounds.each_with_index do |compound,cidx|
-                - timer += 800
-                :javascript
-                  $(document).ready(function() {
-                    $("img.circle").show();
-                    var model = '#{model}',
-                        msize = #{msize},
-                        idx = #{j+1},
-                        last = false,
-                        compound = '#{compound.id}',
-                        csize = #{csize},
-                        cidx = #{cidx},
-                        timer = #{timer},
-                        tmppath = '#{@tmppaths[model]}';
-                    // check for last request;
-                    if (cidx+1 == csize) {
-                      last = true;
-                    };
-                    setTimeout(function(){
-                      if (model != "Cramer"){
-                        renderResponse(model,cidx,compound,last,csize,tmppath);
-                      } else if (model == "Cramer" && cidx == 0){
-                        renderResponse(model,cidx,compound,last,csize,tmppath);
-                      };
-                    }, timer );
-                  });
-                // table layout:
-                // one row per prediction;
-                // first col compound; sec col results
-                %tr{:id=>model}
-                  // compound
-                  %td.col-md-6{:id=>"compound"}
-                    %p=embedded_svg(compound.svg, title: compound.smiles)
-                    %p=compound.smiles
-                  // prediction values from js function
-                  %td.col-md-6{:id=>"prediction_#{compound.id}_#{model}_#{cidx}", :style => "vertical-align:top;"}
+      %div{:id=>"progress_#{idx}", :style=>"width:100%;height:3px;position:relative;background-color:#ccc;"}
+        %div{:id=>"bar_#{idx}", :style=>"background-color: #4CAF50;width:10px;height:3px;position:absolute;"}
+      - # increase interval timer for large datasets 
+      - ctimer = ((@compounds.size/1000) == 0 ? 1000 : ((@compounds.size/1000)*1000))
+      :javascript
+        var timer = #{ctimer};
+        $(document).ready(function(){
+          markers[#{idx}] = setInterval(function(){
+            renderTask('#{task}','#{model}',#{idx});
+          }, timer );
+        });
+      #data-container{:id=>idx,:style=>"width:100%;"}
+      -#pager{:id=>idx}
