@@ -59,7 +59,7 @@ helpers do
           if prediction[:info] =~ /\b(identical)\b/i
             prediction[:info] = "This compound was part of the training dataset. All information "\
               "from this compound was removed from the training data before the "\
-              "prediction, to obtain unbiased results."
+              "prediction to obtain unbiased results."
           end
           note = "\"#{prediction[:warnings].uniq.join(" ")}\""
 
@@ -69,11 +69,11 @@ helpers do
           output["db_hit"] = prediction[:info] if prediction[:info]
           
           if prediction[:measurements].is_a?(Array)
-            output["measurements"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{model.unit})"} : prediction[:measurements].collect{|value| "#{value}"}
-            output["converted_measurements"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)} #{model.unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"} : false
+            output["measurements"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)}"} : prediction[:measurements].collect{|value| "#{value}"}
+            output["converted_measurements"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)}"} : false
           else
-            output["measurements"] = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{model.unit})}" : "#{prediction[:measurements]}"
-            output["converted_measurements"] = (type == "Regression") ? "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(model.unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : false
+            output["measurements"] = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)}" : "#{prediction[:measurements]}"
+            output["converted_measurements"] = (type == "Regression") ? "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)}" : false
 
           end #db_hit
 
@@ -86,7 +86,7 @@ helpers do
             end #prediction interval
 
             line += "#{idx+1},#{output['model_name']},#{compound.smiles},"\
-              "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{prediction[:measurements].join("; ") if prediction[:info]}\","\
+              "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
               "#{output['prediction_value'] != false ? output['prediction_value'] : ""},"\
               "#{output['converted_value'] != false ? output['converted_value'] : ""},"\
               "#{output['interval'].split(" - ").first.strip unless output['interval'] == false},"\
@@ -117,7 +117,7 @@ helpers do
             output['probability'] = prediction[:probabilities] ? prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"} : false
 
             line += "#{idx+1},Consensus mutagenicity,#{compound.smiles},"\
-              "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{prediction[:measurements].join("; ") if prediction[:info]}\","\
+              "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
               "#{sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"},"\
               "#{output['confidence']},#{output['sa_matches'] != false ? "\"#{output['sa_matches']}\"" : "none"},"\
               "#{output['prediction_value']},"\
@@ -134,7 +134,7 @@ helpers do
           if prediction[:info] =~ /\b(identical)\b/i
             prediction[:info] = "This compound was part of the training dataset. All information "\
               "from this compound was removed from the training data before the "\
-              "prediction, to obtain unbiased results."
+              "prediction to obtain unbiased results."
           end
           note = "\"#{prediction[:warnings].join(" ")}\""
 
@@ -143,10 +143,10 @@ helpers do
 
           if type == "Regression"
             line += "#{idx+1},#{output['model_name']},#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
-              "#{prediction[:measurements] if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
+              "#{prediction[:measurements].collect{|m| m.delog10.signif(3)}.join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
           else
             line += "#{idx+1},Consensus mutagenicity,#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
-              "#{prediction[:measurements] if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
+              "#{prediction[:measurements].join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
           end
 
         end

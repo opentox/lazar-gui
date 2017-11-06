@@ -3,12 +3,7 @@ require_relative 'prediction.rb'
 require_relative 'helper.rb'
 include OpenTox
 
-configure :production do
-  $logger = Logger.new(STDOUT)
-  enable :reloader
-end
-
-configure :development do
+configure :production, :development do
   $logger = Logger.new(STDOUT)
   enable :reloader
 end
@@ -31,9 +26,10 @@ get '/?' do
 end
 
 get '/predict/?' do
-  if params[:tpid] && !params[:tpid].blank?
-    pid = params[:tpid].to_i
-    Process.kill(9,pid) #if (Process.getpgid(pid) rescue nil).present?
+  begin
+    Process.kill(9,params[:tpid].to_i) if !params[:tpid].blank? #if (Process.getpgid(pid) rescue nil).present?
+  rescue
+    nil
   end
   @models = Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
@@ -134,10 +130,12 @@ end
 get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
   task = Task.find params[:task].to_s
+  m = Model::Validation.find params[:model].to_s
+  endpoint = (params[:model] == "Cramer") ? "Oral_toxicity_(Cramer_rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus_mutagenicity" : "#{m.endpoint}_(#{m.species})")
   tempfile = Tempfile.new
   tempfile.write(task.csv)
   tempfile.rewind
-  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{params[:model]}_#{params[:filename]}", :type => "text/csv", :disposition => "attachment"
+  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{params[:filename]}", :type => "text/csv", :disposition => "attachment"
 end
 
 post '/predict/?' do
@@ -186,7 +184,7 @@ post '/predict/?' do
           if type == "Regression"
             unit = (type == "Regression") ? "(#{m.unit})" : ""
             converted_unit = (type == "Regression") ? "#{m.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
-            header = "ID,Endpoint,Unique SMILES,inTrainingSet,Measurements,Prediction #{unit},Prediction #{converted_unit},"\
+            header = "ID,Endpoint,Unique SMILES,inTrainingSet,Measurements #{unit},Prediction #{unit},Prediction #{converted_unit},"\
               "Prediction Interval Low #{unit},Prediction Interval High #{unit},"\
               "Prediction Interval Low #{converted_unit},Prediction Interval High #{converted_unit},"\
               "inApplicabilityDomain,Note\n"
@@ -204,7 +202,6 @@ post '/predict/?' do
           predictions = []
           @compounds.each do |compound|
             if Prediction.where(compound: compound.id, model: m.id).exists?
-              $logger.debug "prediction already exists !"
               prediction = Prediction.find_by(compound: compound.id, model: m.id).prediction
             else
               prediction = m.predict(compound)
@@ -297,8 +294,8 @@ post '/predict/?' do
 
     end#main task
     @pid = task.pid
-    $logger.debug "application pid: #{@pid}"
 
+    #@dataset.delete
     File.delete File.join("tmp", params[:fileselect][:filename])
     return haml :batch
   end
