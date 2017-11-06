@@ -50,8 +50,6 @@ get '/task/?' do
     smiles = compound.smiles
     task = Task.find(params[:predictions].to_s)
     unless task.predictions[params[:model]].nil?
-      model = Model::Validation.find params[:model].to_s
-      type = (model.regression? ? "Regression" : "Classification")
       if params[:model] == "Cramer"
         prediction = task.predictions[params[:model]]
         html = "<table class=\"table table-bordered single-batch\"><tr>"
@@ -62,6 +60,8 @@ get '/task/?' do
         string += "</table></td>"
         html += "#{string}</tr></table>"
       else
+        model = Model::Validation.find params[:model].to_s
+        type = (model.regression? ? "Regression" : "Classification")
         html = "<table class=\"table table-bordered single-batch\"><tr>"
         html += "<td>#{image}</br>#{smiles}</br></td>"
         string = "<td><table class=\"table\">"
