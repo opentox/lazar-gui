@@ -211,26 +211,26 @@ post '/predict/?' do
               prediction_object = Prediction.new
               prediction_object[:compound] = compound.id
               prediction_object[:model] = m.id
+              if type == "Classification"# consensus mutagenicity
+                sa_prediction = KaziusAlerts.predict(compound.smiles)
+                lazar_mutagenicity = prediction
+                confidence = 0
+                lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
+                if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
+                  confidence = 0.85
+                elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
+                  confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
+                elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
+                  confidence = 0.11
+                elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
+                  confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
+                end
+                prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
+                prediction["Consensus confidence"] = confidence.signif(3)
+                prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
+              end
               prediction_object[:prediction] = prediction
               prediction_object.save
-            end
-            if type == "Classification"# consensus mutagenicity
-              sa_prediction = KaziusAlerts.predict(compound.smiles)
-              lazar_mutagenicity = prediction
-              confidence = 0
-              lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
-              if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
-                confidence = 0.85
-              elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
-                confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
-              elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
-                confidence = 0.11
-              elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
-                confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
-              end
-              prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
-              prediction["Consensus confidence"] = confidence.signif(3)
-              prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
             end
             # regression
             unless prediction[:value].blank?
