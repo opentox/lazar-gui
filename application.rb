@@ -6,6 +6,8 @@ include OpenTox
 configure :production, :development do
   $logger = Logger.new(STDOUT)
   enable :reloader
+  also_reload './helper.rb'
+  also_reload './prediction.rb'
 end
 
 before do
@@ -43,71 +45,74 @@ get '/task/?' do
     task = Task.find(params[:turi].to_s)
     return JSON.pretty_generate(:percent => task.percent)
   elsif params[:predictions]
+    task = Task.find(params[:predictions].to_s)
+    predictions = task.predictions[params[:model]]
     pageSize = params[:pageSize].to_i - 1
     pageNumber= params[:pageNumber].to_i - 1
-    compound = Compound.find @@compounds_ids[pageNumber]
+    prediction_object = Prediction.find predictions[pageNumber]
+    prediction = prediction_object.prediction
+    compound = Compound.find prediction_object.compound
+    model = Model::Validation.find prediction_object.model
     image = compound.svg
     smiles = compound.smiles
-    task = Task.find(params[:predictions].to_s)
-    unless task.predictions[params[:model]].nil?
-      if params[:model] == "Cramer"
-        prediction = task.predictions[params[:model]]
-        html = "<table class=\"table table-bordered single-batch\"><tr>"
-        html += "<td>#{image}</br>#{smiles}</br></td>"
-        string = "<td><table class=\"table\">"
-        string += "<tr class=\"hide-top\"><td>Cramer rules:</td><td>#{prediction["Cramer rules"][pageNumber.to_i]}</td>"
-        string += "<tr><td>Cramer rules, with extensions:</td><td>#{prediction["Cramer rules, with extensions"][pageNumber.to_i]}</td>"
-        string += "</table></td>"
-        html += "#{string}</tr></table>"
-      else
-        model = Model::Validation.find params[:model].to_s
-        type = (model.regression? ? "Regression" : "Classification")
-        html = "<table class=\"table table-bordered single-batch\"><tr>"
-        html += "<td>#{image}</br>#{smiles}</br></td>"
-        string = "<td><table class=\"table\">"
-        prediction = task.predictions[params[:model]][pageNumber.to_i]
-        sorter = []
-        if prediction[:info]
-          sorter << {"Info" => prediction[:info]}
-          if prediction["measurements_string"].kind_of?(Array)
-            sorter << {"Measured activity" => "#{prediction["measurements_string"].join(";")}</br>#{prediction["converted_measurements"].join(";")}"}
-          else
-            sorter << {"Measured activity" => "#{prediction["measurements_string"]}</br>#{prediction["converted_measurements"]}"}
-          end
-        end
-
-        # regression
-        if prediction[:value] && type == "Regression"
-          sorter << {"Prediction" => "#{prediction["prediction_value"]}</br>#{prediction["converted_prediction_value"]}"}
-          sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction["converted_interval"]}"}
-          sorter << {"Warnings" => prediction[:warnings].join("</br>")}
-        # classification
-        elsif prediction[:value] && type == "Classification"
-          sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
-          sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
-          sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}
-          sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
-          sorter << {"Prediction" => prediction[:value]}
-          sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
+    if params[:model] == "Cramer"
+      task = Task.find(params[:turi].to_s)
+      prediction = task.predictions[params[:model]]
+      html = "<table class=\"table table-bordered single-batch\"><tr>"
+      html += "<td>#{image}</br>#{smiles}</br></td>"
+      string = "<td><table class=\"table\">"
+      string += "<tr class=\"hide-top\"><td>Cramer rules:</td><td>#{prediction["Cramer rules"][pageNumber.to_i]}</td>"
+      string += "<tr><td>Cramer rules, with extensions:</td><td>#{prediction["Cramer rules, with extensions"][pageNumber.to_i]}</td>"
+      string += "</table></td>"
+      html += "#{string}</tr></table>"
+    else
+      type = (model.regression? ? "Regression" : "Classification")
+      html = "<table class=\"table table-bordered single-batch\"><tr>"
+      html += "<td>#{image}</br>#{smiles}</br></td>"
+      string = "<td><table class=\"table\">"
+      sorter = []
+      if prediction[:info]
+        prediction[:info] = "This compound was part of the training dataset. All information from this compound was "\
+                            "removed from the training data before the prediction to obtain unbiased results."
+        sorter << {"Info" => prediction[:info]}
+        if prediction["measurements_string"].kind_of?(Array)
+          sorter << {"Measured activity" => "#{prediction["measurements_string"].join(";")}</br>#{prediction["converted_measurements"].join(";")}"}
         else
-          sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+          sorter << {"Measured activity" => "#{prediction["measurements_string"]}</br>#{prediction["converted_measurements"]}"}
         end
-        sorter.each_with_index do |hash,idx|
-          k = hash.keys[0]
-          v = hash.values[0]
-          string += (idx == 0 ? "<tr class=\"hide-top\">" : "<tr>")+(k =~ /lazar/i ? "<td colspan=\"2\">" : "<td>")
-          # keyword
-          string += "#{k}:"
-          string += "</td><td>"
-          # values
-          string += "#{v}"
-          string += "</td></tr>"
-        end
-        string += "</table></td>"
-        html += "#{string}</tr></table>"
       end
+
+      # regression
+      if prediction[:value] && type == "Regression"
+        sorter << {"Prediction" => "#{prediction["prediction_value"]}</br>#{prediction["converted_prediction_value"]}"}
+        sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction["converted_interval"]}"}
+        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      # classification
+      elsif prediction[:value] && type == "Classification"
+        sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
+        sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
+        sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}
+        sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
+        sorter << {"Prediction" => prediction[:value]}
+        sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
+      else
+        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      end
+      sorter.each_with_index do |hash,idx|
+        k = hash.keys[0]
+        v = hash.values[0]
+        string += (idx == 0 ? "<tr class=\"hide-top\">" : "<tr>")+(k =~ /lazar/i ? "<td colspan=\"2\">" : "<td>")
+        # keyword
+        string += "#{k}:"
+        string += "</td><td>"
+        # values
+        string += "#{v}"
+        string += "</td></tr>"
+      end
+      string += "</table></td>"
+      html += "#{string}</tr></table>"
     end
-    return JSON.pretty_generate(:predictions => [html])
+    return JSON.pretty_generate(:prediction => [html])
   end
 end
 
@@ -132,10 +137,18 @@ end
 get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
   task = Task.find params[:task].to_s
-  m = Model::Validation.find params[:model].to_s
+  m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
   endpoint = (params[:model] == "Cramer") ? "Oral_toxicity_(Cramer_rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus_mutagenicity" : "#{m.endpoint}_(#{m.species})")
   tempfile = Tempfile.new
-  tempfile.write(task.csv)
+  if params[:model] == "Cramer"
+    tempfile.write(task.csv)
+  else
+    header = task.csv
+    lines = []
+    task.predictions[params[:model]].each_with_index{|p,idx| lines << "#{idx+1},#{Prediction.find(p).csv}"}
+    csv = header + lines.join("")
+    tempfile.write(csv)
+  end
   tempfile.rewind
   send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{params[:filename]}", :type => "text/csv", :disposition => "attachment"
 end
@@ -202,13 +215,21 @@ post '/predict/?' do
           p = 100.0/@compounds.size
           counter = 1
           predictions = []
-          @compounds.each do |compound|
+          @compounds.each_with_index do |compound,idx|
             if Prediction.where(compound: compound.id, model: m.id).exists?
-              prediction = Prediction.find_by(compound: compound.id, model: m.id).prediction
+              prediction_object = Prediction.find_by(compound: compound.id, model: m.id)
+              prediction = prediction_object.prediction
+              prediction_id = prediction_object.id
+              # in case prediction object was created by single prediction
+              if prediction_object.csv.blank?
+                prediction_object[:csv] = prediction_to_csv(m,compound,prediction)
+                prediction_object.save
+              end
             else
               prediction = m.predict(compound)
               # save prediction object
               prediction_object = Prediction.new
+              prediction_id = prediction_object.id
               prediction_object[:compound] = compound.id
               prediction_object[:model] = m.id
               if type == "Classification"# consensus mutagenicity
@@ -229,40 +250,41 @@ post '/predict/?' do
                 prediction["Consensus confidence"] = confidence.signif(3)
                 prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
               end
-              prediction_object[:prediction] = prediction
-              prediction_object.save
-            end
-            # regression
-            unless prediction[:value].blank?
-              if type == "Regression"
+              # add additionally fields for html representation
+              unless prediction[:value].blank? || type == "Classification"
                 prediction[:prediction_value] = "#{prediction[:value].delog10.signif(3)} #{unit}"
                 prediction["converted_prediction_value"] = "#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{converted_unit}"
               end
+              unless prediction[:prediction_interval].blank?
+                interval = prediction[:prediction_interval]
+                prediction[:interval] = "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} #{unit}"
+                prediction[:converted_interval] = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)} #{converted_unit}"
+              end
+              prediction["unit"] = unit
+              prediction["converted_unit"] = converted_unit
+              if prediction[:measurements].is_a?(Array)
+                prediction["measurements_string"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} #{unit}"} : prediction[:measurements].join("</br>")
+                prediction["converted_measurements"] = prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"} if type == "Regression"
+              else
+                output["measurements_string"] = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} #{unit}}" : prediction[:measurements]
+                output["converted_measurements"] = "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if type == "Regression"
+              end
+
+              # store in prediction_object
+              prediction_object[:prediction] = prediction
+              prediction_object[:csv] = prediction_to_csv(m,compound,prediction)
+              prediction_object.save
             end
-            unless prediction[:prediction_interval].blank?
-              interval = prediction[:prediction_interval]
-              prediction[:interval] = "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} #{unit}"
-              prediction[:converted_interval] = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)} #{converted_unit}"
-            end
-            prediction["unit"] = unit
-            prediction["converted_unit"] = converted_unit
-            if prediction[:measurements].is_a?(Array)
-              prediction["measurements_string"] = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} #{unit}"} : prediction[:measurements].join("</br>")
-              prediction["converted_measurements"] = prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"} if type == "Regression"
-            else
-              output["measurements_string"] = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} #{unit}}" : prediction[:measurements]
-              output["converted_measurements"] = "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if type == "Regression"
-            end
-            predictions << prediction.delete_if{|k,v| k =~ /neighbors|prediction_feature_id|r_squared|rmse/i}
+            # collect prediction_object ids
+            predictions << prediction_id
             t.update_percent((counter*p).ceil)
             counter += 1
           end
           # write csv
-          t[:csv] = header + to_csv(model,predictions,@compounds)
+          t[:csv] = header
           # write predictions
           @predictions["#{model}"] = predictions
         else # Cramer model
-          #t[:csv] = to_csv(model,nil,@compounds)
           compounds = @compounds.collect{|c| c.smiles}
           prediction = [Toxtree.predict(compounds, "Cramer rules"), Toxtree.predict(compounds, "Cramer rules with extensions")]
           output = {}
@@ -321,23 +343,36 @@ post '/predict/?' do
       else
         model = Model::Validation.find model_id
         @models << model
-        if model.model.name =~ /kazius/
-          sa_prediction = KaziusAlerts.predict(@compound.smiles)
-          lazar_mutagenicity = model.predict(@compound)
-          confidence = 0
-          lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
-          if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
-            confidence = 0.85
-          elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
-            confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
-          elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
-            confidence = 0.11
-          elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
-            confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
-          end
-          @predictions << [lazar_mutagenicity, {:prediction => sa_prediction, :confidence => confidence}]
+        if Prediction.where(compound: @compound.id, model: model.id).exists?
+          prediction_object = Prediction.find_by(compound: @compound.id, model: model.id)
+          prediction = prediction_object.prediction
+          @predictions << prediction
         else
-          @predictions << model.predict(@compound)
+          prediction_object = Prediction.new
+
+          if model.model.name =~ /kazius/
+            sa_prediction = KaziusAlerts.predict(@compound.smiles)
+            lazar_mutagenicity = model.predict(@compound)
+            confidence = 0
+            lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
+            if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
+              confidence = 0.85
+            elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
+              confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
+            elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
+              confidence = 0.11
+            elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
+              confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
+            end
+            prediction << [lazar_mutagenicity, {:prediction => sa_prediction, :confidence => confidence}]
+          else
+            prediction << model.predict(@compound)
+          end
+          prediction_object[:compound] = @compound.id
+          prediction_object[:model] = model.id
+          prediction_object[:prediction] = prediction
+          prediction_object.save
+          @predictions << prediction
         end
       end
     end

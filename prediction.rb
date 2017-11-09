@@ -9,8 +9,9 @@ module OpenTox
     field :compound, type: BSON::ObjectId
     field :model, type: BSON::ObjectId
     field :prediction, type: Hash, default:{}
+    field :csv, type: String
 
-    attr_accessor :compound, :model, :prediction
+    attr_accessor :compound, :model, :prediction, :csv
 
     def compound
       self[:compound]
@@ -22,6 +23,10 @@ module OpenTox
     
     def prediction
       self[:prediction]
+    end
+
+    def csv
+      self[:csv]
     end
 
   end

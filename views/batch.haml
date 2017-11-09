@@ -54,7 +54,7 @@
       $('#pager_'+id).show();
       $('#pager_'+id).pagination({
         dataSource: '#{to("/")}' + 'task/?predictions=' + task_id + '&model=' + model_id ,
-        locator: 'predictions',
+        locator: 'prediction',
         totalNumber: #{@compounds.size},
         pageSize: 1,
         showPageNumbers: true,
