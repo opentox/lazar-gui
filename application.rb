@@ -49,15 +49,11 @@ get '/task/?' do
     predictions = task.predictions[params[:model]]
     pageSize = params[:pageSize].to_i - 1
     pageNumber= params[:pageNumber].to_i - 1
-    prediction_object = Prediction.find predictions[pageNumber]
-    prediction = prediction_object.prediction
-    compound = Compound.find prediction_object.compound
-    model = Model::Validation.find prediction_object.model
-    image = compound.svg
-    smiles = compound.smiles
     if params[:model] == "Cramer"
-      task = Task.find(params[:turi].to_s)
-      prediction = task.predictions[params[:model]]
+      prediction = predictions
+      compound = Compound.find prediction["compounds"][pageNumber]
+      image = compound.svg
+      smiles = compound.smiles
       html = "<table class=\"table table-bordered single-batch\"><tr>"
       html += "<td>#{image}</br>#{smiles}</br></td>"
       string = "<td><table class=\"table\">"
@@ -66,6 +62,12 @@ get '/task/?' do
       string += "</table></td>"
       html += "#{string}</tr></table>"
     else
+      prediction_object = Prediction.find predictions[pageNumber]
+      prediction = prediction_object.prediction
+      compound = Compound.find prediction_object.compound
+      model = Model::Validation.find prediction_object.model
+      image = compound.svg
+      smiles = compound.smiles
       type = (model.regression? ? "Regression" : "Classification")
       html = "<table class=\"table table-bordered single-batch\"><tr>"
       html += "<td>#{image}</br>#{smiles}</br></td>"
@@ -158,7 +160,7 @@ post '/predict/?' do
   # process batch prediction
   if !params[:fileselect].blank?
     if params[:fileselect][:filename] !~ /\.csv$/
-      bad_request_error "Please submit a csv file."
+      bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
     end
     File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
@@ -185,7 +187,6 @@ post '/predict/?' do
     
     @models = params[:selection].keys
     # for single predictions in batch
-    @@compounds_ids = @compounds.collect{|c| c.id.to_s}
     @tasks = []
     @models.each{|m| t = Task.new; t.save; @tasks << t}
     @predictions = {}
@@ -277,7 +278,7 @@ post '/predict/?' do
             end
             # collect prediction_object ids
             predictions << prediction_id
-            t.update_percent((counter*p).ceil)
+            t.update_percent((counter*p).ceil > 100 ? 100 : (counter*p).ceil)
             counter += 1
           end
           # write csv
@@ -302,6 +303,7 @@ post '/predict/?' do
           predictions = {}
           predictions["Cramer rules"] = output["cramer_rules"].collect{|rule| rule != "nil" ? rule : "none"}
           predictions["Cramer rules, with extensions"] = output["cramer_rules_extensions"].collect{|rule| rule != "nil" ? rule : "none"}
+          predictions["compounds"] = @compounds.collect{|c| c.id}
 
           # write csv
           t[:csv] = csv
