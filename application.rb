@@ -354,7 +354,8 @@ post '/predict/?' do
 
           if model.model.name =~ /kazius/
             sa_prediction = KaziusAlerts.predict(@compound.smiles)
-            lazar_mutagenicity = model.predict(@compound)
+            prediction = model.predict(@compound)
+            lazar_mutagenicity = prediction
             confidence = 0
             lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
             if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
@@ -366,9 +367,11 @@ post '/predict/?' do
             elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
               confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
             end
-            prediction << [lazar_mutagenicity, {:prediction => sa_prediction, :confidence => confidence}]
+            prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
+            prediction["Consensus confidence"] = confidence.signif(3)
+            prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
           else
-            prediction << model.predict(@compound)
+            prediction = model.predict(@compound)
           end
           prediction_object[:compound] = @compound.id
           prediction_object[:model] = model.id

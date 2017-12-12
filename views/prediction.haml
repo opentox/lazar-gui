@@ -25,19 +25,19 @@
           - toxtree = @predictions.pop if @toxtree == true
           - unless @predictions.blank?
             - @predictions.each_with_index do |prediction,i|
-              - if prediction.dimension > 0
-                - sa_prediction = prediction[1]
-                - prediction = prediction[0]
-              - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+              - if prediction["Consensus prediction"]
+                - sa_prediction = true
+              - type = (@models[i].regression? ? "Regression" : "Classification")
               - @model_types[i] = type
               - unit = @models[i].unit
               %td{:style=>"vertical-align:top;white-space:nowrap;"}
                 %b.title
                   = (sa_prediction ? "Consensus mutagenicity" : "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})")
+                %p
                 / check kazius
                 - if sa_prediction
-                  - hash = sa_prediction[:prediction]
-                  - confidence = sa_prediction[:confidence]
+                  - sa_value = prediction["Consensus prediction"]
+                  - confidence = prediction["Consensus confidence"]
                   / check for database hit
                   - if prediction[:info] =~ /\b(identical)\b/i
                     - @dbhit[i] = true
@@ -52,21 +52,21 @@
                       = prediction[:measurements].join("; ")
                   %b Consensus prediction:
                   %br
-                  =(hash[:prediction] == true ? "mutagenic" : "non-mutagenic")
+                  = sa_value
                   %p
                   %b Consensus confidence:
                   %br
-                  =confidence.to_f.signif(3)
+                  = confidence
                   %p
                   %b Structural alerts for mutagenicity:
                   %br
-                  =hash[:matches].blank? ? "none" : hash[:matches].join("; ")
+                  = prediction["Structural alerts for mutagenicity"].gsub(";","</br>")
                 / check for prediction
-                %p
-                / regression
                 - if prediction[:value]
-                  %b.title= ("Lazar #{@models[i].endpoint.gsub('_', ' ').downcase} (#{@models[i].species}):" if sa_prediction)
                   %p
+                  - if sa_prediction
+                    %b.title= ("Lazar #{@models[i].endpoint.gsub('_', ' ').downcase} (#{@models[i].species}):")
+                    %p
                   / check for database hit
                   - if prediction[:info] =~ /\b(identical)\b/i
                     - @dbhit[i] = true
