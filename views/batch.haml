@@ -125,9 +125,19 @@
       :javascript
         var timer = #{ctimer};
         $(document).ready(function(){
-          markers[#{idx}] = setInterval(function(){
-            renderTask('#{task}','#{model}',#{idx});
-          }, timer );
+          // check button class before execute a task
+          if (#{idx} > 0){
+            markers[#{idx}] = setInterval(function(){
+              var button = document.getElementById("detailsbutton_#{idx-1}");
+              if(!button.classList.contains('disabled')){
+                renderTask('#{task}','#{model}',#{idx});
+              }
+            }, timer );
+          }else{
+            markers[#{idx}] = setInterval(function(){
+              renderTask('#{task}','#{model}',#{idx});
+            }, timer );
+          };
         });
       #data-container{:id=>idx,:style=>"width:100%;"}
       -#pager{:id=>idx}
