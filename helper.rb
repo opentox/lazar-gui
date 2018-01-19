@@ -34,7 +34,7 @@ helpers do
     output["converted_model_unit"] = converted_model_unit
 
     if prediction[:value]
-      inApp = (prediction[:warnings].join(" ") =~ /Cannot/ ? "no" : (prediction[:warnings].join(" ") =~ /may|Insufficient/ ? "maybe" : "yes"))
+      inApp = (prediction[:warnings].join(" ") =~ /Cannot/ ? "no" : (prediction[:warnings].join(" ") =~ /may|Insufficient|Weighted/ ? "maybe" : "yes"))
       if prediction[:info] =~ /\b(identical)\b/i
         prediction[:info] = "This compound was part of the training dataset. All information "\
           "from this compound was removed from the training data before the "\
