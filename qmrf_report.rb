@@ -27,10 +27,22 @@ def qmrf_report id
   # Date of QMRF 2.1
   report.value "qmrf_date", "#{Time.now.strftime('%d %B %Y')}"
 
-  # QMRF author(s) and contact details 2.1
+  # QMRF author(s) and contact details 2.2
   report.change_catalog :authors_catalog, :firstauthor, {:name => "Christoph Helma", :affiliation => "in silico toxicology gmbh", :contact => "Rastatterstr. 41, CH-4057 Basel", :email => "info@in-silico.ch", :number => "1", :url => "www.in-silico.ch"}
   report.ref_catalog :qmrf_authors, :authors_catalog, :firstauthor
 
+  # Date of QMRF update(s) 2.3
+  if prediction_model.name =~ /TD50|multiple/
+    report.value "qmrf_date_revision", "2014-12-05" 
+  end
+ 
+  # Date of QMRF update(s) 2.4
+  if prediction_model.name =~ /TD50/
+    report.value "qmrf_revision", "Q29-44-39-423" 
+  elsif prediction_model.name =~ /multiple/
+    report.value "qmrf_revision", "Q28-43-38-420" 
+  end
+ 
   # Model developer(s) and contact details 2.5
   report.change_catalog :authors_catalog, :modelauthor, {:name => "Christoph Helma", :affiliation => "in silico toxicology gmbh", :contact => "Rastatterstr. 41, CH-4057 Basel", :email => "info@in-silico.ch", :number => "1", :url => "www.in-silico.ch"}
   report.ref_catalog :model_authors, :authors_catalog, :modelauthor
