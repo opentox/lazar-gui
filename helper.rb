@@ -122,4 +122,11 @@ helpers do
     csv
   end
 
+  def dataset_storage
+    all = Dataset.where(:source => /^tmp/)
+    out = Hash.new
+    all.reverse.each{|d| out[d.id] = [d.name, d.created_at]}
+    out
+  end  
+
 end

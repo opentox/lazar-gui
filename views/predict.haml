@@ -26,7 +26,14 @@
   function getInput(){
     identifier = document.getElementById("identifier").value.trim();
     fileselect = document.getElementById("fileselect").value;
-    if (fileselect != ""){
+    allexisting = document.querySelectorAll('[id^="existing"]');
+    existingcsv = false
+    for (var index = 0; index < allexisting.length; index++) {
+      if(allexisting[index].checked == true) {
+        existingcsv = true;
+      };
+    };
+    if (fileselect != "" || existingcsv == true){
       return 1;
     };
     if (identifier != ""){
@@ -70,6 +77,12 @@
       //TODO check file type is csv
       return true;
     };
+    allexisting = document.querySelectorAll('[id^="existing"]');
+    for (var index = 0; index < allexisting.length; index++) {
+      if(allexisting[index].checked == true) {
+        return true;
+      };
+    };
     alert("Please select a file (csv).");
     return false;
   };
@@ -85,11 +98,12 @@
   };
   function checkboxes () {
     var checked = false;
-    $('input[type="checkbox"]').each(function() {
-      if ($(this).is(":checked")) {
+    models = document.querySelectorAll('[id^="selection"]');
+    for (var index = 0; index < models.length; index++) {
+      if(models[index].checked == true) {
         checked = true;
       };
-    });
+    };
     if (checked == false){
       alert("Please select an endpoint.");
       $("img.circle").hide();
@@ -114,23 +128,43 @@
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
   %fieldset#top.well
     %h2 1. Draw a chemical structure
-    #insert
-      %label &nbsp;
-      #appletContainer
-      %br
-      %label{:for => 'identifier'}
-        or enter the
-        %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
-        string:
-      %br
-      %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
-      %p
-      %label{:for=>"fileselect"}
-        or upload a CSV file for batch predictions
-      %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
-      %br
-      %span.btn.btn-default.btn-file
-        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :autocomplete=>"off", :accept=>"text/csv"}
+    %div.row
+      %div.col-md-6
+        #insert
+          %label &nbsp;
+          #appletContainer
+          %br
+          %label{:for => 'identifier'}
+            or enter the
+            %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
+            string:
+          %br
+          %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
+          %p
+          %label{:for=>"fileselect"}
+            or upload a CSV file for batch predictions
+          %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"First column must contain a header with \"SMILES\" or \"InChI\" and the compounds. Also note that a file with the same name of a file that already exists won't be processed."}}
+          %br
+          %span.btn.btn-default.btn-file
+            %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :autocomplete=>"off", :accept=>"text/csv"}
+      %div.col-md-6
+        - if !@existing_datasets.blank?
+          %label{:for=>"storage"} or select an uploaded CSV file
+          #storage.storage-list
+            - @existing_datasets.each do |id,values|
+              %div.p2
+                %input.checkDataset{:type => "checkbox", :name => "existing[#{id}]", :id => "existing[#{id}]", :value => true, :disabled => false}
+                %div.btn-group{:role=>"group", :aria=>{:label=>"remove-download"}}
+                  %a.btn.btn-secondary{:role=>"button", :href=>to("/delete/dataset/#{id}")}
+                    %i.glyphicon.glyphicon-trash
+                  %a.btn.btn-secondary{:role=>"button", :href=>to("/download/dataset/#{id}")}
+                    %i.glyphicon.glyphicon-save
+              %div.p2
+                %label{:for => "existing[#{id}]"}
+                  = values[0]
+              %div.p2
+                = values[1].strftime("%Y-%m-%d %H:%M:%S")
+              %hr
 
   %fieldset#middle.well
     %h2 2. Select one or more endpoints
@@ -145,6 +179,9 @@
           }else{
             $(".check").prop('checked', false);
           };
+        });
+        $(".checkDataset").click(function () {
+          $('.checkDataset').not(this).prop('checked', false);
         });
       - @endpoints.each do |endpoint|
         %div{:id=>endpoint.gsub(/\s+/, "_")}
@@ -197,6 +234,7 @@
       %div.col-md-2
         %h2
           3. Predict
-      %div.col-md-10
-        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
+      %div.col-md-10.input-group
+        %button.has-feedback.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>"", :onclick => "getsmiles()"}
+          %span.glyphicon.glyphicon-play
         %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}

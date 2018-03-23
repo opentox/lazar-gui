@@ -33,6 +33,7 @@ get '/predict/?' do
   rescue
     nil
   end
+  @existing_datasets = dataset_storage
   @models = Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
@@ -136,6 +137,22 @@ get '/predict/dataset/:name' do
   csv
 end
 
+get '/download/dataset/:id' do
+  response['Content-Type'] = "text/csv"
+  dataset = Dataset.find params[:id]
+  tempfile = Tempfile.new
+  tempfile.write(File.read("tmp/"+dataset.name+".csv"))
+  tempfile.rewind
+  send_file tempfile, :filename => dataset.name+".csv", :type => "text/csv", :disposition => "attachment"
+end
+
+get '/delete/dataset/:id' do
+  dataset = Dataset.find params[:id]
+  dataset.delete
+  File.delete File.join("tmp/"+dataset.name+".csv")
+  redirect to("/")
+end
+
 get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
   task = Task.find params[:task].to_s
@@ -156,35 +173,49 @@ get '/predict/csv/:task/:model/:filename/?' do
 end
 
 post '/predict/?' do
-
   # process batch prediction
-  if !params[:fileselect].blank?
-    if params[:fileselect][:filename] !~ /\.csv$/
-      bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
+  if !params[:fileselect].blank? || !params[:existing].blank?
+    if !params[:existing].blank?
+      @dataset = Dataset.find params[:existing].keys[0]
+      @compounds = @dataset.compounds
+      @filename = @dataset.name
     end
-    File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
-      f.write(params[:fileselect][:tempfile].read)
-    end
-    @filename = params[:fileselect][:filename]
-    begin
-      input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename]), true
-      $logger.debug "save dataset #{params[:fileselect][:filename]}"
-      if input.class == OpenTox::Dataset
-        @dataset = Dataset.find input
-        @compounds = @dataset.compounds
-      else
+    if !params[:fileselect].blank?
+      if params[:fileselect][:filename] !~ /\.csv$/
+        bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
+      end
+      @filename = params[:fileselect][:filename]
+      begin
+        @dataset = Dataset.find_by(:name => params[:fileselect][:filename].sub(/\.csv$/,""))
+        if @dataset
+          $logger.debug "Take file from database."
+          @compounds = @dataset.compounds
+        else
+          File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
+            f.write(params[:fileselect][:tempfile].read)
+          end
+          input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename]), true
+          $logger.debug "Processing '#{params[:fileselect][:filename]}'"
+          if input.class == OpenTox::Dataset
+            @dataset = input
+            @compounds = input.compounds
+          else
+            File.delete File.join("tmp", params[:fileselect][:filename])
+            bad_request_error "Could not serialize file '#{@filename}'."
+          end
+        end
+      rescue
+        File.delete File.join("tmp", params[:fileselect][:filename])
         bad_request_error "Could not serialize file '#{@filename}'."
       end
-    rescue
-      bad_request_error "Could not serialize file '#{@filename}'."
-    end
 
-    if @compounds.size == 0
-      message = dataset[:warnings]
-      @dataset.delete
-      bad_request_error message
+      if @compounds.size == 0
+        message = dataset[:warnings]
+        @dataset.delete
+        bad_request_error message
+      end
     end
-    
+      
     @models = params[:selection].keys
     # for single predictions in batch
     @tasks = []
@@ -322,7 +353,7 @@ post '/predict/?' do
     @pid = task.pid
 
     #@dataset.delete
-    File.delete File.join("tmp", params[:fileselect][:filename])
+    #File.delete File.join("tmp", params[:fileselect][:filename])
     return haml :batch
   end
 
