@@ -180,5 +180,6 @@
         %h2
           3. Predict
       %div.col-lg-10.col-md-10.col-sm-10.col-xs-10
-        %input.btn.btn-warning.h2{ :type => "submit", :id => "submit", :value=>">>", :onclick => "getsmiles()"}
+        %button.has-feedback.btn.btn-warning.h2{:type => "submit", :id => "submit", :value=>"", :onclick => "getsmiles()"}
+          %span.glyphicon.glyphicon-play
         %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}

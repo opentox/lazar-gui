@@ -1,3 +1,11 @@
+:javascript
+  $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    $('.modal').on('hidden.bs.modal', function () {
+      $(this).removeData('bs.modal');
+    });
+  });
+
 %div.well
   %a.btn.btn-warning{:href => to('/predict')}
     %i.glyphicon.glyphicon-menu-left
