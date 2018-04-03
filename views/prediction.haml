@@ -1,3 +1,11 @@
+:javascript
+  $(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    $('.modal').on('hidden.bs.modal', function () {
+      $(this).removeData('bs.modal');
+    });
+  });
+
 %div.well
   %a.btn.btn-warning{:href => to('/predict')}
     %i.glyphicon.glyphicon-menu-left
@@ -35,7 +43,10 @@
                   
                   / show message about dbhit and measurements
                   %p
-                    %b Compound is part of the training dataset
+                    :plain
+                      This compound was part of the training dataset. <i>All</i> information </br>
+                      from this compound was removed from the training data before the </br>
+                      prediction, to obtain unbiased results.
                     %p
                     %b Measured activity:
                     %br
