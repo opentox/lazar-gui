@@ -28,8 +28,13 @@
     = ", min: #{model.model.algorithms["similarity"]["min"]}"
     %br
     Prediction:
-    %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
-      = model.model.algorithms["prediction"]["method"]
+    - if model.model.algorithms["prediction"]["method"] !~ /Caret/
+      %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
+        = model.model.algorithms["prediction"]["method"]
+    - else
+      %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox/Algorithm/Caret", :rel=>"external"}
+        = model.model.algorithms["prediction"]["method"]
+
     %br
     Descriptors:
     = model.model.algorithms["descriptors"]["method"]+","
