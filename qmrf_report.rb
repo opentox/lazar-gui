@@ -32,14 +32,15 @@ def qmrf_report id
   report.ref_catalog :qmrf_authors, :authors_catalog, :firstauthor
 
   # Date of QMRF update(s) 2.3
-  if prediction_model.name =~ /TD50|multiple/
+  $logger.debug prediction_model
+  if prediction_model.model.name =~ /TD50|multiple/
     report.value "qmrf_date_revision", "2014-12-05" 
   end
  
   # Date of QMRF update(s) 2.4
-  if prediction_model.name =~ /TD50/
+  if prediction_model.model.name =~ /TD50/
     report.value "qmrf_revision", "Q29-44-39-423" 
-  elsif prediction_model.name =~ /multiple/
+  elsif prediction_model.model.name =~ /multiple/
     report.value "qmrf_revision", "Q28-43-38-420" 
   end
  
