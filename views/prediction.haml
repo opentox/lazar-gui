@@ -89,7 +89,7 @@
                         = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                 
                 / show warnings and info
-                -#%p
+                %p
                   - if !prediction[:info].blank?
                     %b Info:
                     %br
