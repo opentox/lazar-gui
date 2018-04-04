@@ -16,7 +16,7 @@
     %table.table.table-bordered{:id=>"overview"}
       %tbody
         %tr
-          %td{:id=>"compound", :style=>"vertical-align:top;"}
+          %td{:id=>"compound", :style=>"vertical-align:top;text-align:center;"}
             %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@compound.id.to_s)}/details"), :id=>"link01"}}
               = @compound.svg
             %p= @compound.smiles
@@ -97,8 +97,7 @@
                   - if !prediction[:warnings].blank?
                     %b Warnings:
                     - prediction[:warnings].uniq.each do |warning|
-                      %br
-                      %p=warning.sub(/,/, ",<br>")
+                      %p=warning #.sub(/,/, ",<br>")
                       /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
               - else
                 %br

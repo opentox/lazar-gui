@@ -2,7 +2,7 @@
   %h3 Neighbors:
   / tabs div
   #tabs
-    %ul.nav.nav-tabs.nav-justified{:id=>"neighborTabs", :role=>"tablist"}
+    %ul.nav.nav-tabs.nav-justified{:id=>"neighborTabs", :role=>"tablist", :style=>"width:100%;overflow-x:auto;"}
       - @models.each_with_index do |model,i|
         / get predictionFeature type
         - m = Model::Lazar.find model.model_id.to_s
