@@ -9,7 +9,7 @@ Service start:
 ------
     sudo mongod &
     R CMD Rserve --vanilla &
-    unicorn -p 8088 -E production
+    unicorn -p 8088 -c unicorn.rb -E production
 
 Visit:
 ------
