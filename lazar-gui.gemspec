@@ -23,8 +23,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "gem-path"
 
   s.post_install_message = %q{
-  Service cmds:
-    lazar-start &
+  Service commands:
+    lazar-start
     lazar-stop
   }
 end
