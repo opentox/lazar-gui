@@ -5,11 +5,12 @@ Installation:
 -------------
     bundle install
 
-Usage:
+Service start:
 ------
-    sudo /etc/init.d/mongod start
-    unicorn -D
+    sudo mongod &
+    R CMD Rserve --vanilla &
+    unicorn -p 8088 -E production
 
 Visit:
 ------
-    http://localhost:8080
+    http://localhost:8088
