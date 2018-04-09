@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 gemspec
-gem "lazar", :path => "../lazar"
-gem "qsar-report", :path => "../qsar-report"
+gem "lazar"
+gem "qsar-report"
 gem "gem-path"
 gem "sinatra"
 gem "sinatra-reloader"

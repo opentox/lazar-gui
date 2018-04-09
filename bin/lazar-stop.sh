@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 grep_lazar=`ps aux | grep -v grep | grep lazar-start`
 grep_mongo=`ps aux | grep -v grep | grep mongod`
 grep_rserve=`ps aux | grep -v grep | grep Rserve`

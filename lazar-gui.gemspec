@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency "lazar"
   s.add_runtime_dependency "sinatra"
+  s.add_runtime_dependency "sinatra-reloader"
   s.add_runtime_dependency "rdiscount"
   s.add_runtime_dependency "haml"
   s.add_runtime_dependency "sass"
