@@ -164,7 +164,13 @@ get '/predict/csv/:task/:model/:filename/?' do
   else
     header = task.csv
     lines = []
-    task.predictions[params[:model]].each_with_index{|p,idx| lines << "#{idx+1},#{Prediction.find(p).csv}"}
+    task.predictions[params[:model]].each_with_index do |p,idx| 
+      if p.is_a? BSON::ObjectId
+        lines << "#{idx+1},#{Prediction.find(p).csv}"
+      else
+        lines << "#{idx+1},#{p}\n"
+      end
+    end
     csv = header + lines.join("")
     tempfile.write(csv)
   end
@@ -336,6 +342,12 @@ post '/predict/?' do
           predictions["Cramer rules, with extensions"] = output["cramer_rules_extensions"].collect{|rule| rule != "nil" ? rule : "none"}
           predictions["compounds"] = @compounds.collect{|c| c.id}
 
+          if @dataset.warnings
+            @dataset.warnings.each do |warning|
+              w = warning.split(".").first
+              csv << w.sub(/,/," and")+"\n"
+            end
+          end
           # write csv
           t[:csv] = csv
           # write predictions
@@ -345,6 +357,12 @@ post '/predict/?' do
         # save task 
         # append predictions as last action otherwise they won't save
         # mongoid works with shallow copy via #dup
+        if @dataset.warnings
+          @dataset.warnings.each do |warning|
+            w = warning.split(".").first
+            @predictions["#{model}"] << w.sub(/,/," and")
+          end
+        end
         t[:predictions] = @predictions
         t.save
       end#models
