@@ -1,5 +1,6 @@
 require_relative 'task.rb'
 require_relative 'prediction.rb'
+require_relative 'batch.rb'
 require_relative 'helper.rb'
 include OpenTox
 
@@ -8,6 +9,7 @@ configure :production, :development do
   enable :reloader
   also_reload './helper.rb'
   also_reload './prediction.rb'
+  also_reload './batch.rb'
 end
 
 before do
@@ -46,12 +48,11 @@ get '/task/?' do
     task = Task.find(params[:turi].to_s)
     return JSON.pretty_generate(:percent => task.percent)
   elsif params[:predictions]
-    task = Task.find(params[:predictions].to_s)
-    predictions = task.predictions[params[:model]]
+    task = Task.find(params[:predictions])
     pageSize = params[:pageSize].to_i - 1
     pageNumber= params[:pageNumber].to_i - 1
     if params[:model] == "Cramer"
-      prediction = predictions
+      prediction = task.predictions[params[:model]]
       compound = Compound.find prediction["compounds"][pageNumber]
       image = compound.svg
       smiles = compound.smiles
@@ -63,6 +64,7 @@ get '/task/?' do
       string += "</table></td>"
       html += "#{string}</tr></table>"
     else
+      predictions = task.predictions[params[:model]].collect{|hash| hash.values[0]}
       prediction_object = Prediction.find predictions[pageNumber]
       prediction = prediction_object.prediction
       compound = Compound.find prediction_object.compound
@@ -147,7 +149,7 @@ get '/download/dataset/:id' do
 end
 
 get '/delete/dataset/:id' do
-  dataset = Dataset.find params[:id]
+  dataset = Batch.find params[:id]
   dataset.delete
   File.delete File.join("tmp/"+dataset.name+".csv")
   redirect to("/")
@@ -164,11 +166,13 @@ get '/predict/csv/:task/:model/:filename/?' do
   else
     header = task.csv
     lines = []
-    task.predictions[params[:model]].each_with_index do |p,idx| 
-      if p.is_a? BSON::ObjectId
-        lines << "#{idx+1},#{Prediction.find(p).csv}"
+    task.predictions[params[:model]].each_with_index do |hash,idx|
+      identifier = hash.keys[0]
+      prediction_id = hash.values[0]
+      if prediction_id.is_a? BSON::ObjectId
+        lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv}"
       else
-        lines << "#{idx+1},#{p}\n"
+        lines << "#{idx+1},#{identifier},#{p}\n"
       end
     end
     csv = header + lines.join("")
@@ -182,8 +186,9 @@ post '/predict/?' do
   # process batch prediction
   if !params[:fileselect].blank? || !params[:existing].blank?
     if !params[:existing].blank?
-      @dataset = Dataset.find params[:existing].keys[0]
+      @dataset = Batch.find params[:existing].keys[0]
       @compounds = @dataset.compounds
+      @identifiers = @dataset.identifiers
       @filename = @dataset.name
     end
     if !params[:fileselect].blank?
@@ -192,19 +197,21 @@ post '/predict/?' do
       end
       @filename = params[:fileselect][:filename]
       begin
-        @dataset = Dataset.find_by(:name => params[:fileselect][:filename].sub(/\.csv$/,""))
+        @dataset = Batch.find_by(:name => params[:fileselect][:filename].sub(/\.csv$/,""))
         if @dataset
           $logger.debug "Take file from database."
           @compounds = @dataset.compounds
+          @identifiers = @dataset.identifiers
         else
           File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
             f.write(params[:fileselect][:tempfile].read)
           end
-          input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename]), true
+          input = Batch.from_csv_file File.join("tmp", params[:fileselect][:filename])
           $logger.debug "Processing '#{params[:fileselect][:filename]}'"
-          if input.class == OpenTox::Dataset
+          if input.class == OpenTox::Batch
             @dataset = input
-            @compounds = input.compounds
+            @compounds = @dataset.compounds
+            @identifiers = @dataset.identifiers
           else
             File.delete File.join("tmp", params[:fileselect][:filename])
             bad_request_error "Could not serialize file '#{@filename}'."
@@ -216,7 +223,7 @@ post '/predict/?' do
       end
 
       if @compounds.size == 0
-        message = dataset[:warnings]
+        message = @dataset[:warnings]
         @dataset.delete
         bad_request_error message
       end
@@ -237,7 +244,7 @@ post '/predict/?' do
           if type == "Regression"
             unit = (type == "Regression") ? "(#{m.unit})" : ""
             converted_unit = (type == "Regression") ? "#{m.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
-            header = "ID,Endpoint,Unique SMILES,inTrainingSet,Measurements #{unit},Prediction #{unit},Prediction #{converted_unit},"\
+            header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements #{unit},Prediction #{unit},Prediction #{converted_unit},"\
               "Prediction Interval Low #{unit},Prediction Interval High #{unit},"\
               "Prediction Interval Low #{converted_unit},Prediction Interval High #{converted_unit},"\
               "inApplicabilityDomain,Note\n"
@@ -245,7 +252,7 @@ post '/predict/?' do
           # add header for classification
           if type == "Classification"
             av = m.prediction_feature.accept_values
-            header = "ID,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
+            header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
               "Structural alerts for mutagenicity,Lazar Prediction,"\
               "Lazar predProbability #{av[0]},Lazar predProbability #{av[1]},inApplicabilityDomain,Note\n"
           end
@@ -253,7 +260,8 @@ post '/predict/?' do
           p = 100.0/@compounds.size
           counter = 1
           predictions = []
-          @compounds.each_with_index do |compound,idx|
+          @compounds.each_with_index do |cid,idx|
+            compound = Compound.find cid
             if Prediction.where(compound: compound.id, model: m.id).exists?
               prediction_object = Prediction.find_by(compound: compound.id, model: m.id)
               prediction = prediction_object.prediction
@@ -263,6 +271,8 @@ post '/predict/?' do
                 prediction_object[:csv] = prediction_to_csv(m,compound,prediction)
                 prediction_object.save
               end
+              # identifier
+              identifier = @identifiers[idx]
             else
               prediction = m.predict(compound)
               # save prediction object
@@ -312,9 +322,12 @@ post '/predict/?' do
               prediction_object[:prediction] = prediction
               prediction_object[:csv] = prediction_to_csv(m,compound,prediction)
               prediction_object.save
+
+              # identifier
+              identifier = @identifiers[idx]
             end
-            # collect prediction_object ids
-            predictions << prediction_id
+            # collect prediction_object ids with identifier
+            predictions << {identifier => prediction_id}
             t.update_percent((counter*p).ceil > 100 ? 100 : (counter*p).ceil)
             counter += 1
           end
@@ -323,24 +336,24 @@ post '/predict/?' do
           # write predictions
           @predictions["#{model}"] = predictions
         else # Cramer model
-          compounds = @compounds.collect{|c| c.smiles}
+          compounds = @compounds.collect{|cid| c = Compound.find cid; c.smiles}
           prediction = [Toxtree.predict(compounds, "Cramer rules"), Toxtree.predict(compounds, "Cramer rules with extensions")]
           output = {}
           output["model_name"] = "Oral toxicity (Cramer rules)"
           output["cramer_rules"] = prediction.collect{|array| array.collect{|hash| hash["Cramer rules"]}}.flatten.compact
           output["cramer_rules_extensions"] = prediction.collect{|array| array.collect{|hash| hash["Cramer rules, with extensions"]}}.flatten.compact
           # header
-          csv = "ID,Endpoint,Unique SMILES,Cramer rules,Cramer rules with extensions\n"
+          csv = "ID,Input,Endpoint,Unique SMILES,Cramer rules,Cramer rules with extensions\n"
           # content
           compounds.each_with_index do |smiles, idx|
-            csv << "#{idx+1},#{output["model_name"]},#{smiles},"\
+            csv << "#{idx+1},#{@identifiers[idx]},#{output["model_name"]},#{smiles},"\
               "#{output["cramer_rules"][idx] != "nil" ? output["cramer_rules"][idx] : "none" },"\
               "#{output["cramer_rules_extensions"][idx] != "nil" ? output["cramer_rules_extensions"][idx] : "none"}\n"
           end
           predictions = {}
           predictions["Cramer rules"] = output["cramer_rules"].collect{|rule| rule != "nil" ? rule : "none"}
           predictions["Cramer rules, with extensions"] = output["cramer_rules_extensions"].collect{|rule| rule != "nil" ? rule : "none"}
-          predictions["compounds"] = @compounds.collect{|c| c.id}
+          predictions["compounds"] = @compounds
 
           if @dataset.warnings
             @dataset.warnings.each do |warning|

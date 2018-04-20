@@ -16,17 +16,14 @@ helpers do
   end
 
   def prediction_to_csv(m,c,p)
-    #model = Model::Validation.find(m.to_s)
     model = m
     model_name = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
     model_unit = model.regression? ? "(#{model.unit})" : ""
     converted_model_unit = model.regression? ? "#{model.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
 
-    #predictions = predictions_ids.collect{|prediction_id| Prediction.find prediction_id}
     csv = ""
-    compound = c#Compound.find prediction_object.compound
-    prediction = p#prediction_object.prediction
-    #prediction.delete_if{|k,v| k =~ /neighbors|prediction_feature_id/}
+    compound = c
+    prediction = p
     output = {}
     line = ""
     output["model_name"] = model_name
@@ -123,7 +120,7 @@ helpers do
   end
 
   def dataset_storage
-    all = Dataset.where(:source => /^tmp/)
+    all = Batch.where(:source => /^tmp/)
     out = Hash.new
     all.reverse.each{|d| out[d.id] = [d.name, d.created_at]}
     out

@@ -102,7 +102,6 @@
   - @models.each_with_index do |model,idx|
     - m = Model::Validation.find model unless model == "Cramer"
     - task = @tasks[idx].id
-    - predictions = @tasks[idx].predictions["#{model}"]
     #result.panel{:id=>idx}
       %div.row
         %div.col-md-6
