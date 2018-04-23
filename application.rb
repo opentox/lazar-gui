@@ -141,7 +141,7 @@ end
 
 get '/download/dataset/:id' do
   response['Content-Type'] = "text/csv"
-  dataset = Dataset.find params[:id]
+  dataset = Batch.find params[:id]
   tempfile = Tempfile.new
   tempfile.write(File.read("tmp/"+dataset.name+".csv"))
   tempfile.rewind
@@ -157,9 +157,10 @@ end
 
 get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
+  filename = params[:filename] =~ /\.csv$/ ? params[:filename].gsub(/\.csv$/,"") : params[:filename]
   task = Task.find params[:task].to_s
   m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
-  dataset = Batch.find_by(:name => params[:filename])
+  dataset = Batch.find_by(:name => filename)
   warnings = dataset.warnings.blank? ? nil : dataset.warnings.join("\n")
   unless warnings.nil?
     keys_array = []
@@ -219,7 +220,7 @@ get '/predict/csv/:task/:model/:filename/?' do
     tempfile.write(csv)
   end
   tempfile.rewind
-  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{params[:filename]}.csv", :type => "text/csv", :disposition => "attachment"
+  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{filename}.csv", :type => "text/csv", :disposition => "attachment"
 end
 
 post '/predict/?' do
