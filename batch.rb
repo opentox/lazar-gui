@@ -65,11 +65,21 @@ module OpenTox
             compound = nil
           end
           if compound.nil? # compound parsers may return nil
-            #warn "Cannot parse #{compound_format} compound '#{identifier}' at line #{i+2} of #{source}, all entries are ignored."
-            batch.compounds  << "Cannot parse #{compound_format} compound '#{identifier}' at line #{i+2} of #{source}."
+            batch.warnings << "Cannot parse #{compound_format} compound '#{identifier}' at line #{i+2} of #{source}."
             next
           end
           batch.compounds << compound.id
+        end
+        batch.compounds.duplicates.each do |duplicate|
+          dup = Compound.find duplicate
+          positions = []
+          batch.compounds.each_with_index do |co,i|
+            c = Compound.find co
+            if !c.blank? and c.inchi and c.inchi == dup.inchi
+              positions << i+1
+            end
+          end
+          batch.warnings << "Duplicate compound at ID #{positions.join(' and ')}."
         end
         batch.save
       end

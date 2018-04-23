@@ -159,27 +159,67 @@ get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
   task = Task.find params[:task].to_s
   m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
+  dataset = Batch.find_by(:name => params[:filename])
+  warnings = dataset.warnings.blank? ? nil : dataset.warnings.join("\n")
+  unless warnings.nil?
+    keys_array = []
+    warnings.split("\n").each do |warning|
+      text = warning.split("ID").first
+      numbers = warning.split("ID").last.split("and")
+      keys_array << numbers.collect{|n| n.strip.to_i}
+    end
+    @dups = {}
+    keys_array.each do |keys|
+      keys.each do |key|
+        @dups[key] = "Duplicate compound at ID #{keys.join(" and ")}\n"
+      end
+    end
+  end
   endpoint = (params[:model] == "Cramer") ? "Oral_toxicity_(Cramer_rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus_mutagenicity" : "#{m.endpoint}_(#{m.species})")
   tempfile = Tempfile.new
   if params[:model] == "Cramer"
-    tempfile.write(task.csv)
+    # add duplicate warning at the end of a line if ID matches
+    if @dups
+      lines = task.csv.split("\n")
+      header = lines.shift
+      out = ""
+      lines.each_with_index do |line,idx|
+        if @dups[idx+1]
+          out << "#{line.tr("\n","")},#{@dups[idx+1]}"
+        else
+          out << line+"\n"
+        end
+      end
+      tempfile.write(header+"\n"+out)
+    else
+      tempfile.write(task.csv)
+    end
   else
     header = task.csv
     lines = []
     task.predictions[params[:model]].each_with_index do |hash,idx|
       identifier = hash.keys[0]
       prediction_id = hash.values[0]
-      if prediction_id.is_a? BSON::ObjectId
-        lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv}"
+      # add duplicate warning at the end of a line if ID matches
+      if @dups && @dups[idx+1]
+        if prediction_id.is_a? BSON::ObjectId
+          lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv.tr("\n","")},#{@dups[idx+1]}"
+        else
+          lines << "#{idx+1},#{identifier},#{p},#{@dups[idx+1]}"
+        end
       else
-        lines << "#{idx+1},#{identifier},#{p}\n"
+        if prediction_id.is_a? BSON::ObjectId
+          lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv}"
+        else
+          lines << "#{idx+1},#{identifier},#{p}\n"
+        end
       end
     end
     csv = header + lines.join("")
     tempfile.write(csv)
   end
   tempfile.rewind
-  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{params[:filename]}", :type => "text/csv", :disposition => "attachment"
+  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{params[:filename]}.csv", :type => "text/csv", :disposition => "attachment"
 end
 
 post '/predict/?' do
@@ -223,7 +263,7 @@ post '/predict/?' do
       end
 
       if @compounds.size == 0
-        message = @dataset[:warnings]
+        message = @dataset.warnings
         @dataset.delete
         bad_request_error message
       end
@@ -354,13 +394,6 @@ post '/predict/?' do
           predictions["Cramer rules"] = output["cramer_rules"].collect{|rule| rule != "nil" ? rule : "none"}
           predictions["Cramer rules, with extensions"] = output["cramer_rules_extensions"].collect{|rule| rule != "nil" ? rule : "none"}
           predictions["compounds"] = @compounds
-
-          if @dataset.warnings
-            @dataset.warnings.each do |warning|
-              w = warning.split(".").first
-              csv << w.sub(/,/," and")+"\n"
-            end
-          end
           # write csv
           t[:csv] = csv
           # write predictions
@@ -370,12 +403,6 @@ post '/predict/?' do
         # save task 
         # append predictions as last action otherwise they won't save
         # mongoid works with shallow copy via #dup
-        if @dataset.warnings
-          @dataset.warnings.each do |warning|
-            w = warning.split(".").first
-            @predictions["#{model}"] << w.sub(/,/," and")
-          end
-        end
         t[:predictions] = @predictions
         t.save
       end#models
