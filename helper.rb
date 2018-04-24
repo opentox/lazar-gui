@@ -109,8 +109,17 @@ helpers do
         line += "#{output['model_name']},#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
           "#{prediction[:measurements].collect{|m| m.delog10.signif(3)}.join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
       else
-        line += "Consensus mutagenicity,#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
-          "#{prediction[:measurements].join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
+        #line += "Consensus mutagenicity,#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
+        #  "#{prediction[:measurements].join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
+        line += "Consensus mutagenicity,#{compound.smiles},"\
+          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
+          "#{prediction['Consensus prediction']},"\
+          "#{prediction['Consensus confidence']},"\
+          "#{prediction['Structural alerts for mutagenicity']},"\
+          "#{output['prediction_value']},"\
+          "#{!prediction[:probabilities].blank? ? output['probabilities'].first : ""},"\
+          "#{!prediction[:probabilities].blank? ? output['probabilities'].last : ""},"\
+          "#{inApp},#{note.nil? ? "" : note}\n"
       end
 
     end

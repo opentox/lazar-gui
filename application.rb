@@ -100,7 +100,14 @@ get '/task/?' do
         sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
         sorter << {"Prediction" => prediction[:value]}
         sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
-      else
+      elsif !prediction[:value] && type == "Classification"
+        sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
+        sorter << {"Consensus confidence" => prediction["Consensus confidence"]}
+        sorter << {"Structural alerts for mutagenicity" => prediction["Structural alerts for mutagenicity"]}
+        sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
+        sorter << {"Prediction" => ""}
+        sorter << {"Probability" => ""}
+      #else
         sorter << {"Warnings" => prediction[:warnings].join("</br>")}
       end
       sorter.each_with_index do |hash,idx|
@@ -337,7 +344,7 @@ post '/predict/?' do
                 end
                 prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
                 prediction["Consensus confidence"] = confidence.signif(3)
-                prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
+                prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ").gsub(/,/," ")
               end
               # add additionally fields for html representation
               unless prediction[:value].blank? || type == "Classification"
