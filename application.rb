@@ -95,17 +95,15 @@ get '/task/?' do
     elsif !prediction[:value] && type == "Regression"
       sorter << {"Prediction" => ""}
       sorter << {"95% Prediction interval" => ""}
-      sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      sorter << {"Warnings" => prediction[:warnings].last =~ /similar/ ? prediction[:warnings].last : prediction[:warnings].join("</br>")}
     # classification
     elsif prediction[:value] && type == "Classification"
-      sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
       sorter << {"Prediction" => prediction[:value]}
       sorter << {"Probability" => prediction[:probabilities].collect{|k,v| "#{k}: #{v.signif(3)}"}.join("</br>")}
     elsif !prediction[:value] && type == "Classification"
-      sorter << {"Lazar mutagenicity (Salmonella typhimurium)" => ""}
       sorter << {"Prediction" => ""}
       sorter << {"Probability" => ""}
-      sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      sorter << {"Warnings" => prediction[:warnings].last =~ /similar/ ? prediction[:warnings].last : prediction[:warnings].join("</br>")}
     end
     sorter.each_with_index do |hash,idx|
       k = hash.keys[0]
@@ -260,9 +258,8 @@ post '/predict/?' do
         # add header for classification
         if type == "Classification"
           av = m.prediction_feature.accept_values
-          header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
-            "Structural alerts for mutagenicity,Lazar Prediction,"\
-            "Lazar predProbability #{av[0]},Lazar predProbability #{av[1]},inApplicabilityDomain,Note\n"
+          header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements,"\
+            "Lazar Prediction,Lazar predProbability #{av[0]},Lazar predProbability #{av[1]},inApplicabilityDomain,Note\n"
         end
         # predict compounds
         p = 100.0/@compounds.size

@@ -79,11 +79,8 @@ helpers do
           prediction[:probabilities].each{|k,v| output['probabilities'] << v.signif(3)}
         end
 
-        line += "Consensus mutagenicity,#{compound.smiles},"\
+        line += "#{output['model_name']},#{compound.smiles},"\
           "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
-          "#{prediction['Consensus prediction']},"\
-          "#{prediction['Consensus confidence']},"\
-          "#{prediction['Structural alerts for mutagenicity']},"\
           "#{output['prediction_value']},"\
           "#{!prediction[:probabilities].blank? ? output['probabilities'].first : ""},"\
           "#{!prediction[:probabilities].blank? ? output['probabilities'].last : ""},"\
@@ -100,20 +97,14 @@ helpers do
           "from this compound was removed from the training data before the "\
           "prediction to obtain unbiased results."
       end
-      note = "\"#{prediction[:warnings].join(" ")}\""
-
-      output['warnings'] = prediction[:warnings]
-      output['info'] = prediction[:info] if prediction[:info]
+      note = "\"#{prediction[:warnings].last =~ /similar/ ? prediction[:warnings].last : prediction[:warnings].join(" ")}\""
 
       if model.regression?
         line += "#{output['model_name']},#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
           "#{prediction[:measurements].collect{|m| m.delog10.signif(3)}.join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
       else
-        line += "Consensus mutagenicity,#{compound.smiles},"\
+        line += "#{output['model_name']},#{compound.smiles},"\
           "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
-          "#{prediction['Consensus prediction']},"\
-          "#{prediction['Consensus confidence']},"\
-          "#{prediction['Structural alerts for mutagenicity']},"\
           "#{output['prediction_value']},"\
           "#{!prediction[:probabilities].blank? ? output['probabilities'].first : ""},"\
           "#{!prediction[:probabilities].blank? ? output['probabilities'].last : ""},"\
