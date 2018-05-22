@@ -92,6 +92,10 @@ get '/task/?' do
         sorter << {"Prediction" => "#{prediction["prediction_value"]}</br>#{prediction["converted_prediction_value"]}"}
         sorter << {"95% Prediction interval" => "#{prediction[:interval]}</br>#{prediction["converted_interval"]}"}
         sorter << {"Warnings" => prediction[:warnings].join("</br>")}
+      elsif !prediction[:value] && type == "Regression"
+        sorter << {"Prediction" => ""}
+        sorter << {"95% Prediction interval" => ""}
+        sorter << {"Warnings" => prediction[:warnings].join("</br>")}
       # classification
       elsif prediction[:value] && type == "Classification"
         sorter << {"Consensus prediction" => prediction["Consensus prediction"]}
