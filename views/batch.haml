@@ -29,16 +29,11 @@
     var aClient = new HttpClient();
     aClient.get(uri, function(res) {
       var response = JSON.parse(res);
-      if (model_id == "Cramer"){
-        $("img.circle").show();
-      }else{
-        progress(response['percent'],id);
-      }
+      progress(response['percent'],id);
       if (response['percent'] == 100){
         window.clearInterval(markers[id]);
         $("a#downbutton_"+id).removeClass("disabled");
         $("a#detailsbutton_"+id).removeClass("disabled");
-        $("img.circle").hide();
       };
     });
   };

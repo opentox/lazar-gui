@@ -26,6 +26,10 @@
 }
 body {
   background-color:#E7E7E7;
+  
+  a {
+    color: inherit;
+  }
 }
 table.table-borderless tbody tr td{
   border-top: none;
@@ -41,7 +45,7 @@ h4.head-back, h5.head-back{
   }
 
   li a {
-    //height: 7em;
+    height: 7em;
   }
 }
 img {
@@ -89,7 +93,30 @@ supporters{
     margin: 1em;
   }
 }
-
+.csv.btn{
+  width: 100%;
+  height: 30px;
+}
+.dlwait{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.single-batch{
+  width: 100%;
+}
+.single-batch{
+  table-layout: fixed;
+  width: 100%;
+}
+tr.hide-top > td {
+  border-top: 0px !important;
+}
 .footer{
   margin-top:3em;
+}
+.storage-list {
+    height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
 }
