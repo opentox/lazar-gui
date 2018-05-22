@@ -1,7 +1,19 @@
-require 'rdiscount'
-require_relative 'qmrf_report.rb'
+[
+  'batch.rb',
+  'helper.rb',
+  'login.rb',
+  'prediction.rb',
+  'qmrf_report.rb',
+  'task.rb'
+].each do |lib|
+  require_relative lib
+end
+
 include OpenTox
 
+use Rack::Auth::Basic, "Please enter your login credentials." do |username, password|
+  [username, password] == [$user, $pass]
+end
 
 configure :production do
   $logger = Logger.new(STDOUT)

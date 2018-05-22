@@ -1,10 +1,94 @@
+:javascript
+
+  function progress(value,id) {
+    var percent = Math.round(value);
+    var bar = document.getElementById("bar_"+id);
+    var prog = document.getElementById("progress_"+id);
+    bar.style.width = value + '%';
+    if (percent == 100){
+      prog.style.display = "none";
+    };
+  };
+
+  var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+    var anHttpRequest = new XMLHttpRequest();
+    anHttpRequest.onreadystatechange = function() {
+    if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+      aCallback(anHttpRequest.responseText);
+    }
+      anHttpRequest.open( "GET", aUrl, true );
+      anHttpRequest.send( null );
+    }
+  };  
+
+  var markers = [];
+
+  function renderTask(task_id,model_id,id) {
+    var uri = "#{to("/")}" + 'task/?turi=' + task_id;
+    var aClient = new HttpClient();
+    aClient.get(uri, function(res) {
+      var response = JSON.parse(res);
+      if (model_id == "Cramer"){
+        $("img.circle").show();
+      }else{
+        progress(response['percent'],id);
+      }
+      if (response['percent'] == 100){
+        window.clearInterval(markers[id]);
+        $("a#downbutton_"+id).removeClass("disabled");
+        $("a#detailsbutton_"+id).removeClass("disabled");
+        $("img.circle").hide();
+      };
+    });
+  };
+  function simpleTemplating(data) {
+    var html = '<ul class=pagination>';
+    $.each(data, function(index, item){
+      html += '<li>'+ item +'</li>'+'</br>';
+    });
+    html += '</ul>';
+    return html;
+  };
+  function pagePredictions(task_id,model_id,id){
+    button = document.getElementById("detailsbutton_"+id);
+    span = button.childNodes[1];
+    if (span.className == "glyphicon glyphicon-menu-right"){
+      span.className = "glyphicon glyphicon-menu-down";
+      $('#data-container_'+id).show();
+      $('#pager_'+id).show();
+      $('#pager_'+id).pagination({
+        dataSource: '#{to("/")}' + 'task/?predictions=' + task_id + '&model=' + model_id ,
+        locator: 'prediction',
+        totalNumber: #{@compounds.size},
+        pageSize: 1,
+        showPageNumbers: true,
+        showGoInput: true,
+        formatGoInput: 'go to <%= input %>',
+        formatAjaxError: function(jqXHR, textStatus, errorThrown) {
+          $('#data-container_'+id).html(errorThrown);
+        },
+        /*ajax: {
+          beforeSend: function() {
+            $('#data-container_'+id).html('Loading content ...');
+          }
+        },*/
+        callback: function(data, pagination) {
+          var html = simpleTemplating(data);
+          $('#data-container_'+id).html(html);
+          $('#data-container_'+id).css("min-height", $(window).height() + "px" );
+        }
+      });
+    } else if (span.className = "glyphicon glyphicon-menu-down"){
+      span.className = "glyphicon glyphicon-menu-right";
+      $('#data-container_'+id).hide();
+      $('#pager_'+id).hide();
+    };
+  };
 %div.well
-  %a.btn.btn-warning{:href => to('/predict')}
+  %a.btn.btn-warning{:href => to("/predict?tpid=#{@pid}")}
     %span.glyphicon.glyphicon-menu-left{:aria=>{:hidden=>"true"}}
     New Prediction
-  %a.btn.btn-success{:id => "downbutton", :href=>"#{to("/predict/#{@tmppath}/#{@filename}")}", :title=>"download"}
-    %span.glyphicon.glyphicon-download-alt
-    Download CSV
 
   / show file name
   %topline
@@ -13,97 +97,46 @@
         %h3 Batch Prediction Results:
       %div.col-md-8
         %h3= @filename
-  
-  / displays all prediction result in one table
-  %div.table-responsive
-    %table.table.table-bordered{:id=>"batch", :style=>"background-color:white;"}
-      %tbody
-        - if @warnings
-          - @warnings.each do |warning|
-            %tr
-              %td
-                %b Warning
-              %td
-                = warning.sub(/\b(tmp\/)\b/,"")
-        - @view.each do |compound, array|
-          %tr
-            %td{:style=>"vertical-align:top;"}
-              %p= compound.svg
-              %p= compound.smiles
-            - array.each do |model,prediction|
-              %td{:style=>"vertical-align:top;white-space:nowrap;"}
-                - model.model.class.to_s.match("Classification") ? type = "Classification" : type = "Regression"
-                - unit = model.unit
-                
-                %b{:class => "title"}
-                  = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
-                    
-                / check for prediction
-                - if prediction[:value]
-                  %p
-                  / show model type (classification|regression)
-                  %b Type:
-                  = type
-                  %p 
-                  / check for database hit
-                  - if prediction[:info] =~ /\b(identical)\b/i
-                    
-                    / show message about dbhit and measurements
-                    %p
-                      %b Compound is part of the training dataset
-                      %p
-                      %b Measured activity:
-                      %br
-                      - if prediction[:measurements].is_a?(Array)
-                        = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
-                      - else
-                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
-                    
-                    
-                  / show prediction
-                  %p
-                    %b Prediction:
-                    %br
-                    = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
-                    
-                    / show prediction interval or probability
-                    %p
-                    - if type == "Regression"
-                      %b 95% Prediction interval:
-                      - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
-                      %br
-                      = interval.nil? ? "" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
-                      %br
-                      = "#{compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !prediction[:prediction_interval].nil?
-                    - else
-                      %b Probability:
-                      - unless prediction[:probabilities].nil?
-                        - probabilities = ""
-                        - prediction[:probabilities].each{|k,v| probabilities += "#{k}: #{v.signif(3)}<br>"}
-                        %br
-                        = probabilities
-                  / show warnings
-                  %p
-                  - if !prediction[:info].blank?
-                    %b Info:
-                    %br
-                    %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                  - if !prediction[:warnings].blank?
-                    %b Warnings:
-                    - prediction[:warnings].uniq.each do |warning|
-                      %br
-                      %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
-                        
-                  / no prediction  
-                - else
-                  %br
-                  - if !prediction[:info].blank?
-                    %b Info:
-                    %br
-                    %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                  - if !prediction[:warnings].blank?
-                    %b Warnings:
-                    - prediction[:warnings].uniq.each do |warning|
-                      %br
-                      %p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
-            %tr
+
+
+  - @models.each_with_index do |model,idx|
+    - m = Model::Validation.find model
+    - task = @tasks[idx].id
+    #result.panel{:id=>idx}
+      %div.row
+        %div.col-md-6
+          %h5= "#{m.endpoint} (#{m.species})"
+          #pager{:id=>idx}
+        %div.col-md-6.h5
+          %a.btn.btn-default.btn-xs.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('#{task}','#{model}','#{idx}')", :style=>"font-size:small;"}
+            %span.glyphicon.glyphicon-menu-right
+            Details
+          %a.btn.btn-default.btn-xs.disabled{:id => "downbutton_#{idx}", :href=>"#{to("/predict/csv/#{task}/#{model}/#{@filename}")}", :title=>"download", :style=>"font-size:small;"}
+            %span.glyphicon.glyphicon-download-alt
+            CSV
+      - if model == "Cramer"
+        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
+      - if model != "Cramer"
+        %div{:id=>"progress_#{idx}", :style=>"width:100%;height:3px;position:relative;background-color:#ccc;"}
+          %div{:id=>"bar_#{idx}", :style=>"background-color: #4CAF50;width:10px;height:3px;position:absolute;"}
+      - # increase interval timer for large datasets 
+      - ctimer = ((@compounds.size/1000) == 0 ? 1000 : ((@compounds.size/1000)*1000))
+      :javascript
+        var timer = #{ctimer};
+        $(document).ready(function(){
+          // check button class before execute a task
+          if (#{idx} > 0){
+            markers[#{idx}] = setInterval(function(){
+              var button = document.getElementById("detailsbutton_#{idx-1}");
+              if(!button.classList.contains('disabled')){
+                renderTask('#{task}','#{model}',#{idx});
+              }
+            }, timer );
+          }else{
+            markers[#{idx}] = setInterval(function(){
+              renderTask('#{task}','#{model}',#{idx});
+            }, timer );
+          };
+        });
+      #data-container{:id=>idx,:style=>"width:100%;"}
+      -#pager{:id=>idx}
