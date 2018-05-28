@@ -70,10 +70,11 @@ get '/task/?' do
     compound = Compound.find prediction_object.compound
     model = Model::Validation.find prediction_object.model
     image = compound.svg
+    details = "<a class=\"btn btn-link\" data-id=\"details\" data-remote=\"#{to('/prediction/')+compound.id}/details\" data-toggle=\"modal\" href=\"#details\" #{image}</a>"
     smiles = compound.smiles
     type = (model.regression? ? "Regression" : "Classification")
-    html = "<table class=\"table table-bordered single-batch\"><tr>"
-    html += "<td>#{image}</br>#{smiles}</br></td>"
+    html = "<table class=\"table table-bordered single-batch\" style=\"word-wrap:break-word;table-layout:fixed;\"><tr>"
+    html += "<td>#{details}</br>#{smiles}</br></td>"
     string = "<td><table class=\"table\">"
     sorter = []
     if prediction[:info]
@@ -127,6 +128,18 @@ get '/predict/modeldetails/:model' do
   crossvalidations = Validation::RepeatedCrossValidation.find(model.repeated_crossvalidation_id).crossvalidations
 
   return haml :model_details, :layout=> false, :locals => {:model => model, :crossvalidations => crossvalidations}
+end
+
+get '/prediction/:compound/details/?' do
+  @compound = Compound.find params[:compound]
+  @smiles = @compound.smiles
+  begin
+    @names = @compound.names.nil? ? "No names for this compound available." : @compound.names
+  rescue
+    @names = "No names for this compound available."
+  end
+  @inchi = @compound.inchi.gsub("InChI=", "")
+  haml :details, :layout => false
 end
 
 get '/jme_help/?' do
