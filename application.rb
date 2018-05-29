@@ -1,7 +1,6 @@
 [
   'batch.rb',
   'helper.rb',
-  'login.rb',
   'prediction.rb',
   'qmrf_report.rb',
   'task.rb'
@@ -11,20 +10,20 @@ end
 
 include OpenTox
 
-use Rack::Auth::Basic, "Please enter your login credentials." do |username, password|
-  [username, password] == [$user, $pass]
-end
+#use Rack::Auth::Basic, "Please enter your login credentials." do |username, password|
+#  [username, password] == [$user, $pass]
+#end
 
 configure :development, :production do
   $logger = Logger.new(STDOUT)
-  enable :reloader
-  [
-    'batch.rb',
-    'helper.rb',
-    'prediction.rb'
-  ].each do |lib|
-    also_reload lib
-  end
+  #enable :reloader
+  #[
+  #  'batch.rb',
+  #  'helper.rb',
+  #  'prediction.rb'
+  #].each do |lib|
+  #  also_reload lib
+  #end
 end
 
 before do
@@ -382,6 +381,28 @@ post '/predict/?' do
     haml :prediction
   end
 end
+
+get "/report/:id/?" do
+  prediction_model = Model::Validation.find params[:id]
+  bad_request_error "model with id: '#{params[:id]}' not found." unless prediction_model
+  report = qmrf_report params[:id]
+  # output
+  t = Tempfile.new
+  t << report.to_xml
+  name = prediction_model.species.sub(/\s/,"-")+"-"+prediction_model.endpoint.downcase.sub(/\s/,"-")
+  send_file t.path, :filename => "QMRF_report_#{name.gsub!(/[^0-9A-Za-z]/, '_')}.xml", :type => "application/xml", :disposition => "attachment"
+end
+
+get '/license' do
+  @license = RDiscount.new(File.read("LICENSE.md")).to_html
+  haml :license, :layout => false
+end
+
+get '/faq' do
+  @faq = RDiscount.new(File.read("FAQ.md")).to_html
+  haml :faq, :layout => false
+end
+
 
 get '/style.css' do
   headers 'Content-Type' => 'text/css; charset=utf-8'
