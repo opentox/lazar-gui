@@ -1,0 +1,1098 @@
+{
+  "openapi": "3.0.0",
+  "x-orn-@id": "https://lazar.prod.openrisknet.org",
+  "x-orn-@type": "x-orn:Service",
+  "x-orn-@context": {
+    "@vocab": "http://openrisknet.org/schema#",
+    "x-orn": "http://openrisknet.org/schema#",
+    "x-orn-@id": "@id",
+    "x-orn-@type": "@type"
+  },
+  "servers": [
+    {
+      "url": "https://lazar.prod.openrisknet.org/"
+    }
+  ],
+  "info": {
+    "description": "REST API webservice for lazar and nano-lazar. \n\n*lazar* (lazy structure–activity relationships) is a modular framework for\npredictive toxicology. With activated Authentication & Authorization,\nsubjectid authorization token are obligatory for designated services.\n",
+    "version": "1.1.0",
+    "title": "Lazar & Nano-Lazar REST Service",
+    "contact": {
+      "name": "in silico toxicology gmbh",
+      "email": "info@in-silico.ch",
+      "url": "https://in-silico.ch"
+    },
+    "license": {
+      "name": "GNU GENERAL PUBLIC LICENSE",
+      "url": "https://github.com/opentox/lazar-rest/blob/master/LICENSE"
+    }
+  },
+  "externalDocs": {
+    "description": "See also *lazar-rest* documentation on Github\n",
+    "url": "https://github.com/opentox/lazar-rest"
+  },
+  "paths": {
+    "/model": {
+      "get": {
+        "x-orn-@type": "x-orn:Model",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/model",
+        "x-orn:method": "Get",
+        "tags": [
+          "model"
+        ],
+        "description": "Get a list of all prediction models",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/model/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Model",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/model",
+        "x-orn:method": "Get",
+        "tags": [
+          "model"
+        ],
+        "description": "Get model representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      },
+      "post": {
+        "x-orn-@type": "x-orn:Prediction",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/model/{id}",
+        "x-orn:method": "Post",
+        "tags": [
+          "model"
+        ],
+        "description": "Predict a compound or a nanoparticle",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        },
+        "requestBody": {
+          "description": "SMILES identifier or Nanoparticle URI or comma separated\nlist of SMILES  identifiers or Nanoparticle URI\n",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "x-orn:schema": "application/x-www-form-urlencoded",
+              "schema": {
+                "$ref": "#/components/schemas/postmodel"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report": {
+      "get": {
+        "x-orn-@type": "x-orn:Report",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/report",
+        "x-orn:method": "Get",
+        "tags": [
+          "report"
+        ],
+        "description": "Get a list of QMRF reports",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/report/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Report",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/report/{id}",
+        "x-orn:method": "Get",
+        "tags": [
+          "report"
+        ],
+        "description": "Get QMRF for prediction model",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
+    "/dataset": {
+      "get": {
+        "x-orn-@type": "x-orn:Dataset",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/dataset",
+        "x-orn:method": "Get",
+        "tags": [
+          "dataset"
+        ],
+        "description": "Get a list of all datasets",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/dataset/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Dataset",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/dataset/{id}",
+        "x-orn:method": "Get",
+        "tags": [
+          "dataset"
+        ],
+        "description": "Get dataset representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/dataset/{id}/{attribute}": {
+      "get": {
+        "x-orn-@type": "x-orn:Dataset",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/dataset/{id}/{attribute}",
+        "x-orn:method": "Get",
+        "tags": [
+          "dataset"
+        ],
+        "description": "Get dataset representation",
+        "parameters": [
+          {
+            "name": "attribute",
+            "in": "path",
+            "description": "requested attribute",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "compounds",
+                "nanoparticles",
+                "substances",
+                "features"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/substance": {
+      "get": {
+        "x-orn-@type": "x-orn:Substance",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/substance",
+        "x-orn:method": "Get",
+        "tags": [
+          "substance"
+        ],
+        "description": "Get a list of all substances",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/substance/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Substance",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/substance/{id}",
+        "x-orn:method": "Get",
+        "tags": [
+          "substance"
+        ],
+        "description": "Get substance representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/nanoparticle": {
+      "get": {
+        "x-orn-@type": "x-orn:Nanoparticle",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/nanoparticle",
+        "x-orn:method": "Get",
+        "tags": [
+          "nanoparticle"
+        ],
+        "description": "Get a list of all nanoparticles",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/nanoparticle/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Nanoparticle",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/nanoparticle/{id}",
+        "x-orn:method": "Get",
+        "tags": [
+          "nanoparticle"
+        ],
+        "description": "Get nanoparticle representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/feature": {
+      "get": {
+        "x-orn-@type": "x-orn:Feature",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/feature",
+        "x-orn:method": "Get",
+        "tags": [
+          "feature"
+        ],
+        "description": "Get a list of ids for all features",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/feature/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Feature",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/feature/{id}",
+        "x-orn:method": "Get",
+        "tags": [
+          "feature"
+        ],
+        "description": "Get feature representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/validation": {
+      "get": {
+        "x-orn-@type": "x-orn:Validation",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/validation",
+        "x-orn:method": "Get",
+        "tags": [
+          "validation"
+        ],
+        "description": "Get a list of all validation types",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/validation/{validationtype}": {
+      "get": {
+        "x-orn-@type": "x-orn:Validation",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/validation/{validationtype}",
+        "x-orn:method": "Get",
+        "tags": [
+          "validation"
+        ],
+        "description": "Get all validations of a validation type",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/valtype"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/validation/{validationtype}/{id}": {
+      "get": {
+        "x-orn-@type": "x-orn:Validation",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/validation/{validationtype}/{id}",
+        "x-orn:method": "Get",
+        "tags": [
+          "validation"
+        ],
+        "description": "Get validation representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/valtype"
+          },
+          {
+            "$ref": "#/components/parameters/id"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/compound/descriptor": {
+      "get": {
+        "x-orn-@type": "x-orn:Descriptor",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/descriptor",
+        "x-orn:method": "Get",
+        "tags": [
+          "compound",
+          "descriptor"
+        ],
+        "description": "Get a list of all descriptors",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "x-orn-@type": "x-orn:Prediction",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/descriptor",
+        "x-orn:method": "Post",
+        "tags": [
+          "compound",
+          "descriptor"
+        ],
+        "summary": "Descriptor calculation",
+        "description": "Calculate descriptors for a single compound as SMILES string",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "requestBody": {
+          "description": "identifier and descriptor/s",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "x-orn:schema": "application/x-www-form-urlencoded",
+              "schema": {
+                "$ref": "#/components/schemas/postdescriptor"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compound/descriptor/{descriptor}": {
+      "get": {
+        "x-orn-@type": "x-orn:Descriptor",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/descriptor/{descriptor}",
+        "x-orn:method": "Get",
+        "tags": [
+          "compound",
+          "descriptor"
+        ],
+        "description": "Get informations about a single descriptor",
+        "parameters": [
+          {
+            "name": "descriptor",
+            "in": "path",
+            "description": "descriptor name or ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/compound/{InChI}": {
+      "get": {
+        "x-orn-@type": "x-orn:Compound",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/{InChI}",
+        "x-orn:method": "Get",
+        "tags": [
+          "compound"
+        ],
+        "description": "Get compound representation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InChI"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          }
+        }
+      }
+    },
+    "/api/api.json": {
+      "get": {
+        "tags": [
+          "api"
+        ],
+        "description": "Get swagger api in JSON",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/aa/authenticate": {
+      "post": {
+        "x-orn-@type": "x-orn:Authentication",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/aa/authenticate",
+        "x-orn:method": "Post",
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Get token",
+        "description": "Authentication against OpenSSO. Returns authentication token. Requires\nUsername and Password.\n",
+        "operationId": "login",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "requestBody": {
+          "description": "username and password",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "x-orn:schema": "application/x-www-form-urlencoded",
+              "schema": {
+                "$ref": "#/components/schemas/postauth"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aa/logout": {
+      "post": {
+        "x-orn-@type": "x-orn:Authentication",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/aa/logout",
+        "x-orn:method": "Post",
+        "description": "Devalidates a token. Requires Subjectid.",
+        "summary": "Destroy token",
+        "operationId": "logout",
+        "tags": [
+          "authentication"
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "x-orn:schema": "application/x-www-form-urlencoded",
+              "schema": {
+                "$ref": "#/components/schemas/postlogout"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "api",
+      "description": "Swagger API representation in JSON"
+    },
+    {
+      "name": "algorithm",
+      "description": "Algorithm"
+    },
+    {
+      "name": "authentication",
+      "description": "minimal Authentication service"
+    },
+    {
+      "name": "compound",
+      "description": "Compound"
+    },
+    {
+      "name": "dataset",
+      "description": "Dataset"
+    },
+    {
+      "name": "descriptor",
+      "description": "Descriptor"
+    },
+    {
+      "name": "feature",
+      "description": "Feature"
+    },
+    {
+      "name": "model",
+      "description": "Lazar Model Service"
+    },
+    {
+      "name": "nanoparticle",
+      "description": "Nanoparticle"
+    },
+    {
+      "name": "report",
+      "description": "QMRF Reporting"
+    },
+    {
+      "name": "substance",
+      "description": "Substance"
+    },
+    {
+      "name": "validation",
+      "description": "Validation"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "postmodel": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "x-orn:property": "identifier",
+            "type": "string",
+            "example": "O=C1NC(=O)NC=C1"
+          }
+        }
+      },
+      "postdescriptor": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "x-orn:property": "identifier",
+            "type": "string",
+            "example": "O=C1NC(=O)NC=C1"
+          },
+          "descriptor": {
+            "x-orn:property": "descriptor",
+            "type": "string",
+            "example": "Openbabel.MW,Openbabel.atoms"
+          }
+        }
+      },
+      "postauth": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "x-orn:property": "username",
+            "type": "string"
+          },
+          "password": {
+            "x-orn:property": "password",
+            "type": "string",
+            "format": "password"
+          }
+        }
+      },
+      "postlogout": {
+        "type": "object",
+        "properties": {
+          "subjectid": {
+            "x-orn:property": "subjectid",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "parameters": {
+      "id": {
+        "name": "id",
+        "in": "path",
+        "description": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "InChI": {
+        "name": "InChI",
+        "in": "path",
+        "description": "InChI String",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "valtype": {
+        "name": "validationtype",
+        "in": "path",
+        "description": "validation type",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "subjectid": {
+        "in": "header",
+        "name": "subjectid",
+        "description": "authorization token",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "subjectidRequired": {
+        "in": "header",
+        "name": "subjectid",
+        "description": "authorization token",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "x-orn:returns": "application/json",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Bad Request"
+      },
+      "401": {
+        "description": "Unauthorized"
+      },
+      "403": {
+        "description": "Forbidden"
+      },
+      "404": {
+        "description": "Resource Not Found"
+      },
+      "500": {
+        "description": "Server Error"
+      }
+    }
+  }
+}

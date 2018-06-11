@@ -26,9 +26,26 @@ error do
   haml :error
 end
 
-get '/?' do
-  redirect to('/predict') 
+# https://github.com/britg/sinatra-cross_origin#responding-to-options
+options "*" do
+  response.headers["Allow"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
+  response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
+  200
 end
+
+[
+  "aa.rb",
+  "api.rb",
+  "compound.rb",
+  "dataset.rb",
+  "feature.rb",
+  "model.rb",
+  "nanoparticle.rb",
+  "report.rb",
+  "substance.rb",
+  "swagger.rb",
+  "validation.rb"
+].each{ |f| require_relative "./lib/#{f}" }
 
 get '/predict/?' do
   @models = OpenTox::Model::Validation.all
