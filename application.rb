@@ -14,7 +14,24 @@ configure :development do
 end
 
 before do
-  @version = File.read("VERSION").chomp
+  paths = [
+  "/aa",
+  "/api",
+  "/compound",
+  "/dataset",
+  "/feature",
+  "/model",
+  "/nanoparticle",
+  "/report",
+  "/substance",
+  "/swagger",
+  "/validation"]
+  if paths.include?(request.path)
+    @accept = request.env['HTTP_ACCEPT']
+    response['Content-Type'] = @accept
+  else
+    @version = File.read("VERSION").chomp
+  end
 end
 
 not_found do
