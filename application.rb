@@ -298,3 +298,6 @@ get '/style.css' do
   scss :style
 end
 
+get '/IST_logo_s.png' do
+  redirect to('/images/IST_logo_s.png')
+end
