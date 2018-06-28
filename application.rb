@@ -198,7 +198,7 @@ get '/predict/csv/:task/:model/:filename/?' do
       out = ""
       lines.each_with_index do |line,idx|
         if !@ids.blank?
-          arr = line.spli(",")
+          arr = line.split(",")
           arr.insert(1, @ids[idx])
           line = arr.join(",")
         end
