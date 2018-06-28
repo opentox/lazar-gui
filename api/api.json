@@ -19,7 +19,7 @@
     "title": "Lazar & Nano-Lazar REST Service",
     "contact": {
       "name": "in silico toxicology gmbh",
-      "email": "info@in-silico.ch",
+      "email": "service@in-silico.ch",
       "url": "https://in-silico.ch"
     },
     "license": {
@@ -268,8 +268,34 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/200"
-          },
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "x-orn:returns": "application/json",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "text/csv": {
+                "x-orn:returns": "text/csv",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "application/csv": {
+                "x-orn:returns": "text/csv",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              }
+	    }
+	  },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -813,10 +839,71 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/200"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "x-orn:returns": "application/json",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "chemical/x-daylight-smiles": {
+                "x-orn:returns": "chemical/x-daylight-smiles",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "chemical/x-inchi": {
+                "x-orn:returns": "chemical/x-inchi",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "chemical/x-mdl-sdfile": {
+                "x-orn:returns": "chemical/x-mdl-sdfile",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "image/png": {
+                "x-orn:returns": "image/png",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "image/svg+xml": {
+                "x-orn:returns": "image/svg+xml",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              },
+              "text/plain": {
+                "x-orn:returns": "text/plain",
+                "schema": {
+                  "x-orn:property": "InChI",
+                  "type": "string",
+                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
           }
         }
       }

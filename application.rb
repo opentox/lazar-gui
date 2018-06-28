@@ -2,6 +2,20 @@ require 'rdiscount'
 require_relative 'qmrf_report.rb'
 include OpenTox
 
+[
+  "aa.rb",
+  "api.rb",
+  "compound.rb",
+  "dataset.rb",
+  "feature.rb",
+  "model.rb",
+  "nanoparticle.rb",
+  "report.rb",
+  "substance.rb",
+  "swagger.rb",
+  "validation.rb"
+].each{ |f| require_relative "./lib/#{f}" }
+
 
 configure :production do
   $logger = Logger.new(STDOUT)
@@ -15,18 +29,19 @@ end
 
 before do
   paths = [
-  "/aa",
-  "/api",
-  "/compound",
-  "/dataset",
-  "/feature",
-  "/model",
-  "/nanoparticle",
-  "/report",
-  "/substance",
-  "/swagger",
-  "/validation"]
-  if paths.include?(request.path)
+  "/",
+  "aa",
+  "api",
+  "compound",
+  "dataset",
+  "feature",
+  "model",
+  "nanoparticle",
+  "report",
+  "substance",
+  "swagger",
+  "validation"]
+  if request.path == "/" || paths.include?(request.path.split("/")[1])
     @accept = request.env['HTTP_ACCEPT']
     response['Content-Type'] = @accept
   else
@@ -49,20 +64,6 @@ options "*" do
   response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
   200
 end
-
-[
-  "aa.rb",
-  "api.rb",
-  "compound.rb",
-  "dataset.rb",
-  "feature.rb",
-  "model.rb",
-  "nanoparticle.rb",
-  "report.rb",
-  "substance.rb",
-  "swagger.rb",
-  "validation.rb"
-].each{ |f| require_relative "./lib/#{f}" }
 
 get '/predict/?' do
   @models = OpenTox::Model::Validation.all
