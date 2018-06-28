@@ -172,6 +172,7 @@ get '/predict/csv/:task/:model/:filename/?' do
   task = Task.find params[:task].to_s
   m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
   dataset = Batch.find_by(:name => filename)
+  @ids = dataset.ids
   warnings = dataset.warnings.blank? ? nil : dataset.warnings.join("\n")
   unless warnings.nil?
     keys_array = []
