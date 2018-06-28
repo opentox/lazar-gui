@@ -12,6 +12,7 @@ module OpenTox
     field :name,  type: String
     field :source,  type: String
     field :identifiers, type: Array
+    field :ids, type: Array
     field :compounds, type: Array
     field :warnings, type: Array, default: []
 
@@ -24,7 +25,14 @@ module OpenTox
       else
         $logger.debug "Parsing #{file}."
         table = CSV.read file, :skip_blanks => true, :encoding => 'windows-1251:utf-8'
-        batch = self.new(:source => source, :name => name, :identifiers => [], :compounds => [])
+        batch = self.new(:source => source, :name => name, :identifiers => [], :ids => [], :compounds => [])
+
+        # original IDs
+        if table[0][0] =~ /ID/i
+          ids = table.collect{|row| row.shift}
+          ids.shift
+          batch.ids = ids
+        end
         
         # features
         feature_names = table.shift.collect{|f| f.strip}

@@ -172,6 +172,7 @@ get '/predict/csv/:task/:model/:filename/?' do
   task = Task.find params[:task].to_s
   m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
   dataset = Batch.find_by(:name => filename)
+  @ids = dataset.ids
   warnings = dataset.warnings.blank? ? nil : dataset.warnings.join("\n")
   unless warnings.nil?
     keys_array = []
@@ -196,6 +197,11 @@ get '/predict/csv/:task/:model/:filename/?' do
       header = lines.shift
       out = ""
       lines.each_with_index do |line,idx|
+        if !@ids.blank?
+          arr = line.spli(",")
+          arr.insert(1, @ids[idx])
+          line = arr.join(",")
+        end
         if @dups[idx+1]
           out << "#{line.tr("\n","")},#{@dups[idx+1]}"
         else
@@ -215,15 +221,31 @@ get '/predict/csv/:task/:model/:filename/?' do
       # add duplicate warning at the end of a line if ID matches
       if @dups && @dups[idx+1]
         if prediction_id.is_a? BSON::ObjectId
-          lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv.tr("\n","")},#{@dups[idx+1]}"
+          if @ids.blank?
+            lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv.tr("\n","")},#{@dups[idx+1]}"
+          else
+            lines << "#{idx+1},#{@ids[idx]},#{identifier},#{Prediction.find(prediction_id).csv.tr("\n","")},#{@dups[idx+1]}"
+          end
         else
-          lines << "#{idx+1},#{identifier},#{p},#{@dups[idx+1]}"
+          if @ids.blank?
+            lines << "#{idx+1},#{identifier},#{p},#{@dups[idx+1]}"
+          else
+            lines << "#{idx+1},#{@ids[idx]},#{identifier},#{p},#{@dups[idx+1]}"
+          end
         end
       else
         if prediction_id.is_a? BSON::ObjectId
-          lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv}"
+          if @ids.blank?
+            lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv}"
+          else
+            lines << "#{idx+1},#{@ids[idx]},#{identifier},#{Prediction.find(prediction_id).csv}"
+          end
         else
-          lines << "#{idx+1},#{identifier},#{p}\n"
+          if @ids.blank?
+            lines << "#{idx+1},#{identifier},#{p}\n"
+          else
+            lines << "#{idx+1},#{@ids[idx]}#{identifier},#{p}\n"
+          end
         end
       end
     end
@@ -241,6 +263,7 @@ post '/predict/?' do
       @dataset = Batch.find params[:existing].keys[0]
       @compounds = @dataset.compounds
       @identifiers = @dataset.identifiers
+      @ids = @dataset.ids
       @filename = @dataset.name
     end
     if !params[:fileselect].blank?
@@ -254,6 +277,7 @@ post '/predict/?' do
           $logger.debug "Take file from database."
           @compounds = @dataset.compounds
           @identifiers = @dataset.identifiers
+          @ids = @dataset.ids
         else
           File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
             f.write(params[:fileselect][:tempfile].read)
@@ -264,6 +288,7 @@ post '/predict/?' do
             @dataset = input
             @compounds = @dataset.compounds
             @identifiers = @dataset.identifiers
+            @ids = @dataset.ids
           else
             File.delete File.join("tmp", params[:fileselect][:filename])
             bad_request_error "Could not serialize file '#{@filename}'."
@@ -296,17 +321,30 @@ post '/predict/?' do
           if type == "Regression"
             unit = (type == "Regression") ? "(#{m.unit})" : ""
             converted_unit = (type == "Regression") ? "#{m.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
-            header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements #{unit},Prediction #{unit},Prediction #{converted_unit},"\
+            if @ids.blank?
+              header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements #{unit},Prediction #{unit},Prediction #{converted_unit},"\
               "Prediction Interval Low #{unit},Prediction Interval High #{unit},"\
               "Prediction Interval Low #{converted_unit},Prediction Interval High #{converted_unit},"\
               "inApplicabilityDomain,Note\n"
+            else
+              header = "ID,Original ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements #{unit},Prediction #{unit},Prediction #{converted_unit},"\
+              "Prediction Interval Low #{unit},Prediction Interval High #{unit},"\
+              "Prediction Interval Low #{converted_unit},Prediction Interval High #{converted_unit},"\
+              "inApplicabilityDomain,Note\n"
+            end
           end
           # add header for classification
           if type == "Classification"
             av = m.prediction_feature.accept_values
-            header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
+            if @ids.blank?
+              header = "ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
               "Structural alerts for mutagenicity,Lazar Prediction,"\
               "Lazar predProbability #{av[0]},Lazar predProbability #{av[1]},inApplicabilityDomain,Note\n"
+            else
+              header = "ID,Original ID,Input,Endpoint,Unique SMILES,inTrainingSet,Measurements,Consensus Prediction,Consensus Confidence,"\
+              "Structural alerts for mutagenicity,Lazar Prediction,"\
+              "Lazar predProbability #{av[0]},Lazar predProbability #{av[1]},inApplicabilityDomain,Note\n"
+            end
           end
           # predict compounds
           p = 100.0/@compounds.size
@@ -395,12 +433,22 @@ post '/predict/?' do
           output["cramer_rules"] = prediction.collect{|array| array.collect{|hash| hash["Cramer rules"]}}.flatten.compact
           output["cramer_rules_extensions"] = prediction.collect{|array| array.collect{|hash| hash["Cramer rules, with extensions"]}}.flatten.compact
           # header
-          csv = "ID,Input,Endpoint,Unique SMILES,Cramer rules,Cramer rules with extensions\n"
+          if @ids.blank?
+            csv = "ID,Input,Endpoint,Unique SMILES,Cramer rules,Cramer rules with extensions\n"
+          else
+            csv = "ID,Original ID,Input,Endpoint,Unique SMILES,Cramer rules,Cramer rules with extensions\n"
+          end
           # content
           compounds.each_with_index do |smiles, idx|
-            csv << "#{idx+1},#{@identifiers[idx]},#{output["model_name"]},#{smiles},"\
+            if @ids.blank?
+              csv << "#{idx+1},#{@identifiers[idx]},#{output["model_name"]},#{smiles},"\
               "#{output["cramer_rules"][idx] != "nil" ? output["cramer_rules"][idx] : "none" },"\
               "#{output["cramer_rules_extensions"][idx] != "nil" ? output["cramer_rules_extensions"][idx] : "none"}\n"
+            else
+              csv << "#{idx+1},#{@ids[idx]},#{@identifiers[idx]},#{output["model_name"]},#{smiles},"\
+              "#{output["cramer_rules"][idx] != "nil" ? output["cramer_rules"][idx] : "none" },"\
+              "#{output["cramer_rules_extensions"][idx] != "nil" ? output["cramer_rules_extensions"][idx] : "none"}\n"
+            end
           end
           predictions = {}
           predictions["Cramer rules"] = output["cramer_rules"].collect{|rule| rule != "nil" ? rule : "none"}
