@@ -172,7 +172,6 @@ get '/predict/csv/:task/:model/:filename/?' do
   task = Task.find params[:task].to_s
   m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
   dataset = Batch.find_by(:name => filename)
-  @ids = dataset.ids
   warnings = dataset.warnings.blank? ? nil : dataset.warnings.join("\n")
   unless warnings.nil?
     keys_array = []
@@ -197,11 +196,6 @@ get '/predict/csv/:task/:model/:filename/?' do
       header = lines.shift
       out = ""
       lines.each_with_index do |line,idx|
-        if !@ids.blank?
-          arr = line.split(",")
-          arr.insert(1, @ids[idx])
-          line = arr.join(",")
-        end
         if @dups[idx+1]
           out << "#{line.tr("\n","")},#{@dups[idx+1]}"
         else
