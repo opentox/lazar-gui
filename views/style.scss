@@ -120,3 +120,17 @@ tr.hide-top > td {
     overflow-y: auto;
     overflow-x: auto;
 }
+.help table, .help th, .help td {
+  background-color: white;
+  border: 1px solid black;
+  border-bottom: none;
+  width: 100%;
+}
+.help th, .help td {
+  padding: 10px;
+  text-align: left;
+}
+.storage-list {
+  background-color: #fff;
+  padding: 1em;
+}

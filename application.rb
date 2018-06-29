@@ -530,6 +530,10 @@ post '/predict/?' do
   end
 end
 
+get '/help' do
+  haml :help
+end
+
 get '/style.css' do
   headers 'Content-Type' => 'text/css; charset=utf-8'
   scss :style

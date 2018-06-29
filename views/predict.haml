@@ -143,10 +143,10 @@
           %p
           %label{:for=>"fileselect"}
             or upload a CSV file for batch predictions
-          %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"First column must contain a header with \"SMILES\" or \"InChI\" and the compounds. Also note that a file with the same name of a file that already exists won't be processed."}}
           %br
           %span.btn.btn-default.btn-file
             %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :autocomplete=>"off", :accept=>"text/csv"}
+          %a.btn.btn-warning{:href => to("/help"), :rel => "external", :style=>"margin-left: 1em;"} Help
       %div.col-md-6
         - if !@existing_datasets.blank?
           %label{:for=>"storage"} or select an uploaded CSV file

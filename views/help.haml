@@ -1,0 +1,94 @@
+%div.well
+  %h3 How to use batch prediction
+
+  %p
+    You have two options on how your comma sperated spreadsheet (
+    %strong CSV
+    ) needs to be structured to work with the batch prediction.
+    %br
+    One with only a list of compounds you want to predict and one where you can keep any kind of ID 
+    for each compound for a better tracking of the results.
+    %br
+    Following examples for each option:
+
+  %br
+  %p
+    %div.row
+      %div.col-md-6
+        %strong Option 1:
+        %br
+        A spreadsheet with only 
+        %strong one 
+        column. 
+        %strong Important is the header 
+        containing the 
+        %strong type 
+        of the compounds. 
+        %strong SMILES 
+        or 
+        %strong InChI 
+        are accepted terms followed by corresponding compounds.
+      %div.col-md-6
+        %table.help
+          %tr.row
+            %th.col-md-12
+              SMILES
+          %tr.row
+            %td.col-md-12
+              C1ccccc1NN
+          %tr.row
+            %td.col-md-12
+              Cc1ccc(cc1\N=C=O)/N=C=O
+          %tr.row
+            %td.col-md-12
+              OC(=O)c1ccc(cc1)C(=O)O
+          %tr.row
+            %td.col-md-12
+              ="..."
+  %br
+  %p
+    %div.row
+      %div.col-md-6
+        %strong Option 2:
+        %br
+        A spreadsheet with 
+        %strong two 
+        columns where the 
+        %strong first column must contain a header ID 
+        followed by any kind of ID you want to keep for the results and a 
+        %strong second column with a header SMILES or InChI 
+        followed by corresponding compounds.
+      %div.col-md-6
+        %table.help
+          %tr.row
+            %th.col-md-4
+              ID
+            %th.col-md-8
+              SMILES
+          %tr.row
+            %td.col-md-4
+              2735
+            %td.col-md-8
+              C1ccccc1NN
+          %tr.row
+            %td.col-md-4
+              A2
+            %td.col-md-8
+              O=C(OCCCC)C1=CC=CC=C1C(OCCCC)=O
+          %tr.row
+            %td.col-md-4
+              82 B-6 304663
+            %td.col-md-8
+              CC(C)(C)C1=CC2(C=C(C1=O)C(C)(C)C)CCC(=O)O2
+          %tr.row
+            %td.col-md-4
+              ="..."
+            %td.col-md-8
+              ="..."
+  %br
+  %p
+    %strong Uploaded CSV files will be stored until you delete them. 
+    %strong You can repeat the prediction whenever you select a file in the list of uploads.
+    %br
+    %strong Please note that a new file uploaded with a same name from the list of existing files 
+    %strong will not overwrite the existing file and instead the existing file will be used !
