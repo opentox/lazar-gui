@@ -2,14 +2,7 @@
   %h3 How to use batch prediction
 
   %p
-    You have two options on how your comma sperated spreadsheet (
-    %strong CSV
-    ) needs to be structured to work with the batch prediction.
-    %br
-    One with only a list of compounds you want to predict and one where you can keep any kind of ID 
-    for each compound for a better tracking of the results.
-    %br
-    Following examples for each option:
+    You have two options to format your comma sperated spreadsheet (CSV) for batch predictions:
 
   %br
   %p
@@ -17,17 +10,7 @@
       %div.col-md-6
         %strong Option 1:
         %br
-        A spreadsheet with only 
-        %strong one 
-        column. 
-        %strong Important is the header 
-        containing the 
-        %strong type 
-        of the compounds. 
-        %strong SMILES 
-        or 
-        %strong InChI 
-        are accepted terms followed by corresponding compounds.
+        A spreadsheet with a single column and a header. The header should specify the input format (SMILES or InChI are accepted).
       %div.col-md-6
         %table.help
           %tr.row
@@ -51,13 +34,9 @@
       %div.col-md-6
         %strong Option 2:
         %br
-        A spreadsheet with 
-        %strong two 
-        columns where the 
-        %strong first column must contain a header ID 
-        followed by any kind of ID you want to keep for the results and a 
-        %strong second column with a header SMILES or InChI 
-        followed by corresponding compounds.
+        A spreadsheet with two columns and a header. The first column may contain an arbitrary ID, 
+        the second column the compound structure (as SMILES or InChI).  
+        The header consists of "ID" followed by the input format (SMILES or InChI).
       %div.col-md-6
         %table.help
           %tr.row
@@ -87,8 +66,7 @@
               ="..."
   %br
   %p
-    %strong Uploaded CSV files will be stored until you delete them. 
-    %strong You can repeat the prediction whenever you select a file in the list of uploads.
+    Uploaded CSV files will be stored until you delete them. You can repeat the prediction by selecting a file in the list of uploads.
     %br
-    %strong Please note that a new file uploaded with a same name from the list of existing files 
-    %strong will not overwrite the existing file and instead the existing file will be used !
+    If you upload a file with the same name as one of the existing files, the existing file will be used. 
+    If you want to replace an existing file delete it first!
