@@ -27,7 +27,7 @@ end
 
 post "/model/:id/?" do
   identifier = params[:identifier].split(",")
-  compounds = identifier.collect{ |i| Compound.from_smiles i.strip }
+  compounds = identifier.collect{ |i| Compound.from_smiles i.strip.gsub(/\A"|"\Z/,'') }
   model = Model::Validation.find params[:id]
   batch = {}
   compounds.each do |compound|

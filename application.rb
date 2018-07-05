@@ -7,6 +7,7 @@ include OpenTox
   "api.rb",
   "compound.rb",
   "dataset.rb",
+  "endpoint.rb",
   "feature.rb",
   "model.rb",
   "nanoparticle.rb",
@@ -28,12 +29,13 @@ configure :development do
 end
 
 before do
-  paths = [
+  $paths = [
   "/",
   "aa",
   "api",
   "compound",
   "dataset",
+  "endpoint",
   "feature",
   "model",
   "nanoparticle",
@@ -41,7 +43,7 @@ before do
   "substance",
   "swagger",
   "validation"]
-  if request.path == "/" || paths.include?(request.path.split("/")[1])
+  if request.path == "/" || $paths.include?(request.path.split("/")[1])
     @accept = request.env['HTTP_ACCEPT']
     response['Content-Type'] = @accept
   else
@@ -54,8 +56,14 @@ not_found do
 end
 
 error do
-  @error = request.env['sinatra.error']
-  haml :error
+  if request.path == "/" || $paths.include?(request.path.split("/")[1])
+    @accept = request.env['HTTP_ACCEPT']
+    response['Content-Type'] = @accept
+    @accept == "text/plain" ? request.env['sinatra.error'] : request.env['sinatra.error'].to_json
+  else
+    @error = request.env['sinatra.error']
+    haml :error
+  end
 end
 
 # https://github.com/britg/sinatra-cross_origin#responding-to-options

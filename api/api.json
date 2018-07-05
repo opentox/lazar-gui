@@ -32,6 +32,75 @@
     "url": "https://github.com/opentox/lazar-rest"
   },
   "paths": {
+    "/endpoint": {
+      "get": {
+        "x-orn-@type": "x-orn:Endpoint",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/endpoint",
+        "x-orn:method": "Get",
+        "tags": [
+          "endpoint"
+        ],
+        "description": "Get a list of all available endpoints",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/endpoint/{endpoint}": {
+      "get": {
+        "x-orn-@type": "x-orn:Endpoint",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/endpoint",
+        "x-orn:method": "Get",
+        "tags": [
+          "endpoint"
+        ],
+        "description": "Get a list of all available models for an endpoint",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/endpoint"
+          },
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/model": {
       "get": {
         "x-orn-@type": "x-orn:Model",
@@ -107,7 +176,7 @@
         "tags": [
           "model"
         ],
-        "description": "Predict a compound or a nanoparticle",
+        "description": "Predict a compound or a nanoparticle. Also a comma seperated list is allowed.",
         "parameters": [
           {
             "$ref": "#/components/parameters/id"
@@ -1031,6 +1100,10 @@
       "description": "Descriptor"
     },
     {
+      "name": "endpoint",
+      "description": "Endpoint"
+    },
+    {
       "name": "feature",
       "description": "Feature"
     },
@@ -1111,6 +1184,15 @@
         "name": "id",
         "in": "path",
         "description": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "endpoint": {
+        "name": "endpoint",
+        "in": "path",
+        "description": "type",
         "required": true,
         "schema": {
           "type": "string"
