@@ -3,6 +3,7 @@ gemspec
 gem "lazar", :path => "../lazar"
 gem "toxtree", :path => "../toxtree"
 gem "kazius-alerts", :path => "../kazius-alerts"
+gem "loael-mazzatorta", :path => "../loael-mazzatorta"
 gem "gem-path"
 gem "sinatra"
 gem "sinatra-reloader"

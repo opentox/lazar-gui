@@ -16,11 +16,11 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "lazar"
   s.add_runtime_dependency "toxtree"
   s.add_runtime_dependency "kazius-alerts"
-  s.add_runtime_dependency "gem-path", "~> 0.6.1", '>= 0.6.1'
-  s.add_runtime_dependency "sinatra", "~> 1.4.0", '>= 1.4.0'
-  s.add_runtime_dependency "rdiscount", "~> 2.1.0", '>= 2.1.0'
-  s.add_runtime_dependency "haml", "~> 4.0.0", '>= 4.0.0'
-  s.add_runtime_dependency "sass", "~> 3.4.0", '>= 3.4.0'
+  s.add_runtime_dependency "gem-path"
+  s.add_runtime_dependency "sinatra"
+  s.add_runtime_dependency "rdiscount"
+  s.add_runtime_dependency "haml"
+  s.add_runtime_dependency "sass"
   s.add_runtime_dependency "unicorn"
 
   s.post_install_message = %q{

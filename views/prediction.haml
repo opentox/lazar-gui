@@ -23,6 +23,8 @@
           - @model_types = {}
           - @dbhit = {}
           - toxtree = @predictions.pop if @toxtree == true
+          - mazzatorta = @predictions.find{|p| p["mazzatorta"]}
+          - @predictions.delete(mazzatorta) if mazzatorta
           - unless @predictions.blank?
             - @predictions.each_with_index do |prediction,i|
               - if prediction["Consensus prediction"]
@@ -138,7 +140,7 @@
                       %br
                       =prediction[:warnings].join("</br>")
 
-          / show Cramer rules if checked
+          / Cramer
           - if @toxtree == true
             %td{:style=>"vertical-align:top;white-space:nowrap;"}
               %b.title Oral toxicity (Cramer rules)
@@ -150,6 +152,24 @@
               %b Cramer rules, with extensions:
               %br
               =toxtree.last["Cramer rules, with extensions"]
+
+          / Mazzatorta
+          - if mazzatorta
+            %td{:style=>"vertical-align:top;white-space:nowrap;"}
+              %b.title Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)
+              %p
+              - hash = mazzatorta["mazzatorta"]
+              - unless hash.keys.include?("warnings")
+                %b Prediction:
+                %br
+                = "#{hash[:mmol_prediction]} (mmol/kg_bw/day)"
+                %br
+                = "#{hash[:prediction]} (mg/kg_bw/day)"
+              - else
+                %b Warnings:
+                %br
+                = "#{hash[:warnings]}"
+
 
   / always show the neighbors table, message is given there. Except only Cramer is selected.
   - unless @predictions.blank?

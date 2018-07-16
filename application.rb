@@ -38,8 +38,11 @@ get '/predict/?' do
   @existing_datasets = dataset_storage
   @models = Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
-  @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
-  @endpoints << "Oral toxicity (Cramer rules)"
+  #endpoints = @models.collect{|m| m.endpoint =~ /LOAEL/ ? m.endpoint+" (lazar)" : m.endpoint}
+  endpoints = @models.collect{|m| m.endpoint}
+  endpoints << "Oral toxicity (Cramer rules)"
+  endpoints << "Lowest observed adverse effect level (LOAEL) (Mazzatorta)"
+  @endpoints = endpoints.sort.uniq
   @models.count <= 0 ? (haml :info) : (haml :predict)
 end
 
@@ -61,6 +64,22 @@ get '/task/?' do
       string = "<td><table class=\"table\">"
       string += "<tr class=\"hide-top\"><td>Cramer rules:</td><td>#{prediction["Cramer rules"][pageNumber.to_i]}</td>"
       string += "<tr><td>Cramer rules, with extensions:</td><td>#{prediction["Cramer rules, with extensions"][pageNumber.to_i]}</td>"
+      string += "</table></td>"
+      html += "#{string}</tr></table>"
+    elsif params[:model] == "Mazzatorta"
+      prediction = task.predictions[params[:model]]
+      compound = Compound.find prediction["compounds"][pageNumber]
+      image = compound.svg
+      smiles = compound.smiles
+      html = "<table class=\"table table-bordered single-batch\"><tr>"
+      html += "<td>#{image}</br>#{smiles}</br></td>"
+      string = "<td><table class=\"table\">"
+      if prediction["mazzatorta"][pageNumber.to_i][:prediction]
+        string += "<tr class=\"hide-top\"><td>Prediction:</td><td>#{prediction["mazzatorta"][pageNumber.to_i][:mmol_prediction]} (mmol/kg_bw/day)</td>"
+        string += "<tr class=\"hide-top\"><td></td><td>#{prediction["mazzatorta"][pageNumber.to_i][:prediction]} (mg/kg_bw/day)</td>"
+      else
+        string += "<tr><td>Warnings:</td><td>#{prediction["mazzatorta"][pageNumber.to_i][:warnings]}</td>"
+      end
       string += "</table></td>"
       html += "#{string}</tr></table>"
     else
@@ -188,9 +207,13 @@ get '/predict/csv/:task/:model/:filename/?' do
       end
     end
   end
-  endpoint = (params[:model] == "Cramer") ? "Oral_toxicity_(Cramer_rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus_mutagenicity" : "#{m.endpoint}_(#{m.species})")
+  if params[:model] == "Mazzatorta"
+    endpoint = "Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)"
+  else
+    endpoint = (params[:model] == "Cramer") ? "Oral_toxicity_(Cramer_rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus_mutagenicity" : "#{m.endpoint}_(#{m.species})")
+  end
   tempfile = Tempfile.new
-  if params[:model] == "Cramer"
+  if params[:model] == "Cramer" || params[:model] == "Mazzatorta"
     # add duplicate warning at the end of a line if ID matches
     if @dups
       lines = task.csv.split("\n")
@@ -309,7 +332,7 @@ post '/predict/?' do
     task = Task.run do
       @models.each_with_index do |model,idx|
         t = @tasks[idx]
-        unless model == "Cramer"
+        if model !~ /Cramer|Mazzatorta/
           m = Model::Validation.find model
           type = (m.regression? ? "Regression" : "Classification")
           # add header for regression
@@ -420,6 +443,47 @@ post '/predict/?' do
           t[:csv] = header
           # write predictions
           @predictions["#{model}"] = predictions
+        elsif model == "Mazzatorta"
+          compounds = @compounds.collect{|cid| c = Compound.find cid; c.smiles}
+          prediction = LoaelMazzatorta.predict(compounds)
+          output = {}
+          output["model_name"] = "Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)"
+          output["mazzatorta"] = []
+          #output["mazzatorta"] = prediction
+          # header
+          if @ids.blank?
+            csv = "ID,Input,Endpoint,Unique SMILES,Prediction (mmol/kg_bw/day),Prediction (mg/kg_bw/day),Notes\n"
+          else
+            csv = "ID,Original ID,Input,Endpoint,Unique SMILES,Prediction (mmol/kg_bw/day),Prediction (mg/kg_bw/day),Notes\n"
+          end
+          # content
+          compounds.each_with_index do |smiles, idx|
+            compound = Compound.find @compounds[idx]
+            if prediction[idx]["value"]
+              output["mazzatorta"][idx] = {:mmol_prediction => compound.mg_to_mmol(prediction[idx]["value"].delog10p).signif(3),:prediction => prediction[idx]["value"].delog10p.signif(3)}
+            else
+              output["mazzatorta"][idx] = {:warnings => prediction[idx]["warnings"][0].split("\t").first}
+            end
+            if @ids.blank?
+              csv << "#{idx+1},#{@identifiers[idx]},#{output["model_name"]},#{smiles},"\
+                "#{output["mazzatorta"][idx][:mmol_prediction] if output["mazzatorta"][idx][:mmol_prediction]},"\
+                "#{output["mazzatorta"][idx][:prediction] if output["mazzatorta"][idx][:prediction]},"\
+                "#{output["mazzatorta"][idx][:warnings] if output["mazzatorta"][idx][:warnings]}\n"
+            else
+              csv << "#{idx+1},#{@ids[idx]},#{@identifiers[idx]},#{output["model_name"]},#{smiles},"\
+                "#{output["mazzatorta"][idx][:mmol_prediction] if output["mazzatorta"][idx][:mmol_prediction]},"\
+                "#{output["mazzatorta"][idx][:prediction] if output["mazzatorta"][idx][:prediction]},"\
+                "#{output["mazzatorta"][idx][:warnings] if output["mazzatorta"][idx][:warnings]}\n"
+            end
+          end
+          predictions = {}
+          predictions["mazzatorta"] = output["mazzatorta"]
+          #predictions["compounds"] = @compounds
+          # write csv
+          t[:csv] = csv
+          # write predictions
+          @predictions["#{model}"] = predictions
+          t.update_percent(100)
         else # Cramer model
           compounds = @compounds.collect{|cid| c = Compound.find cid; c.smiles}
           prediction = [Toxtree.predict(compounds, "Cramer rules"), Toxtree.predict(compounds, "Cramer rules with extensions")]
@@ -486,6 +550,16 @@ post '/predict/?' do
       if model_id == "Cramer"
         @toxtree = true
         @predictions << [Toxtree.predict(@compound.smiles, "Cramer rules"), Toxtree.predict(@compound.smiles, "Cramer rules with extensions")]
+      elsif model_id == "Mazzatorta"
+        prediction = LoaelMazzatorta.predict(@compound.smiles)
+        output = {}
+        $logger.debug prediction
+        if prediction["value"]
+          output["mazzatorta"] = {:mmol_prediction => @compound.mg_to_mmol(prediction["value"].delog10p).signif(3),:prediction => prediction["value"].delog10p.signif(3)}
+        else
+          output["mazzatorta"] << {:warnings => prediction["warnings"][0].split("\t").first}
+        end
+        @predictions << output
       else
         model = Model::Validation.find model_id
         @models << model

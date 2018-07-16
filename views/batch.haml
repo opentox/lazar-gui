@@ -76,7 +76,7 @@
         callback: function(data, pagination) {
           var html = simpleTemplating(data);
           $('#data-container_'+id).html(html);
-          $('#data-container_'+id).css("min-height", $(window).height() + "px" );
+          //$('#data-container_'+id).css("min-height", $(window).height() + "px" );
         }
       });
     } else if (span.className = "glyphicon glyphicon-menu-down"){
@@ -105,8 +105,12 @@
     #result.panel{:id=>idx}
       %div.row
         %div.col-md-6
-          %h5= (model == "Cramer") ? "Oral toxicity (Cramer rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus mutagenicity" : "#{m.endpoint} (#{m.species})")
-          #pager{:id=>idx}
+          - if model =~ /Mazzatorta/
+            %h5= "Lowest observed adverse effect level (LOAEL) (Mazzatorta) Rats"
+            #pager{:id=>idx}
+          - else
+            %h5= (model == "Cramer") ? "Oral toxicity (Cramer rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus mutagenicity" : "#{m.endpoint} (#{m.species})")
+            #pager{:id=>idx}
         %div.col-md-6.h5
           %a.btn.btn-default.btn-xs.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('#{task}','#{model}','#{idx}')", :style=>"font-size:small;"}
             %span.glyphicon.glyphicon-menu-right
