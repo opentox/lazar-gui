@@ -478,7 +478,7 @@ post '/predict/?' do
           end
           predictions = {}
           predictions["mazzatorta"] = output["mazzatorta"]
-          #predictions["compounds"] = @compounds
+          predictions["compounds"] = @compounds
           # write csv
           t[:csv] = csv
           # write predictions

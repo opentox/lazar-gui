@@ -29,7 +29,7 @@
     var aClient = new HttpClient();
     aClient.get(uri, function(res) {
       var response = JSON.parse(res);
-      if (model_id == "Cramer"){
+      if (model_id =~ /Cramer|Mazzatorta/){
         $("img.circle").show();
       }else{
         progress(response['percent'],id);
@@ -100,7 +100,7 @@
 
 
   - @models.each_with_index do |model,idx|
-    - m = Model::Validation.find model unless model == "Cramer"
+    - m = Model::Validation.find model unless model =~ /Cramer|Mazzatorta/
     - task = @tasks[idx].id
     #result.panel{:id=>idx}
       %div.row
@@ -118,9 +118,9 @@
           %a.btn.btn-default.btn-xs.disabled{:id => "downbutton_#{idx}", :href=>"#{to("/predict/csv/#{task}/#{model}/#{@filename}")}", :title=>"download", :style=>"font-size:small;"}
             %span.glyphicon.glyphicon-download-alt
             CSV
-      - if model == "Cramer"
+      - if model =~ /Cramer|Mazzatorta/
         %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
-      - if model != "Cramer"
+      - else
         %div{:id=>"progress_#{idx}", :style=>"width:100%;height:3px;position:relative;background-color:#ccc;"}
           %div{:id=>"bar_#{idx}", :style=>"background-color: #4CAF50;width:10px;height:3px;position:absolute;"}
       - # increase interval timer for large datasets 
