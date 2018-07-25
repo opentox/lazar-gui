@@ -29,9 +29,8 @@ module OpenTox
 
         # original IDs
         if table[0][0] =~ /ID/i
-          ids = table.collect{|row| row.shift}
-          ids.shift
-          batch.ids = ids
+          @original_ids = table.collect{|row| row.shift}
+          @original_ids.shift
         end
         
         # features
@@ -60,8 +59,7 @@ module OpenTox
         end
         
         table.each_with_index do |vals,i|
-          identifier = vals.shift.strip
-          batch.identifiers << identifier
+          identifier = vals.shift.strip.gsub(/^'|'$/,"")
           begin
             case compound_format
             when /SMILES/i
@@ -72,13 +70,17 @@ module OpenTox
           rescue 
             compound = nil
           end
-          if compound.nil? # compound parsers may return nil
+          # collect only for present compounds
+          unless compound.nil?
+            batch.identifiers << identifier
+            batch.compounds << compound.id
+            batch.ids << @original_ids[i] if @original_ids
+          else
             batch.warnings << "Cannot parse #{compound_format} compound '#{identifier}' at line #{i+2} of #{source}."
-            next
           end
-          batch.compounds << compound.id
         end
         batch.compounds.duplicates.each do |duplicate|
+          $logger.debug "Duplicates found in #{name}."
           dup = Compound.find duplicate
           positions = []
           batch.compounds.each_with_index do |co,i|

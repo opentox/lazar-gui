@@ -189,16 +189,27 @@ get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
   filename = params[:filename] =~ /\.csv$/ ? params[:filename].gsub(/\.csv$/,"") : params[:filename]
   task = Task.find params[:task].to_s
-  m = Model::Validation.find params[:model].to_s unless params[:model] == "Cramer"
+  m = Model::Validation.find params[:model].to_s unless params[:model] =~ /Cramer|Mazzatorta/
   dataset = Batch.find_by(:name => filename)
+  $logger.debug dataset.inspect
   @ids = dataset.ids
   warnings = dataset.warnings.blank? ? nil : dataset.warnings.join("\n")
   unless warnings.nil?
+    @parse = []
+    warnings.split("\n").each do |warning|
+      if warning =~ /^Cannot/
+        smi = warning.split("SMILES compound").last.split("at").first
+        line = warning.split("SMILES compound").last.split("at line").last.split("of").first.strip.to_i
+        @parse << "Cannot parse SMILES compound#{smi}at line #{line} of #{dataset.source.split("/").last}\n"
+      end
+    end
     keys_array = []
     warnings.split("\n").each do |warning|
-      text = warning.split("ID").first
-      numbers = warning.split("ID").last.split("and")
-      keys_array << numbers.collect{|n| n.strip.to_i}
+      if warning =~ /^Duplicate/
+        text = warning.split("ID").first
+        numbers = warning.split("ID").last.split("and")
+        keys_array << numbers.collect{|n| n.strip.to_i}
+      end
     end
     @dups = {}
     keys_array.each do |keys|
@@ -209,13 +220,15 @@ get '/predict/csv/:task/:model/:filename/?' do
   end
   if params[:model] == "Mazzatorta"
     endpoint = "Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)"
+  elsif params[:model] == "Cramer"
+    endpoint = "Oral_toxicity_(Cramer_rules)"
   else
-    endpoint = (params[:model] == "Cramer") ? "Oral_toxicity_(Cramer_rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus_mutagenicity" : "#{m.endpoint}_(#{m.species})")
+    endpoint = "#{m.endpoint}_(#{m.species})"
   end
   tempfile = Tempfile.new
-  if params[:model] == "Cramer" || params[:model] == "Mazzatorta"
-    # add duplicate warning at the end of a line if ID matches
-    if @dups
+  if params[:model] =~ /Cramer|Mazzatorta/
+    # add duplicate and parse warnings
+    unless warnings.nil?
       lines = task.csv.split("\n")
       header = lines.shift
       out = ""
@@ -226,7 +239,8 @@ get '/predict/csv/:task/:model/:filename/?' do
           out << line+"\n"
         end
       end
-      tempfile.write(header+"\n"+out)
+      (@parse && !@parse.blank?) ? tempfile.write(header+"\n"+out+"\n"+@parse.join("\n")) : tempfile.write(header+"\n"+out)
+      #tempfile.write(header+"\n"+out)
     else
       tempfile.write(task.csv)
     end
@@ -243,12 +257,6 @@ get '/predict/csv/:task/:model/:filename/?' do
             lines << "#{idx+1},#{identifier},#{Prediction.find(prediction_id).csv.tr("\n","")},#{@dups[idx+1]}"
           else
             lines << "#{idx+1},#{@ids[idx]},#{identifier},#{Prediction.find(prediction_id).csv.tr("\n","")},#{@dups[idx+1]}"
-          end
-        else
-          if @ids.blank?
-            lines << "#{idx+1},#{identifier},#{p},#{@dups[idx+1]}"
-          else
-            lines << "#{idx+1},#{@ids[idx]},#{identifier},#{p},#{@dups[idx+1]}"
           end
         end
       else
@@ -267,8 +275,8 @@ get '/predict/csv/:task/:model/:filename/?' do
         end
       end
     end
-    csv = header + lines.join("")
-    tempfile.write(csv)
+    (@parse && !@parse.blank?) ? tempfile.write(header+lines.join("")+"\n"+@parse.join("\n")) : tempfile.write(header+lines.join(""))
+    #tempfile.write(header+lines.join(""))
   end
   tempfile.rewind
   send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{endpoint}_#{filename}.csv", :type => "text/csv", :disposition => "attachment"
@@ -278,6 +286,7 @@ post '/predict/?' do
   # process batch prediction
   if !params[:fileselect].blank? || !params[:existing].blank?
     if !params[:existing].blank?
+      $logger.debug "Take file from database."
       @dataset = Batch.find params[:existing].keys[0]
       @compounds = @dataset.compounds
       @identifiers = @dataset.identifiers
@@ -553,7 +562,6 @@ post '/predict/?' do
       elsif model_id == "Mazzatorta"
         prediction = LoaelMazzatorta.predict(@compound.smiles)
         output = {}
-        $logger.debug prediction
         if prediction["value"]
           output["mazzatorta"] = {:mmol_prediction => @compound.mg_to_mmol(prediction["value"].delog10p).signif(3),:prediction => prediction["value"].delog10p.signif(3)}
         else

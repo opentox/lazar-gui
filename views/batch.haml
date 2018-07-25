@@ -29,8 +29,10 @@
     var aClient = new HttpClient();
     aClient.get(uri, function(res) {
       var response = JSON.parse(res);
-      if (model_id =~ /Cramer|Mazzatorta/){
-        $("img.circle").show();
+      if (model_id == "Cramer"){
+        $("img.circle_cramer").show();
+      } else if (model_id == "Mazzatorta"){
+        $("img.circle_mazza").show();
       }else{
         progress(response['percent'],id);
       }
@@ -38,7 +40,12 @@
         window.clearInterval(markers[id]);
         $("a#downbutton_"+id).removeClass("disabled");
         $("a#detailsbutton_"+id).removeClass("disabled");
-        $("img.circle").hide();
+        if (model_id == "Cramer"){
+          $("img.circle_cramer").hide();
+        };
+        if (model_id == "Mazzatorta"){
+          $("img.circle_mazza").hide();
+        };
       };
     });
   };
@@ -107,10 +114,9 @@
         %div.col-md-6
           - if model =~ /Mazzatorta/
             %h5= "Lowest observed adverse effect level (LOAEL) (Mazzatorta) Rats"
-            #pager{:id=>idx}
           - else
             %h5= (model == "Cramer") ? "Oral toxicity (Cramer rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus mutagenicity" : "#{m.endpoint} (#{m.species})")
-            #pager{:id=>idx}
+          #pager{:id=>idx}
         %div.col-md-6.h5
           %a.btn.btn-default.btn-xs.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('#{task}','#{model}','#{idx}')", :style=>"font-size:small;"}
             %span.glyphicon.glyphicon-menu-right
@@ -118,9 +124,11 @@
           %a.btn.btn-default.btn-xs.disabled{:id => "downbutton_#{idx}", :href=>"#{to("/predict/csv/#{task}/#{model}/#{@filename}")}", :title=>"download", :style=>"font-size:small;"}
             %span.glyphicon.glyphicon-download-alt
             CSV
-      - if model =~ /Cramer|Mazzatorta/
-        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
-      - else
+      - if model == "Cramer"
+        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle1", :class=>"circle_cramer", :alt=>"wait", :style=>"display:none;"}
+      - if model == "Mazzatorta"
+        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle2", :class=>"circle_mazza", :alt=>"wait", :style=>"display:none;"}
+      - if model !~ /Cramer|Mazzatorta/
         %div{:id=>"progress_#{idx}", :style=>"width:100%;height:3px;position:relative;background-color:#ccc;"}
           %div{:id=>"bar_#{idx}", :style=>"background-color: #4CAF50;width:10px;height:3px;position:absolute;"}
       - # increase interval timer for large datasets 
@@ -143,4 +151,3 @@
           };
         });
       #data-container{:id=>idx,:style=>"width:100%;"}
-      -#pager{:id=>idx}
