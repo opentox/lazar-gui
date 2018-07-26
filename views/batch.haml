@@ -114,7 +114,7 @@
       %div.row
         %div.col-md-6
           - if model =~ /Mazzatorta/
-            %h5= "Lowest observed adverse effect level (LOAEL) (Mazzatorta) Rats"
+            %h5= "Lowest observed adverse effect level (LOAEL) (Mazzatorta) (Rats)"
           - else
             %h5= (model == "Cramer") ? "Oral toxicity (Cramer rules)" : (m.endpoint =~ /Mutagenicity/i ? "Consensus mutagenicity" : "#{m.endpoint} (#{m.species})")
           #pager{:id=>idx}
