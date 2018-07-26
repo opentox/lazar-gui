@@ -40,6 +40,7 @@
         window.clearInterval(markers[id]);
         $("a#downbutton_"+id).removeClass("disabled");
         $("a#detailsbutton_"+id).removeClass("disabled");
+        $("a#detailsbutton_"+id).addClass("btn-success");
         if (model_id == "Cramer"){
           $("img.circle_cramer").hide();
         };
