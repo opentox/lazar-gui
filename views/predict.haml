@@ -187,7 +187,7 @@
         %div{:id=>endpoint.gsub(/\s+/, "_")}
           %h4.head-back=endpoint
           - if endpoint !~ /^Oral|Mazzatorta/
-            - @models.select{|m| endpoint = endpoint.gsub("(lazar)","").strip if endpoint =~ /lazar/; m.endpoint == endpoint}.each do |model|
+            - @models.select{|m| m.endpoint == endpoint}.each do |model|
               %div.row{:id => model.id,:style=>"margin-bottom:1em;"}
                 %span.col-lg-4.col-md-4.col-sm-4.col-xs-4
                   %input.check{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species.gsub(/\s+/, "_")}]", :value => true, :disabled => false}

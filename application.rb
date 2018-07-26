@@ -38,7 +38,6 @@ get '/predict/?' do
   @existing_datasets = dataset_storage
   @models = Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
-  #endpoints = @models.collect{|m| m.endpoint =~ /LOAEL/ ? m.endpoint+" (lazar)" : m.endpoint}
   endpoints = @models.collect{|m| m.endpoint if m.endpoint != "Mutagenicity"}.compact
   endpoints << "Oral toxicity (Cramer rules)"
   endpoints << "Lowest observed adverse effect level (LOAEL) (Mazzatorta)"
