@@ -1,95 +1,111 @@
 :javascript
   $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
+    //$('[data-toggle="popover"]').popover();
     $('.modal').on('hidden.bs.modal', function () {
       $(this).removeData('bs.modal');
     });
+    $('.modal').on('show.bs.modal', function(e){
+      var button = $(e.relatedTarget);
+      var modal = $(this);
+      modal.find('.modal-content').load(button.data("remote"));
+    });
   });
-
-%div.well
+%div.card
   %a.btn.btn-warning{:href => to('/predict')}
-    %i.glyphicon.glyphicon-menu-left
+    %span.fa.fa-caret-left
     New Prediction
-  / displays all prediction result in first table
-  %h3 Prediction Results:
-  %div.table-responsive
-    %table.table.table-bordered{:id=>"overview"}
-      %tbody
-        %tr
-          %td{:id=>"compound", :style=>"vertical-align:top;text-align:center;"}
-            %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(@compound.id.to_s)}/details"), :id=>"link01"}}
-              = @compound.svg
-            %p= @compound.smiles
-          - @model_types = {}
-          - @dbhit = {}
-          - @predictions.each_with_index do |prediction,i|
-            - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
-            - @model_types[i] = type
-            - unit = @models[i].unit
-            %td{:style=>"vertical-align:top;white-space:nowrap;"}
-              %b{:class => "title"}
-                = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
-              
-              / check for prediction
-              - if prediction[:neighbors] and !prediction[:value].nil?
-                %p
-                / show model type (classification|regression)
-                %b Type:
-                = type
-                %p 
-                / check for database hit
-                - if prediction[:info] =~ /\b(identical)\b/i
-                  - @dbhit[i] = true
-                  
-                  / show message about dbhit and measurements
+%div.card.bg-light
+  %div.card-body
+    %h3.card-title Prediction Results:
+    %div.table-responsive
+      %table.table.table-bordered{:id=>"overview"}
+        %tbody
+          %tr
+            %td.align-items-center{:id=>"compound"}
+              %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: to("/prediction/#{@compound.id}/details"), :id=>"link01"}}
+                = @compound.svg
+              %p= @compound.smiles
+            - @model_types = {}
+            - @dbhit = {}
+            - @predictions.each_with_index do |prediction,i|
+              - type = @models[i].model.class.to_s.match("Classification") ? "Classification" : "Regression"
+              - @model_types[i] = type
+              - unit = @models[i].unit
+              %td
+                %b{:class => "title"}
+                  = "#{@models[i].endpoint.gsub('_', ' ')} (#{@models[i].species})"
+                
+                / check for prediction
+                - if prediction[:neighbors] and !prediction[:value].nil?
                   %p
-                    :plain
-                      This compound was part of the training dataset. <i>All</i> information </br>
-                      from this compound was removed from the training data before the </br>
-                      prediction, to obtain unbiased results.
+                  / show model type (classification|regression)
+                  %b Type:
+                  = type
+                  %p 
+                  / check for database hit
+                  - if prediction[:info] =~ /\b(identical)\b/i
+                    - @dbhit[i] = true
+                    
+                    / show message about dbhit and measurements
                     %p
-                    %b Measured activity:
-                    %br
-                    - if prediction[:measurements].is_a?(Array)
-                      = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
-                    - else
-                      = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
-                
-                - else
-                  - @dbhit[i] = false
-                
-                / show prediction
-                %p
-                  %b Prediction:
-                  / prediction popover
-                  %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>.<hr></hr><a href=\"https://doi.org/10.3389/fphar.2013.00038\", target=\"_blank\"><img src=\"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg\" alt=\"DOI\"></a>"}}
-                  %br
-                  = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
-                  
-                  / show prediction interval or probability
-                  %p
-                  - if type == "Regression"
-                    %b 95% Prediction interval:
-                    - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
-                    / prediction interval popover
-                    %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Prediction intervall", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"An estimate of prediction uncertainty. The \"real\" value should be with 95% probability within the prediction interval."}}
-                    %br
-                    = interval.nil? ? "--" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
-                    %br
-                    = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !interval.nil?
-                  - else
-                    %b Probability:
-                    / probability popover
-                    %a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"Pobability", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Probability that the prediction belongs to one of the given classes."}}
-                    - unless prediction[:probabilities].nil?
+                      :plain
+                        This compound was part of the training dataset. <i>All</i> information </br>
+                        from this compound was removed from the training data before the </br>
+                        prediction, to obtain unbiased results.
+                      %p
+                      %b Measured activity:
                       %br
-                      = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0].signif(3)}"
-                      - if prediction[:probabilities].size == 2
+                      - if prediction[:measurements].is_a?(Array)
+                        = (type == "Regression") ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(value.delog10).signif(3)} #{unit =~ /mmol\/L/ ? "(mg/L)" : "(mg/kg_bw/day)"}"}.join("</br>") : prediction[:measurements].join(", ")
+                      - else
+                        = (type == "Regression") ? "#{prediction[:measurements].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:measurements]
+                  
+                  - else
+                    - @dbhit[i] = false
+                  
+                  / show prediction
+                  %p
+                    %b Prediction:
+                    / prediction popover
+                    %a.btn.fa.fa-info-circle{:href=>"javascript:void(0)", :title=>"Prediction", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"<p>lazar searches the training dataset for similar compounds (neighbors) and calculates the prediction from their experimental activities.<p><b>Classification:</b></br>Majority vote of neighbor activities weighted by similarity.<p><b>Regression:</b></br>Prediction from a local partial least squares regression model with neighbor activities weighted by similarity.<p><a href=\"http://www.frontiersin.org/Journal/10.3389/fphar.2013.00038/abstract\", target=\"_blank\"> Original publication</a>.<hr></hr><a href=\"https://doi.org/10.3389/fphar.2013.00038\", target=\"_blank\"><img src=\"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg\" alt=\"DOI\"></a>"}}
+                    %br
+                    = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
+                    
+                    / show prediction interval or probability
+                    %p
+                    - if type == "Regression"
+                      %b 95% Prediction interval:
+                      - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
+                      / prediction interval popover
+                      %a.btn.fa.fa-info-circle{:href=>"javascript:void(0)", :title=>"Prediction intervall", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"An estimate of prediction uncertainty. The \"real\" value should be with 95% probability within the prediction interval."}}
+                      %br
+                      = interval.nil? ? "--" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
+                      %br
+                      = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !interval.nil?
+                    - else
+                      %b Probability:
+                      / probability popover
+                      %a.btn.fa.fa-info-circle{:href=>"javascript:void(0)", :title=>"Pobability", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Probability that the prediction belongs to one of the given classes."}}
+                      - unless prediction[:probabilities].nil?
                         %br
-                        = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
-                
-                / show warnings and info
-                %p
+                        = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0].signif(3)}"
+                        - if prediction[:probabilities].size == 2
+                          %br
+                          = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
+                  
+                  / show warnings and info
+                  %p
+                    - if !prediction[:info].blank?
+                      %b Info:
+                      %br
+                      %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
+                    - if !prediction[:warnings].blank?
+                      %b Warnings:
+                      - prediction[:warnings].uniq.each do |warning|
+                        %p=warning #.sub(/,/, ",<br>")
+                        /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
+                - else
+                  %br
                   - if !prediction[:info].blank?
                     %b Info:
                     %br
@@ -97,24 +113,13 @@
                   - if !prediction[:warnings].blank?
                     %b Warnings:
                     - prediction[:warnings].uniq.each do |warning|
-                      %p=warning #.sub(/,/, ",<br>")
-                      /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
-              - else
-                %br
-                - if !prediction[:info].blank?
-                  %b Info:
-                  %br
-                  %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                - if !prediction[:warnings].blank?
-                  %b Warnings:
-                  - prediction[:warnings].uniq.each do |warning|
-                    %br
-                    %p=warning.sub(/,/, ",<br>")
+                      %br
+                      %p=warning.sub(/,/, ",<br>")
 
-  / always show the neighbors table, message is given there  
-  = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
+/ always show the neighbors table, message is given there  
+= haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
     
-%div.modal.fade{:id=>"details0", :role=>"dialog"}
-  %div.modal-dialog.modal-lg
+%div.modal.fade{:id=>"details0", :tabindex=>"-1", :role=>"dialog"}
+  %div.modal-dialog.modal-lg{:role=>"document"}
     %div.modal-content
 

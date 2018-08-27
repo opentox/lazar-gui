@@ -6,77 +6,54 @@
     %meta{'name'=>"viewport", :content=>"width=device-width, initial-scale=1"}
     %title lazar Toxicity Predictions
     %link{:rel=>'icon', :type=>'image/x-icon', :href=>'/images/favicon.ico'}
-    %link{:rel=>'stylesheet', :href=>"#{'/css/bootstrap.min.css'}"}
-    %link{:rel=>'stylesheet', :href=>"#{'/css/theme.default.min.css'}"}
-    %link{:rel=>'stylesheet', :href=>"#{'/css/theme.bootstrap.min.css'}"}
-    %link{ :href=>"/style.css", :rel=>"stylesheet"}
-    %link{ :href=>"/stylesheets/jquery-ui.css", :rel=>"stylesheet"}
-    %script{:src=>"/javascripts/jquery-1.11.2.min.js"}
-    %script{:src=>"/javascripts/bootstrap.min.js"}
-    %script{:src=>"/javascripts/jquery.tablesorter.min.js"}
-    %script{:src=>"/javascripts/jquery.tablesorter.widgets.js"}
+    %link{:href=>"/stylesheets/bootstrap.min.css", :rel=>"stylesheet"}
+    %link{:href=>"/stylesheets/font-awesome.min.css", :rel=>"stylesheet"}
+    %link{:href=>"/style.css", :rel=>"stylesheet"}
+    %script{ :src=>"/javascripts/jquery.min.js"}
+    %script{ :src=>"/javascripts/popper.min.js"}
     %script{:src=>"/javascripts/lazar-gui.js"}
-    %script{:src=>"/javascripts/google_analytics_lazar.js"}
+    %script{ :src=>"/javascripts/bootstrap.js"}
+    //%script{ :src=>"/javascripts/bootstrap.js.map"}
+    //%script{:src=>"/javascripts/google_analytics_lazar.js"}
   %body
     %noscript
       %div{ :style=>"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif"}
       Your web browser must have JavaScript enabled in order for this application to display correctly.
-    %header.page-header
-      %div.row
-        %div.col-md-3
-          %a{:href=> to("/")}
-            %img.media-object{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"150px", :heigth=>"150px"}
-        %div.col-md-6
-          %h1.media-heading
-            lazar toxicity predictions
-        %div.col-md-3
-          %h1.media-heading
-            %small
-              %a.btn{:href=>"https://nano-lazar.in-silico.ch", :rel=>"external"}
-                nano-lazar
-                %span.glyphicon.glyphicon-new-window
-
+    %header.container-fluid.page-header
+      %div.row.align-items-center
+        %div.col-3
+          %a.card-link{:href=> "https://in-silico.ch/", :rel=>"external"}
+            %img{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"100px", :heigth=>"100px"}
+          %a.card-link{:href=> "https://openrisknet.org/", :rel=>"external"}
+            %img{:src=>"/images/orn-logo.jpg", :alt=>"orn-logo", :width=>"100px", :heigth=>"100px"}
+        %div.col-6
+          %h1 lazar toxicity predictions
+        %div.col-3
+          %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Tweet"}
+            %span.fa.fa-2x.fa-twitter-square
+          %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Google+"}
+            %span.fa.fa-2x.fa-google-plus-square
+          %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on LinkedIn"}
+            %span.fa.fa-2x.fa-linkedin-square
+          %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Facebook"}
+            %span.fa.fa-2x.fa-facebook-square
     %div.container-fluid
       %topline.alert
-        %div.row
-          %div.col-md-10
-            Problems, bugs, ideas for improvements ? Please report at our
-            %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker
-            , check out the 
-            %a{:href=> to("/faq"), :rel => "external"} FAQ
-            page or send us an email.
-            %a{ :href=>"mailto:info@in-silico.ch?subject=[lazar v#{@version}]", :target=>"_top"}
-              %img.share{:src=>"/images/Email.png"}
-            [version: #{@version}]
-          %div.col-md-2{:style=>"text-align:right;"}
-            %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Tweet"}
-              %img.share{:src=>"/images/Twitter.png"}
-            %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Google+"}
-              %img.share{:src=>"/images/Google+.png"}
-            %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on LinkedIn"}
-              %img.share{:src=>"/images/LinkedIn.png"}
-            %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Facebook"}
-              %img.share{:src=>"/images/Facebook.png"}
-        %div.row
-          %div.col-md-12
-            Please cite
-            %a{ :href=>"https://doi.org/10.3389/fphar.2013.00038", :rel=>"external"}
-              %img{ :src=>"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg", :alt=>"DOI"}
-            in scientific publications.
+        %p
+          Problems, bugs, ideas for improvements ? Please report at our
+          %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker
+          , check out the 
+          %a{:href=> to("/faq")} FAQ
+          page or send us an email.
+          %a{ :href=>"mailto:info@in-silico.ch?subject=[lazar v#{@version}]", :target=>"_top"}
+            %span.fa.fa-envelope
+          [version: #{@version}]
+        %p
+          Please cite
+          %a{ :href=>"https://doi.org/10.3389/fphar.2013.00038", :rel=>"external"}
+            %img{ :src=>"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg", :alt=>"DOI"}
+          in scientific publications.
       
-      :javascript
-        $(document).ready(function(){
-          $("#back-top").hide();
-          $(".blind").error(function(){
-            $(this).attr('src', '/images/blind.png');
-          });
-        });
-        $(document).ready(function(){
-          $('[data-toggle="popover"]').popover();
-          $('.modal').on('hidden.bs.modal', function () {
-            $(this).removeData('bs.modal');
-          });
-        });
           
       = yield
     
@@ -89,24 +66,13 @@
               %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
               |
               %a{:href => to("/license"), :rel => "external"} GPL3 License
-          %supporters
-            %div.panel.panel-default
-              Financial support by
-              %div.panel-body
-                %a{:href=>"http://www.bfr.bund.de/de/start.html", :rel=>"external"}
-                  %img{:src=>"/images/bfr_logo.gif"}
-                %a{:href=>"http://www.opentox.org/", :rel=>"external"}
-                  %img{:src=>"/images/ot_logo.png"}
-                %a{:href=>"https://enanomapper.net/", :rel=>"external"}
-                  %img{:src=>"/images/enm_logo.png"}
-                %a{:href=>"https://www.researchgate.net/institution/Nestle_SA/department/Nestle_Research_Center", :rel=>"external"}
-                  %img{:src=>"/images/nestec.jpg"}
- 
 
     #back-top{:style => "z-index:100;position:fixed;bottom:1%;right:1%;"}
       %a{:href => "", :style=>"text:decoration:none;color:#ccc;"}
-        %span.glyphicon.glyphicon-circle-arrow-up{:style => "font-size:3em;color:black;"}
+        %span.fa.fa-caret-up{:style => "font-size:3em;color:black;"}
     :javascript
+      //var $j = jQuery.noConflict();
+      // $j is now an alias to the jQuery function; creating the new alias is optional.
       $("#back-top").hide();
       $(function () {
         $(window).scroll(function () {
@@ -122,5 +88,17 @@
             scrollTop: 0
           }, 500);
           return false;
+        });
+      });
+      $(document).ready(function(){
+        $("#back-top").hide();
+        $(".blind").on('error', function(){
+          $(this).attr('src', '/images/blind.png');
+        });
+      });
+      $(document).ready(function(){
+        //$('[data-toggle="popover"]').popover();
+        $('.modal').on('hidden.bs.modal', function () {
+          $(this).removeData('bs.modal');
         });
       });

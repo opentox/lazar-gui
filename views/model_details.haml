@@ -1,7 +1,6 @@
-%div.panel.panel-default
-  %div.panel-heading
-    %b Model:
-  %div.panel-body
+%div.card.bg-light
+  %div.card-body
+    %h6.card-title Model:
     Source:
     %a{:href=>model.source, :rel=>"external"}
       = model.source
@@ -18,10 +17,9 @@
     %a{:href=>"#{to("/predict/dataset/#{training_dataset.name}")}"}
       = training_dataset.name
 
-%div.panel.panel-default
-  %div.panel-heading
-    %b Algorithms:
-  %div.panel-body
+%div.card.bg-light
+  %div.card-body
+    %h6.card-title Algorithms:
     Similarity:
     %a{:href=> "http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["similarity"]["method"].sub("::", "%2F")}", :rel=>"external"}
       = model.model.algorithms["similarity"]["method"]
@@ -40,18 +38,15 @@
     = model.model.algorithms["descriptors"]["method"]+","
     = model.model.algorithms["descriptors"]["type"]
 
-%div.panel.panel-default
-  - if type == "Classification"
-    %div.panel-heading
-      %b Independent crossvalidations:
-  - else
-    %div.panel-heading
-      %b Independent crossvalidations (-log10 transformed):
-  %div.panel-body
-    /%div.row{:id=>"validations#{model.id}", :style=>"background-color:#f5f5f5;"}
+%div.card.bg-light
+  %div.card-body
+    - if type == "Classification"
+      %h6.card-title Independent crossvalidations:
+    - else
+      %h6.card-title Independent crossvalidations (-log10 transformed):
     %div.row{:id=>"validations#{model.id}"}
       - crossvalidations.each do |cv|
-        %span.col-xs-4.col-sm-4.col-md-4.col-lg-4
+        %span.col-4
           = "Num folds:\t"
           = cv.folds
           %br
@@ -84,64 +79,65 @@
             %p
             - ["confusion_matrix", "weighted_confusion_matrix"].each_with_index do |matrix,idx|
               %b= (idx == 0 ? "Confusion Matrix" : "Weighted Confusion Matrix")
-              %table.table.table-condensed.table-borderless{:style=>"width:20%;"}
-                %tbody
-                  %tr
-                    %td
-                    %td
-                    %td 
-                      %b actual
-                    %td
-                    %td
-                  %tr
-                    %td
-                    %td
-                    %td active
-                    %td inactive
-                    -#%td total
-                  %tr
-                    %td 
-                      %b predicted
-                    %td active
-                    %td 
-                      =( idx == 1 ? cv.send(matrix)[0][0].round(3) : cv.send(matrix)[0][0])
-                    %td 
-                      =( idx == 1 ? cv.send(matrix)[0][1].round(3) : cv.send(matrix)[0][1])
-                    -#%td 
-                      =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
-                  %tr
-                    %td
-                    %td inactive
-                    %td 
-                      =( idx == 1 ? cv.send(matrix)[1][0].round(3) : cv.send(matrix)[1][0])
-                    %td 
-                      =( idx == 1 ? cv.send(matrix)[1][1].round(3) : cv.send(matrix)[1][1])
-                    -#%td 
-                      =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
-                  -#%tr
-                    %td
-                    %td total
-                    %td
-                      =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
-                    %td
-                      =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
-                    %td
-                      -#= "Confusion Matrix:\t"
-                      -#= cv.confusion_matrix
-                  %br
+              %div.table-responsive
+                %table.table.table-sm.table-borderless
+                  %tbody
+                    %tr
+                      %td
+                      %td
+                      %td 
+                        %b actual
+                      %td
+                      %td
+                    %tr
+                      %td
+                      %td
+                      %td active
+                      %td inactive
+                      -#%td total
+                    %tr
+                      %td 
+                        %b predicted
+                      %td active
+                      %td 
+                        =( idx == 1 ? cv.send(matrix)[0][0].round(3) : cv.send(matrix)[0][0])
+                      %td 
+                        =( idx == 1 ? cv.send(matrix)[0][1].round(3) : cv.send(matrix)[0][1])
+                      -#%td 
+                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
+                    %tr
+                      %td
+                      %td inactive
+                      %td 
+                        =( idx == 1 ? cv.send(matrix)[1][0].round(3) : cv.send(matrix)[1][0])
+                      %td 
+                        =( idx == 1 ? cv.send(matrix)[1][1].round(3) : cv.send(matrix)[1][1])
+                      -#%td 
+                        =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
+                    -#%tr
+                      %td
+                      %td total
+                      %td
+                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
+                      %td
+                        =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
+                      %td
+                        -#= "Confusion Matrix:\t"
+                        -#= cv.confusion_matrix
+                    %br
             %br
             /= "Confidence plot:"
             /%p.plot
             /  %img{:src=>"confp#{cv.id}.svg"}
           - if model.regression?
             %br
-            %a.ht5{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"} RMSE:
+            %a{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"} RMSE:
             = cv.rmse.round(3) if cv.rmse
             %br
-            %a.ht5{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"} MAE:
+            %a{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"} MAE:
             = cv.mae.round(3) if cv.mae
             %br 
-            %a.ht5{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
+            %a{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
             = cv.r_squared.round(3) if cv.r_squared
             %br
             /= "Confidence plot:"
@@ -152,10 +148,10 @@
             /%p.plot
             /  %img{:src=>"/corrp#{cv.id}.svg"}
           
-%div.panel.panel-default
-  %div.panel-heading
-    %b QMRF:
-  %div.panel-body
-    %a.btn.btn-default.btn-xs{:href=>"#{to("/report/#{model.id}")}", :id=>"report#{model.id}", :style=>"font-size:small;"}
-      %span.glyphicon.glyphicon-download-alt
+%div.card.bg-light
+  %div.card-body
+    %h6.card-title QMRF:
+    %a.btn.btn-outline-info{:href=>"#{to("/report/#{model.id}")}", :id=>"report#{model.id}", :style=>"font-size:small;"}
+      %span.fa.fa-download
       XML
+%br

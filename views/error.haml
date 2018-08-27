@@ -1,7 +1,6 @@
-%div.well
+%div.card
   %a.btn.btn-warning{:href => to('/predict')}
-    %i.glyphicon.glyphicon-menu-left
+    %i.fa.fa-caret-left
     Back
-  %hr
-  %div.well{:style=>"width:100%;margin-bottom:2em;"}
+  %div.card-body
     = @error

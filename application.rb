@@ -316,10 +316,15 @@ end
 
 get '/faq' do
   @faq = RDiscount.new(File.read("FAQ.md")).to_html
-  haml :faq, :layout => false
+  haml :faq#, :layout => false
 end
 
 get '/style.css' do
+  headers 'Content-Type' => 'text/css; charset=utf-8'
+  scss :style
+end
+
+get '/swagger-ui.css' do
   headers 'Content-Type' => 'text/css; charset=utf-8'
   scss :style
 end

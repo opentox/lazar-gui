@@ -1,2 +1,6 @@
-%div.well.faq
-  = @faq
+%div.card
+  %a.btn.btn-warning{:href => to('/predict')}
+    %i.fa.fa-caret-left
+    Back
+  %div.card-body
+    = @faq

@@ -13,7 +13,7 @@
     }
   };
 
-  $(function() { 
+  /*$(function() { 
     $('a[data-toggle="tab"]').on('click', function (e) {
       localStorage.setItem('lastTab', $(e.target).attr('href'));
     });
@@ -21,7 +21,7 @@
     if (lastTab) {
       $('a[href="'+lastTab+'"]').click();
     }
-  });  
+  });*/  
   
   function getInput(){
     identifier = document.getElementById("identifier").value.trim();
@@ -110,76 +110,72 @@
     };
   };
 
+  function loadDetails(id) {
+    button = document.getElementById("link"+id);
+    span = button.childNodes[1];
+    if (span.className == "fa fa-caret-right"){
+      span.className = "fa fa-caret-down";
+    } else if (span.className = "fa fa-caret-down"){
+      span.className = "fa fa-caret-right";
+    };
+    image = document.getElementById("circle"+id);
+    if ($('modeldetails'+id).length == 0) {
+      $(button).hide();
+      $(image).show();
+      aClient = new HttpClient();
+      aClient.get("#{to("/predict/modeldetails/")}"+id, function(response) {
+        var details = document.createElement("modeldetails"+id);
+        details.innerHTML = response;
+        document.getElementById("details"+id).appendChild(details);
+        $(button).show();
+        $(image).hide();
+        addExternalLinks();
+      });
+    }
+  }
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
-  %fieldset#top.well
-    %h2 1. Draw a chemical structure
-    #insert
+  %fieldset#top.card.bg-light
+    #insert.card-body
+      %h2.card-title 1. Draw a chemical structure
       %label &nbsp;
-      #appletContainer
+      #appletContainer.d-flex
       %br
-      %label{:for => 'identifier'}
-        or enter the
-        %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
-        string:
-      %br
-      %input{:type => 'text', :name => 'identifier', :id => 'identifier', :size => '60'}
       %p
-      -#%label{:for=>"fileselect"}
-        or upload a CSV file for batch predictions:
-      -#%a.btn.glyphicon.glyphicon-info-sign{:href=>"javascript:void(0)", :title=>"File format", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"auto", html:"true", content:"One column with compounds and keyword SMILES or InChI in the first row."}}
-      -#%br
-      %span.btn.btn-default.btn-file{:style=>"display:none;"}
-        %input{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv", :disabled=>"disabled", :type=>"hidden"}
+        %label{:for => 'identifier'}
+          or enter the
+          %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
+          string:
+        %input.form-control{:type => 'text', :name => 'identifier', :id => 'identifier'}
+      %p{:style=>"display:none;"}
+        %label{:for=>"fileselect"}
+          or upload a CSV file for batch predictions:
+        %br
+        %input.form-control-file{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
 
-  %fieldset#middle.well
-    %h2 2. Select one or more endpoints
-    #models
+  %fieldset#middle.card.bg-light
+    #models.card-body
+      %h2.card-title 2. Select one or more endpoints
       - @endpoints.each do |endpoint|
-        %div{:id=>endpoint.gsub(/\s+/, "_")}
-          %h4.head-back=endpoint
-          - @models.select{|m| m.endpoint == endpoint}.each do |model|
-            %div.row{:id => model.id,:style=>"margin-bottom:1em;"}
-              %span.col-lg-4.col-md-4.col-sm-4.col-xs-4
-                %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species.gsub(/\s+/, "_")}]", :value => true, :disabled => false}
-                %label{:for => "selection[#{model.species.gsub(/\s+/, "_")}]"}
-                  = model.species
-              %span.col-lg-8.col-md-8.col-sm-8.col-xs-8
-                %a.btn.btn-default.btn-xs{:data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :onclick=>"load#{model.id}Details('#{model}')", :id => "link#{model.id}", :style=>"font-size:small;"}
-                  %span.glyphicon.glyphicon-menu-right
-                  Details | Validation
-                %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle#{model.id}", :class=>"circle#{model.id}", :alt=>"wait", :style=>"display:none;"}
-            %div.panel-collapse.collapse{:id=>"details#{model.id}", :style=>"margin-left:1em;"}
-            :javascript
-              function load#{model.id}Details(model) {
-                button = document.getElementById("link#{model.id}");
-                span = button.childNodes[1];
-                if (span.className == "glyphicon glyphicon-menu-right"){
-                  span.className = "glyphicon glyphicon-menu-down";
-                } else if (span.className = "glyphicon glyphicon-menu-down"){
-                  span.className = "glyphicon glyphicon-menu-right";
-                };
-                image = document.getElementById("circle#{model.id}");
-                if ($('modeldetails#{model.id}').length == 0) {
-                  $(button).hide();
-                  $(image).show();
-                  aClient = new HttpClient();
-                  aClient.get("#{to("/predict/modeldetails/#{model.id}")}", function(response) {
-                    var details = document.createElement("modeldetails#{model.id}");
-                    details.innerHTML = response;
-                    document.getElementById("details#{model.id}").appendChild(details);
-                    $(button).show();
-                    $(image).hide();
-                    addExternalLinks();
-                  });
-                }
-              }
-  %fieldset#bottom.well
-    %div.row
-      %div.col-lg-2.col-md-2.col-sm-2.col-xs-2
-        %h2
-          3. Predict
-      %div.col-lg-10.col-md-10.col-sm-10.col-xs-10
-        %button.has-feedback.btn.btn-warning.h2{:type => "submit", :id => "submit", :value=>"", :onclick => "getsmiles()"}
-          %span.glyphicon.glyphicon-play
-        %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
+        %div.card{:id=>endpoint.gsub(/\s+/, "_")}
+          %div.card-header
+            %h5.card-title=endpoint
+          %div.card-body
+            - @models.select{|m| m.endpoint == endpoint}.each do |model|
+              %div.row{:id => model.id,:style=>"margin-bottom:1em;"}
+                %span.col-6
+                  %input{:type => "checkbox", :name => "selection[#{model.id}]", :id => "selection[#{model.species.gsub(/\s+/, "_")}]", :value => true, :disabled => false}
+                  %label{:for => "selection[#{model.species.gsub(/\s+/, "_")}]"}
+                    = model.species
+                %span.col-6
+                  %a.btn.btn-outline-info{:role=>"button", :data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :aria=>{:expanded=>"false", :controls=>"details#{model.id}"}, :onclick=>"loadDetails('#{model.id}')", :id => "link#{model.id}", :style=>"font-size:small;"}
+                    %span.fa.fa-caret-right
+                    Details | Validation
+                  %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle#{model.id}", :class=>"circle#{model.id}", :alt=>"wait", :style=>"display:none;"}
+              %div.collapse{:id=>"details#{model.id}", :style=>"margin-left:1em;"}
+  %fieldset#bottom.card.bg-light
+    %div.card-body
+      %h2.card-title 3. Predict
+      %button.has-feedback.btn.btn-primary.btn-lg{:type => "submit", :id => "submit", :value=>"", :onclick => "getsmiles()"}
+        %span.fa.fa-play
+      %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
