@@ -38,7 +38,6 @@ get '/predict/?' do
   @existing_datasets = dataset_storage
   @models = Model::Validation.all
   @models = @models.delete_if{|m| m.model.name =~ /\b(Net cell association)\b/}
-  #endpoints = @models.collect{|m| m.endpoint =~ /LOAEL/ ? m.endpoint+" (lazar)" : m.endpoint}
   endpoints = @models.collect{|m| m.endpoint if m.endpoint != "Mutagenicity"}.compact
   endpoints << "Oral toxicity (Cramer rules)"
   endpoints << "Lowest observed adverse effect level (LOAEL) (Mazzatorta)"
@@ -173,21 +172,21 @@ get '/download/dataset/:id' do
   response['Content-Type'] = "text/csv"
   dataset = Batch.find params[:id]
   tempfile = Tempfile.new
-  tempfile.write(File.read("tmp/"+dataset.name+".csv"))
+  tempfile.write(File.read(dataset.source))
   tempfile.rewind
-  send_file tempfile, :filename => dataset.name+".csv", :type => "text/csv", :disposition => "attachment"
+  send_file tempfile, :filename => dataset.source, :type => (dataset.source =~ /\.smi$/ ? "chemical/x-daylight-smiles" : "text/csv"), :disposition => "attachment"
 end
 
 get '/delete/dataset/:id' do
   dataset = Batch.find params[:id]
   dataset.delete
-  File.delete File.join("tmp/"+dataset.name+".csv")
+  File.delete File.join(dataset.source)
   redirect to("/")
 end
 
 get '/predict/csv/:task/:model/:filename/?' do
   response['Content-Type'] = "text/csv"
-  filename = params[:filename] =~ /\.csv$/ ? params[:filename].gsub(/\.csv$/,"") : params[:filename]
+  filename = params[:filename]
   task = Task.find params[:task].to_s
   m = Model::Validation.find params[:model].to_s unless params[:model] =~ /Cramer|Mazzatorta/
   dataset = Batch.find_by(:name => filename)
@@ -218,7 +217,7 @@ get '/predict/csv/:task/:model/:filename/?' do
     end
   end
   if params[:model] == "Mazzatorta"
-    endpoint = "Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)"
+    endpoint = "Lowest observed adverse effect level (LOAEL) (Rat) (Mazzatorta)"
   elsif params[:model] == "Cramer"
     endpoint = "Oral_toxicity_(Cramer_rules)"
   else
@@ -293,38 +292,32 @@ post '/predict/?' do
       @filename = @dataset.name
     end
     if !params[:fileselect].blank?
-      if params[:fileselect][:filename] !~ /\.csv$/
-        bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
+      if params[:fileselect][:filename] !~ /\.csv$|\.smi$/
+        bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a .csv or .smi file."
       end
-      @filename = params[:fileselect][:filename]
-      begin
-        @dataset = Batch.find_by(:name => params[:fileselect][:filename].sub(/\.csv$/,""))
-        if @dataset
-          $logger.debug "Take file from database."
+      @filename = params[:fileselect][:filename].gsub(/\.csv$|\.smi$/,"")
+      @dataset = Batch.find_by(:name => @filename)
+      if @dataset
+        $logger.debug "Take file from database."
+        @compounds = @dataset.compounds
+        @identifiers = @dataset.identifiers
+        @ids = @dataset.ids
+      else
+        File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
+          f.write(params[:fileselect][:tempfile].read)
+        end
+        input = Batch.from_csv_file File.join("tmp", params[:fileselect][:filename])
+        $logger.debug "Processing '#{params[:fileselect][:filename]}'"
+        if input.class == OpenTox::Batch
+          @dataset = input
           @compounds = @dataset.compounds
           @identifiers = @dataset.identifiers
           @ids = @dataset.ids
         else
-          File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
-            f.write(params[:fileselect][:tempfile].read)
-          end
-          input = Batch.from_csv_file File.join("tmp", params[:fileselect][:filename])
-          $logger.debug "Processing '#{params[:fileselect][:filename]}'"
-          if input.class == OpenTox::Batch
-            @dataset = input
-            @compounds = @dataset.compounds
-            @identifiers = @dataset.identifiers
-            @ids = @dataset.ids
-          else
-            File.delete File.join("tmp", params[:fileselect][:filename])
-            bad_request_error "Could not serialize file '#{@filename}'."
-          end
+          File.delete File.join("tmp", params[:fileselect][:filename])
+          bad_request_error "Could not serialize file '#{@filename}'."
         end
-      rescue
-        File.delete File.join("tmp", params[:fileselect][:filename])
-        bad_request_error "Could not serialize file '#{@filename}'."
       end
-
       if @compounds.size == 0
         message = @dataset.warnings
         @dataset.delete
@@ -455,7 +448,7 @@ post '/predict/?' do
           compounds = @compounds.collect{|cid| c = Compound.find cid; c.smiles}
           prediction = LoaelMazzatorta.predict(compounds)
           output = {}
-          output["model_name"] = "Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)"
+          output["model_name"] = "Lowest observed adverse effect level (LOAEL) (Rat) (Mazzatorta)"
           output["mazzatorta"] = []
           #output["mazzatorta"] = prediction
           # header

@@ -1,6 +1,10 @@
 require 'csv'
 require 'tempfile'
 
+def has_tab?(line)
+  !!(line =~ /\t/)
+end
+
 module OpenTox
 
   class Batch
@@ -24,7 +28,13 @@ module OpenTox
         $logger.debug "Skipping import of #{file}, it is already in the database (id: #{batch.id})."
       else
         $logger.debug "Parsing #{file}."
-        table = CSV.read file, :skip_blanks => true, :encoding => 'windows-1251:utf-8'
+        # check delimiter
+        line = File.readlines(file).first
+        if has_tab?(line)
+          table = CSV.read file, :col_sep => "\t", :skip_blanks => true, :encoding => 'windows-1251:utf-8'
+        else
+          table = CSV.read file, :skip_blanks => true, :encoding => 'windows-1251:utf-8'
+        end
         batch = self.new(:source => source, :name => name, :identifiers => [], :ids => [], :compounds => [])
 
         # original IDs
@@ -37,7 +47,11 @@ module OpenTox
         feature_names = table.shift.collect{|f| f.strip}
         warnings << "Duplicated features in table header." unless feature_names.size == feature_names.uniq.size
         compound_format = feature_names.shift.strip
-        bad_request_error "#{compound_format} is not a supported compound format. Accepted formats: SMILES, InChI." unless compound_format =~ /SMILES|InChI/i
+        unless compound_format =~ /SMILES|InChI/i
+          File.delete file
+          bad_request_error "'#{compound_format}' is not a supported compound format in the header. " \
+          "Accepted formats: SMILES, InChI. Please take a look on the help page."
+        end
         numeric = []
         features = []
         # guess feature types
