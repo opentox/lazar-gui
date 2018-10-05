@@ -557,7 +557,7 @@ post '/predict/?' do
         if prediction["value"]
           output["mazzatorta"] = {:mmol_prediction => @compound.mg_to_mmol(prediction["value"].delog10p).signif(3),:prediction => prediction["value"].delog10p.signif(3)}
         else
-          output["mazzatorta"] << {:warnings => prediction["warnings"][0].split("\t").first}
+          output["mazzatorta"] = {:warnings => prediction["warnings"][0].split("\t").first}
         end
         @predictions << output
       else

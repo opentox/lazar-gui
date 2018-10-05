@@ -159,7 +159,7 @@
               %b.title Lowest observed adverse effect level (LOAEL) (Rats) (Mazzatorta)
               %p
               - hash = mazzatorta["mazzatorta"]
-              - unless hash.keys.include?("warnings")
+              - unless hash.keys.include?("warnings") || hash.key?(:warnings)
                 %b Prediction:
                 %br
                 = "#{hash[:mmol_prediction]} (mmol/kg_bw/day)"
