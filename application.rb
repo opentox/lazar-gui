@@ -446,7 +446,19 @@ post '/predict/?' do
           @predictions["#{model}"] = predictions
         elsif model == "Mazzatorta"
           compounds = @compounds.collect{|cid| c = Compound.find cid; c.smiles}
-          prediction = LoaelMazzatorta.predict(compounds)
+          #send input SMILES to prediction
+          oids = @identifiers
+          #prediction = LoaelMazzatorta.predict(compounds)
+          prediction = LoaelMazzatorta.predict(oids)
+          #$logger.debug prediction
+          if prediction.collect{|p| p.keys}.flatten.uniq.include?("warnings")
+            # get indexes
+            warnings = prediction.select{|p| p.keys.include?("warnings")}
+            #[{"warnings"=>["INVALID MOLECULE\t19"], "SMILES"=>"Cn1sc(cc1=O)Cl"},{.....},{.....}]
+            indexes = warnings.collect{|hash| hash["warnings"][0].split("\t").last}
+            #["19", "53"]
+            ##TODO go forward and predict with failed compounds as original smiles and combine both prediction arrays
+          end
           output = {}
           output["model_name"] = "Lowest observed adverse effect level (LOAEL) (Rat) (Mazzatorta)"
           output["mazzatorta"] = []
@@ -539,6 +551,7 @@ post '/predict/?' do
   # validate identifier input
   if !params[:identifier].blank?
     @identifier = params[:identifier].strip
+    @oid = @identifier
     $logger.debug "input:#{@identifier}"
     # get compound from SMILES
     @compound = Compound.from_smiles @identifier
@@ -552,7 +565,8 @@ post '/predict/?' do
         @toxtree = true
         @predictions << [Toxtree.predict(@compound.smiles, "Cramer rules"), Toxtree.predict(@compound.smiles, "Cramer rules with extensions")]
       elsif model_id == "Mazzatorta"
-        prediction = LoaelMazzatorta.predict(@compound.smiles)
+        #prediction = LoaelMazzatorta.predict(@compound.smiles)
+        prediction = LoaelMazzatorta.predict(@oid)
         output = {}
         if prediction["value"]
           output["mazzatorta"] = {:mmol_prediction => @compound.mg_to_mmol(prediction["value"].delog10p).signif(3),:prediction => prediction["value"].delog10p.signif(3)}
@@ -563,40 +577,40 @@ post '/predict/?' do
       else
         model = Model::Validation.find model_id
         @models << model
-        if Prediction.where(compound: @compound.id, model: model.id).exists?
-          prediction_object = Prediction.find_by(compound: @compound.id, model: model.id)
-          prediction = prediction_object.prediction
-          @predictions << prediction
-        else
-          prediction_object = Prediction.new
+        #if Prediction.where(compound: @compound.id, model: model.id).exists?
+        #  prediction_object = Prediction.find_by(compound: @compound.id, model: model.id)
+        #  prediction = prediction_object.prediction
+        #  @predictions << prediction
+        #else
+        #  prediction_object = Prediction.new
 
-          if model.model.name =~ /kazius/
-            sa_prediction = KaziusAlerts.predict(@compound.smiles)
-            prediction = model.predict(@compound)
-            lazar_mutagenicity = prediction
-            confidence = 0
-            lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
-            if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
-              confidence = 0.85
-            elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
-              confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
-            elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
-              confidence = 0.11
-            elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
-              confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
-            end
-            prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
-            prediction["Consensus confidence"] = confidence.signif(3)
-            prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
-          else
-            prediction = model.predict(@compound)
+        if model.model.name =~ /kazius/
+          sa_prediction = KaziusAlerts.predict(@compound.smiles)
+          prediction = model.predict(@compound)
+          lazar_mutagenicity = prediction
+          confidence = 0
+          lazar_mutagenicity_val = (lazar_mutagenicity[:value] == "non-mutagenic" ? false : true)
+          if sa_prediction[:prediction] == false && lazar_mutagenicity_val == false
+            confidence = 0.85
+          elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == true
+            confidence = 0.85 * ( 1 - sa_prediction[:error_product] )
+          elsif sa_prediction[:prediction] == false && lazar_mutagenicity_val == true
+            confidence = 0.11
+          elsif sa_prediction[:prediction] == true && lazar_mutagenicity_val == false
+            confidence = ( 1 - sa_prediction[:error_product] ) - 0.57
           end
-          prediction_object[:compound] = @compound.id
-          prediction_object[:model] = model.id
-          prediction_object[:prediction] = prediction
-          prediction_object.save
-          @predictions << prediction
+          prediction["Consensus prediction"] = sa_prediction[:prediction] == false ? "non-mutagenic" : "mutagenic"
+          prediction["Consensus confidence"] = confidence.signif(3)
+          prediction["Structural alerts for mutagenicity"] = sa_prediction[:matches].blank? ? "none" : sa_prediction[:matches].collect{|a| a.first}.join("; ")
+        else
+          prediction = model.predict(@compound)
         end
+        #prediction_object[:compound] = @compound.id
+        #prediction_object[:model] = model.id
+        #prediction_object[:prediction] = prediction
+        #prediction_object.save
+        @predictions << prediction
+        #end
       end
     end
 
