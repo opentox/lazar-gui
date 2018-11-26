@@ -8,12 +8,13 @@
     %link{:rel=>'icon', :type=>'image/x-icon', :href=>'/images/favicon.ico'}
     %link{:href=>"/stylesheets/bootstrap.min.css", :rel=>"stylesheet"}
     %link{:href=>"/stylesheets/font-awesome.min.css", :rel=>"stylesheet"}
+    %link{:href=>"/stylesheets/pagination.css", :rel=>"stylesheet"}
     %link{:href=>"/style.css", :rel=>"stylesheet"}
     %script{ :src=>"/javascripts/jquery.min.js"}
     %script{ :src=>"/javascripts/popper.min.js"}
     %script{:src=>"/javascripts/lazar-gui.js"}
     %script{ :src=>"/javascripts/bootstrap.js"}
-    //%script{ :src=>"/javascripts/bootstrap.js.map"}
+    %script{:src=>"/javascripts/pagination.min.js"}
     //%script{:src=>"/javascripts/google_analytics_lazar.js"}
   %body
     %noscript
@@ -43,7 +44,7 @@
           Problems, bugs, ideas for improvements ? Please report at our
           %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker
           , check out the 
-          %a{:href=> to("/faq")} FAQ
+          %a{:href=> to("/predict/faq")} FAQ
           page or send us an email.
           %a{ :href=>"mailto:info@in-silico.ch?subject=[lazar v#{@version}]", :target=>"_top"}
             %span.fa.fa-envelope

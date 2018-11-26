@@ -38,27 +38,31 @@ post "/compound/descriptor/?" do
   end
 end
 
-get %r{/compound/(.+)} do |inchi|
-  bad_request_error "Input parameter #{inchi} is not an InChI" unless inchi.match(/^InChI=/)
-  compound = Compound.from_inchi URI.unescape(inchi)
-  response['Content-Type'] = @accept
-  case @accept
-  when "application/json"
-    return JSON.pretty_generate JSON.parse(compound.to_json)
-  when "chemical/x-daylight-smiles"
-    return compound.smiles
-  when "chemical/x-inchi"
-    return compound.inchi
-  when "chemical/x-mdl-sdfile"
-    return compound.sdf
-  when "chemical/x-mdl-molfile"
-  when "image/png"
-    return compound.png
-  when "image/svg+xml"
-    return compound.svg
-  when "text/plain"
-    return "#{compound.names}\n"
+get %r{/compound/(InChI.+)} do |input|
+  compound = Compound.from_inchi URI.unescape(input)
+  if compound
+    response['Content-Type'] = @accept
+    case @accept
+    when "application/json"
+      c = {"compound": {"id": compound.id, "inchi": compound.inchi, "smiles": compound.smiles, "warnings": compound.warnings}}
+      return JSON.pretty_generate JSON.parse(c.to_json)
+    when "chemical/x-daylight-smiles"
+      return compound.smiles
+    when "chemical/x-inchi"
+      return compound.inchi
+    when "chemical/x-mdl-sdfile"
+      return compound.sdf
+    when "chemical/x-mdl-molfile"
+    when "image/png"
+      return compound.png
+    when "image/svg+xml"
+      return compound.svg
+    #when "text/plain"
+      #return "#{compound.names}\n"
+    else
+      halt 400, "Content type #{@accept} not supported."
+    end
   else
-    return compound.inspect
+    halt 400, "Compound with #{input} not found.".to_json
   end
 end

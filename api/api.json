@@ -14,12 +14,12 @@
     }
   ],
   "info": {
-    "description": "REST API webservice for lazar and nano-lazar. \n\n*lazar* (lazy structure–activity relationships) is a modular framework for\npredictive toxicology. With activated Authentication & Authorization,\nsubjectid authorization token are obligatory for designated services.\n",
-    "version": "1.3.0",
-    "title": "Lazar & Nano-Lazar REST Service",
+    "description": "REST API webservice for lazar. \n\n*lazar* (lazy structure–activity relationships) is a modular framework for\npredictive toxicology.",
+    "version": "1.4.0",
+    "title": "Lazar REST Service",
     "contact": {
       "name": "in silico toxicology gmbh",
-      "email": "service@in-silico.ch",
+      "email": "info@in-silico.ch",
       "url": "https://in-silico.ch"
     },
     "license": {
@@ -28,8 +28,8 @@
     }
   },
   "externalDocs": {
-    "description": "See also *lazar-rest* documentation on Github\n",
-    "url": "https://github.com/opentox/lazar-rest"
+    "description": "See also documentation\n",
+    "url": "https://github.com/OpenRiskNet/home/blob/master/openshift/deployments/lazar/README.md"
   },
   "paths": {
     "/api/api.json": {
@@ -47,83 +47,6 @@
           },
           "500": {
             "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
-    "/aa/authenticate": {
-      "post": {
-        "x-orn-@type": "x-orn:Authentication",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/aa/authenticate",
-        "x-orn:method": "Post",
-        "tags": [
-          "authentication"
-        ],
-        "summary": "Get token",
-        "description": "Authentication against OpenSSO. Returns authentication token. Requires\nUsername and Password.\n",
-        "operationId": "login",
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/200"
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        },
-        "requestBody": {
-          "description": "username and password",
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "x-orn:schema": "application/x-www-form-urlencoded",
-              "schema": {
-                "$ref": "#/components/schemas/postauth"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/aa/logout": {
-      "post": {
-        "x-orn-@type": "x-orn:Authentication",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/aa/logout",
-        "x-orn:method": "Post",
-        "description": "Devalidates a token. Requires Subjectid.",
-        "summary": "Destroy token",
-        "operationId": "logout",
-        "tags": [
-          "authentication"
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/200"
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "x-orn:schema": "application/x-www-form-urlencoded",
-              "schema": {
-                "$ref": "#/components/schemas/postlogout"
-              }
-            }
           }
         }
       }
@@ -177,8 +100,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "$ref": "#/components/responses/200"
+          "202": {
+            "$ref": "#/components/responses/202"
           },
           "400": {
             "$ref": "#/components/responses/400"
@@ -392,29 +315,11 @@
           "200": {
             "description": "OK",
             "content": {
-              "application/json": {
-                "x-orn:returns": "application/json",
-                "schema": {
-                  "x-orn:property": "InChI",
-                  "type": "string",
-                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
-                }
-              },
               "text/csv": {
-                "x-orn:returns": "text/csv",
-                "schema": {
-                  "x-orn:property": "InChI",
-                  "type": "string",
-                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
-                }
+                "x-orn:returns": "text/csv"
               },
               "application/csv": {
-                "x-orn:returns": "text/csv",
-                "schema": {
-                  "x-orn:property": "InChI",
-                  "type": "string",
-                  "example": "InChI=1S/C6H6/c1-2-4-6-5-3-1/h1-6H"
-                }
+                "x-orn:returns": "text/csv"
               }
             }
           },
@@ -455,7 +360,6 @@
               "type": "string",
               "enum": [
                 "compounds",
-                "nanoparticles",
                 "substances",
                 "features"
               ]
@@ -631,78 +535,6 @@
         }
       }
     },
-    "/nanoparticle": {
-      "get": {
-        "x-orn-@type": "x-orn:Nanoparticle",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/nanoparticle",
-        "x-orn:method": "Get",
-        "tags": [
-          "nanoparticle"
-        ],
-        "description": "Get a list of all nanoparticles",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/subjectid"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/200"
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "404": {
-            "$ref": "#/components/responses/404"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
-    "/nanoparticle/{id}": {
-      "get": {
-        "x-orn-@type": "x-orn:Nanoparticle",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/nanoparticle/{id}",
-        "x-orn:method": "Get",
-        "tags": [
-          "nanoparticle"
-        ],
-        "description": "Get nanoparticle representation",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/id"
-          },
-          {
-            "$ref": "#/components/parameters/subjectid"
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/200"
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "404": {
-            "$ref": "#/components/responses/404"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
     "/model": {
       "get": {
         "x-orn-@type": "x-orn:Model",
@@ -778,7 +610,7 @@
         "tags": [
           "model"
         ],
-        "description": "Predict a compound or a nanoparticle. Also a comma seperated list is allowed.",
+        "description": "Predict a single compound or upload a CSV file for batch prediction. Use multipart/form-data to upload a file.",
         "parameters": [
           {
             "$ref": "#/components/parameters/id"
@@ -788,8 +620,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "$ref": "#/components/responses/200"
+          "202": {
+            "$ref": "#/components/responses/202"
           },
           "400": {
             "$ref": "#/components/responses/400"
@@ -805,13 +637,19 @@
           }
         },
         "requestBody": {
-          "description": "SMILES identifier or Nanoparticle URI or comma separated\nlist of SMILES  identifiers or Nanoparticle URI\n",
+          "description": "SMILES identifier or CSV file with SMILES identifiers\n",
           "required": true,
           "content": {
             "application/x-www-form-urlencoded": {
               "x-orn:schema": "application/x-www-form-urlencoded",
               "schema": {
                 "$ref": "#/components/schemas/postmodel"
+              }
+            },
+            "multipart/form-data": {
+              "x-orn:schema": "multipart/form-data",
+              "schema": {
+                "$ref": "#/components/schemas/postbatch"
               }
             }
           }
@@ -928,7 +766,7 @@
         "tags": [
           "substance"
         ],
-        "description": "Get substance representation",
+        "description": "Get substance representation by ID",
         "parameters": [
           {
             "$ref": "#/components/parameters/id"
@@ -1080,14 +918,6 @@
       "description": "Swagger API representation in JSON"
     },
     {
-      "name": "algorithm",
-      "description": "Algorithm"
-    },
-    {
-      "name": "authentication",
-      "description": "minimal Authentication service"
-    },
-    {
       "name": "compound",
       "description": "Compound"
     },
@@ -1110,10 +940,6 @@
     {
       "name": "model",
       "description": "Lazar Model Service"
-    },
-    {
-      "name": "nanoparticle",
-      "description": "Nanoparticle"
     },
     {
       "name": "report",
@@ -1152,29 +978,6 @@
             "x-orn:property": "descriptor",
             "type": "string",
             "example": "Openbabel.MW,Openbabel.atoms"
-          }
-        }
-      },
-      "postauth": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "x-orn:property": "username",
-            "type": "string"
-          },
-          "password": {
-            "x-orn:property": "password",
-            "type": "string",
-            "format": "password"
-          }
-        }
-      },
-      "postlogout": {
-        "type": "object",
-        "properties": {
-          "subjectid": {
-            "x-orn:property": "subjectid",
-            "type": "string"
           }
         }
       }
@@ -1230,20 +1033,33 @@
         "schema": {
           "type": "string"
         }
-      },
-      "subjectidRequired": {
-        "in": "header",
-        "name": "subjectid",
-        "description": "authorization token",
-        "required": true,
-        "schema": {
-          "type": "string"
-        }
       }
     },
     "responses": {
       "200": {
         "description": "OK",
+        "content": {
+          "application/json": {
+            "x-orn:returns": "application/json",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "201": {
+        "description": "Created",
+        "content": {
+          "application/json": {
+            "x-orn:returns": "application/json",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "202": {
+        "description": "Accepted",
         "content": {
           "application/json": {
             "x-orn:returns": "application/json",
