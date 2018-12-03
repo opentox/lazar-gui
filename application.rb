@@ -123,7 +123,10 @@ get '/predict/dataset/:name' do
   response['Content-Type'] = "text/csv"
   dataset = Dataset.find_by(:name=>params[:name])
   csv = dataset.to_csv
-  csv
+  t = Tempfile.new
+  t << csv
+  name = params[:name] + ".csv"
+  send_file t.path, :filename => name, :type => "text/csv", :disposition => "attachment"
 end
 
 get '/predict/:tmppath/:filename/?' do
