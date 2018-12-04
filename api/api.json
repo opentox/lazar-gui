@@ -610,7 +610,7 @@
         "tags": [
           "model"
         ],
-        "description": "Predict a single compound or upload a CSV file for batch prediction. Use multipart/form-data to upload a file.",
+        "description": "Predict a compound.",
         "parameters": [
           {
             "$ref": "#/components/parameters/id"
@@ -637,19 +637,13 @@
           }
         },
         "requestBody": {
-          "description": "SMILES identifier or CSV file with SMILES identifiers\n",
+          "description": "SMILES identifier.\n",
           "required": true,
           "content": {
             "application/x-www-form-urlencoded": {
               "x-orn:schema": "application/x-www-form-urlencoded",
               "schema": {
                 "$ref": "#/components/schemas/postmodel"
-              }
-            },
-            "multipart/form-data": {
-              "x-orn:schema": "multipart/form-data",
-              "schema": {
-                "$ref": "#/components/schemas/postbatch"
               }
             }
           }
