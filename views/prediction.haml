@@ -88,10 +88,9 @@
                       %a.btn.fa.fa-info-circle{:href=>"javascript:void(0)", :title=>"Pobability", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Probability that the prediction belongs to one of the given classes."}}
                       - unless prediction[:probabilities].nil?
                         %br
-                        = "#{prediction[:probabilities].keys[0]}: #{prediction[:probabilities].values[0].signif(3)}"
-                        - if prediction[:probabilities].size == 2
+                        - prediction[:probabilities].each do |pp|
+                          = "#{pp[0]}: #{pp[1].signif(3)}"
                           %br
-                          = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
                   
                   / show warnings and info
                   %p
