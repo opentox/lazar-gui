@@ -112,7 +112,7 @@ helpers do
         #line += "Consensus mutagenicity,#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
         #  "#{prediction[:measurements].join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
         line += "Consensus mutagenicity,#{compound.smiles},"\
-          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
+          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{prediction[:measurements].join("; ") if prediction[:info]}\","\
           "#{prediction['Consensus prediction']},"\
           "#{prediction['Consensus confidence']},"\
           "#{prediction['Structural alerts for mutagenicity']},"\
