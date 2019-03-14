@@ -1,6 +1,10 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet", :property=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
+%script{ :src=>"/javascripts/keycloak.min.js"}
 :javascript
+  var keycloak = Keycloak();
+  keycloak.init({ onLoad: 'login-required'})
+
   var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
     var anHttpRequest = new XMLHttpRequest();
