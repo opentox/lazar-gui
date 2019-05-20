@@ -10,7 +10,17 @@
   },
   "servers": [
     {
-      "url": "https://lazar.prod.openrisknet.org/"
+      "url": "https://lazar.{env}.openrisknet.org/",
+      "description": "The API server",
+      "variables": {
+        "env": {
+          "enum": [
+            "prod",
+            "dev"
+          ],
+          "default": "prod"
+        }
+      }
     }
   ],
   "info": {
