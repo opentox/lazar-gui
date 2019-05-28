@@ -72,3 +72,24 @@ ul.share-buttons{
   table-layout: fixed;
   width: 100%;
 }
+.help table, .help th, .help td {
+  background-color: white;
+  border: 1px solid black;
+  border-bottom: none;
+  width: 100%;
+}
+.help th, .help td {
+  padding: 10px;
+  text-align: left;
+}
+/*img.supporters {
+  width: 150px;
+  height: 150px;
+}*/
+supporters{
+  background-color: #fff;
+  img{
+    width: 200px;
+    margin: 1em;
+  }
+}

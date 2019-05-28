@@ -1,0 +1,68 @@
+%div.card.bg-light
+  %div.card-body
+    %h3 How to use batch prediction
+
+    %p
+      You have two options to format your comma or tab sperated spreadsheet for batch predictions:
+
+    %br
+    %p
+      %div.row
+        %div.col-md-6
+          %strong Option 1:
+          %br
+          A spreadsheet with a single column and a header. The header should specify the input format (SMILES or InChI are accepted).
+        %div.col-md-6
+          %table.help
+            %tr.row
+              %th.col-md-12
+                SMILES
+            %tr.row
+              %td.col-md-12
+                C1ccccc1NN
+            %tr.row
+              %td.col-md-12
+                Cc1ccc(cc1\N=C=O)/N=C=O
+            %tr.row
+              %td.col-md-12
+                OC(=O)c1ccc(cc1)C(=O)O
+            %tr.row
+              %td.col-md-12
+                ="..."
+    %br
+    %p
+      %div.row
+        %div.col-md-6
+          %strong Option 2:
+          %br
+          A spreadsheet with two columns and a header. The first column may contain an arbitrary ID, 
+          the second column the compound structure (as SMILES or InChI).  
+          The header consists of "ID" followed by the input format (SMILES or InChI).
+        %div.col-md-6
+          %table.help
+            %tr.row
+              %th.col-md-4
+                ID
+              %th.col-md-8
+                SMILES
+            %tr.row
+              %td.col-md-4
+                2735
+              %td.col-md-8
+                C1ccccc1NN
+            %tr.row
+              %td.col-md-4
+                A2
+              %td.col-md-8
+                O=C(OCCCC)C1=CC=CC=C1C(OCCCC)=O
+            %tr.row
+              %td.col-md-4
+                82 B-6 304663
+              %td.col-md-8
+                CC(C)(C)C1=CC2(C=C(C1=O)C(C)(C)C)CCC(=O)O2
+            %tr.row
+              %td.col-md-4
+                ="..."
+              %td.col-md-8
+                ="..."
+    %br

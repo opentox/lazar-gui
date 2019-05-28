@@ -24,20 +24,14 @@
       %div.row.align-items-center
         %div.col-3
           %a.card-link{:href=> "https://in-silico.ch/", :rel=>"external"}
-            %img{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"100px", :heigth=>"100px"}
-          %a.card-link{:href=> "https://openrisknet.org/", :rel=>"external"}
-            %img{:src=>"/images/orn-logo.jpg", :alt=>"orn-logo", :width=>"100px", :heigth=>"100px"}
-        %div.col-6
+            %img{:src=>"/images/IST_logo_s.png", :alt=>"logo", :width=>"120px"}
+        %div.col-7
           %h1 lazar toxicity predictions
-        %div.col-3
-          %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Tweet"}
-            %span.fa.fa-2x.fa-twitter-square
-          %a{:href=>"https://plus.google.com/share?url=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Google+"}
-            %span.fa.fa-2x.fa-google-plus-square
-          %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on LinkedIn"}
-            %span.fa.fa-2x.fa-linkedin-square
-          %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=http%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Facebook"}
-            %span.fa.fa-2x.fa-facebook-square
+        %div.col-2
+          %h5
+            %a.text-right{:href=>"https://nano-lazar.in-silico.ch", :rel=>"external"}
+              nano-lazar
+              %span.fa.fa-xs.fa-external-link
     %div.container-fluid
       %topline.alert
         %p
@@ -54,7 +48,12 @@
           %a{ :href=>"https://doi.org/10.3389/fphar.2013.00038", :rel=>"external"}
             %img{ :src=>"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg", :alt=>"DOI"}
           in scientific publications.
-      
+          %a{:href=>"https://twitter.com/intent/tweet?source=http%3A%2F%2Flazar.in-silico.ch&text=https%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Tweet"}
+            %span.fa.fa-twitter-square
+          %a{:href=>"http://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=https%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on LinkedIn"}
+            %span.fa.fa-linkedin-square
+          %a{:href=>"https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Flazar.in-silico.ch&title=&summary=&source=https%3A%2F%2Flazar.in-silico.ch", :rel=>"external", :title=>"Share on Facebook"}
+            %span.fa.fa-facebook-square
           
       = yield
     
@@ -67,6 +66,19 @@
               %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
               |
               %a{:href => to("/license"), :rel => "external"} GPL3 License
+        %supporters.row
+          %div.card-body.text-center
+            %div.card-title
+              Financial support by
+            %div.card-text
+              %a{:href=>"http://www.bfr.bund.de/de/start.html", :rel=>"external"}
+                %img{:src=>"/images/bfr_logo.gif"}
+              %a{:href=>"http://www.opentox.org/", :rel=>"external"}
+                %img{:src=>"/images/ot_logo.png"}
+              %a{:href=>"https://enanomapper.net/", :rel=>"external"}
+                %img{:src=>"/images/enm_logo.png"}
+              %a{:href=>"https://www.researchgate.net/institution/Nestle_SA/department/Nestle_Research_Center", :rel=>"external"}
+                %img{:src=>"/images/nestec.jpg"}
 
     #back-top{:style => "z-index:100;position:fixed;bottom:1%;right:1%;"}
       %a{:href => "", :style=>"text:decoration:none;color:#ccc;"}

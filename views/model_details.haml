@@ -9,9 +9,8 @@
     = "Type:\t"
     = type
     %br
-    - training_dataset = OpenTox::Dataset.find model.model.training_dataset_id
     = "Training compounds:\t"
-    = training_dataset.data_entries.size
+    = data_entries.count/3
     %br
     = "Training dataset:\t"
     %a{:href=>"#{to("/predict/dataset/#{training_dataset.name}")}"}
@@ -20,134 +19,157 @@
 %div.card.bg-light
   %div.card-body
     %h6.card-title Algorithms:
-    Similarity:
-    %a{:href=> "http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["similarity"]["method"].sub("::", "%2F")}", :rel=>"external"}
-      = model.model.algorithms["similarity"]["method"]
-    = ", min: #{model.model.algorithms["similarity"]["min"]}"
-    %br
-    Prediction:
-    - if model.model.algorithms["prediction"]["method"] !~ /Caret/
-      %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
-        = model.model.algorithms["prediction"]["method"]
-    - else
-      %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox/Algorithm/Caret", :rel=>"external"}
-        = model.model.algorithms["prediction"]["method"]
+    %p.card-text
+      Similarity:
+      %a.card-link{:href=> "http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["similarity"]["method"].sub("::", "%2F")}", :rel=>"external"}
+        = model.model.algorithms["similarity"]["method"]
+      = ", min: #{model.model.algorithms["similarity"]["min"]}"
+      %br
+      Prediction:
+      - if model.model.algorithms["prediction"]["method"] !~ /Caret/
+        %a.card-link{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
+          = model.model.algorithms["prediction"]["method"]
+      - else
+        %a.card-link{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox/Algorithm/Caret", :rel=>"external"}
+          = model.model.algorithms["prediction"]["method"]
 
-    %br
-    Descriptors:
-    = model.model.algorithms["descriptors"]["method"]+","
-    = model.model.algorithms["descriptors"]["type"]
+      %br
+      Descriptors:
+      = model.model.algorithms["descriptors"]["method"]+","
+      = model.model.algorithms["descriptors"]["type"]
 
 %div.card.bg-light
   %div.card-body
     - if type == "Classification"
-      %h6.card-title Independent crossvalidations:
+      %h6.card-text Independent crossvalidations:
     - else
-      %h6.card-title Independent crossvalidations (-log10 transformed):
-    %div.row{:id=>"validations#{model.id}"}
-      - crossvalidations.each do |cv|
-        %span.col-4
-          = "Num folds:\t"
-          = cv.folds
-          %br
-          = "Num instances:\t"
-          = cv.nr_instances
-          %br
-          = "Num unpredicted"
-          = cv.nr_unpredicted
-          - if model.classification? 
-            %br
-            = "Accuracy:\t"
-            = cv.accuracy.round(3) if cv.accuracy
-            %br
-            = "Weighted accuracy:\t"
-            = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
-            - if cv.true_rate
-              %br
-              = "True positive rate:\t"
-              = cv.true_rate[cv.accept_values[0]].round(3)
-              %br
-              = "True negative rate:\t"
-              = cv.true_rate[cv.accept_values[1]].round(3)
-            - if cv.predictivity
-              %br 
-              = "Positive predictive value:\t"
-              = cv.predictivity[cv.accept_values[0]].round(3)
-              %br
-              = "Negative predictive value:\t"
-              = cv.predictivity[cv.accept_values[1]].round(3)
-            %p
-            - ["confusion_matrix", "weighted_confusion_matrix"].each_with_index do |matrix,idx|
-              %b= (idx == 0 ? "Confusion Matrix" : "Weighted Confusion Matrix")
-              %div.table-responsive
-                %table.table.table-sm.table-borderless
-                  %tbody
-                    %tr
-                      %td
-                      %td
-                      %td 
-                        %b actual
-                      %td
-                      %td
-                    %tr
-                      %td
-                      %td
-                      %td active
-                      %td inactive
-                      -#%td total
-                    %tr
-                      %td 
-                        %b predicted
-                      %td active
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[0][0].round(3) : cv.send(matrix)[0][0])
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[0][1].round(3) : cv.send(matrix)[0][1])
-                      -#%td 
-                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
-                    %tr
-                      %td
-                      %td inactive
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[1][0].round(3) : cv.send(matrix)[1][0])
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[1][1].round(3) : cv.send(matrix)[1][1])
-                      -#%td 
-                        =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
-                    -#%tr
-                      %td
-                      %td total
-                      %td
-                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
-                      %td
-                        =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
-                      %td
-                        -#= "Confusion Matrix:\t"
-                        -#= cv.confusion_matrix
+      %h6.card-text Independent crossvalidations (-log10 transformed):
+  - crossvalidations.each_with_index do |cv,idx|
+    %div.card.bg-light
+      %div.card-body
+        %h6.card-title= "Nr.#{idx+1}  |  Num folds:#{cv.folds}"
+        %p.card-text
+          / predictions nr
+          %div.row
+            %div.col-6
+              %h6
+                Predictions number:
+              - cv.nr_predictions.each do |key,value|
+                %div.row
+                  %div.col
+                    %h6
+                      = key
+                  %div.col
+                    = value
+          - if model.classification?
+            %hr
+            %div.row
+              / accuracy
+              %div.col-6
+                %h6
+                  Accuracy:
+                - cv.accuracy.each do |key, value|
+                  %div.row
+                    %div.col
+                      %h6
+                        = key
+                    %div.col
+                      = value.signif(3)
+            %hr
+            / matrixes
+            %div.row
+              - cv.confusion_matrix.each do |key,matrix|
+                %div.col-4
+                  %h6
+                    Confusion Matrix:
+                    %i= key
                     %br
-            %br
-            /= "Confidence plot:"
-            /%p.plot
-            /  %img{:src=>"confp#{cv.id}.svg"}
+                    %table.table.table-sm.table-borderless.col-4
+                      %tbody
+                        %tr
+                          %td
+                          %td
+                          %td 
+                            %h6 actual
+                          %td
+                        %tr
+                          %td
+                          %td
+                          %td active
+                          %td inactive
+                        %tr
+                          %td 
+                            %h6 predicted
+                          %td active
+                          %td 
+                            = matrix[0][0]
+                          %td 
+                            = matrix[0][1]
+                        %tr
+                          %td
+                          %td inactive
+                          %td 
+                            = matrix[1][0]
+                          %td 
+                            = matrix[1][1]
+                        %br
           - if model.regression?
-            %br
-            %a{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"} RMSE:
-            = cv.rmse.round(3) if cv.rmse
-            %br
-            %a{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"} MAE:
-            = cv.mae.round(3) if cv.mae
-            %br 
-            %a{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
-            = cv.r_squared.round(3) if cv.r_squared
-            %br
-            /= "Confidence plot:"
-            /%p.plot
-            /  %img{:src=>"/confp#{cv.id}.svg"}
-            /%br
-            /= "Correlation plot"
-            /%p.plot
-            /  %img{:src=>"/corrp#{cv.id}.svg"}
-          
+            %hr
+            %div.row
+              %div.col
+                %h6
+                  %a.card-link{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
+                    RMSE:
+                - cv.rmse.each do |key,value|
+                  %div.row
+                    %div.col
+                      %h6
+                        = key
+                    %div.col
+                      = value.signif(3)
+              %div.col
+                %h6
+                  %a.card-link{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"}
+                    MAE:
+                - cv.mae.each do |key,value|
+                  %div.row
+                    %div.col
+                      %h6
+                        = key
+                    %div.col
+                      = value.signif(3)
+              %div.col
+                %h6
+                  %a.card-link{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
+                - cv.r_squared.each do |key,value|
+                  %div.row
+                    %div.col
+                      %h6.card-title
+                        = key
+                    %div.col
+                      = value.signif(3)
+            %hr
+            %div.row
+              %div.col
+                %h6
+                  Within prediction interval:
+                - cv.within_prediction_interval.each do |key,value|
+                  %div.row
+                    %div.col
+                      %h6
+                        = key
+                    %div.col
+                      = value
+              %div.col
+                %h6
+                  Out of prediction interval:
+                - cv.out_of_prediction_interval.each do |key,value|
+                  %div.row
+                    %div.col
+                      %h6
+                        = key
+                    %div.col
+                      = value
 %div.card.bg-light
   %div.card-body
     %h6.card-title QMRF:

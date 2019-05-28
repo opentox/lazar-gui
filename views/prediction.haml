@@ -16,14 +16,14 @@
     New Prediction
 %div.card.bg-light
   %div.card-body
-    %h3.card-title Prediction Results:
+    %h3.card-title Prediction:
     %div.table-responsive
       %table.table.table-bordered{:id=>"overview"}
         %tbody
           %tr
             %td.align-items-center{:id=>"compound"}
               %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: to("/prediction/#{@compound.id}/details"), :id=>"link01"}}
-                = @compound.svg
+                = embedded_svg(@compound.svg, :title=>"click for details")
               %p= @compound.smiles
             - @model_types = {}
             - @dbhit = {}
@@ -71,9 +71,9 @@
                     %br
                     = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                     
-                    / show prediction interval or probability
+                  / show prediction interval or probability
+                  - if type == "Regression"
                     %p
-                    - if type == "Regression"
                       %b 95% Prediction interval:
                       - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
                       / prediction interval popover
@@ -82,7 +82,12 @@
                       = interval.nil? ? "--" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
                       %br
                       = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !interval.nil?
-                    - else
+                    %p
+                      %b Confidence:
+                      %br
+                      = prediction[:confidence]
+                  - else
+                    %p
                       %b Probability:
                       / probability popover
                       %a.btn.fa.fa-info-circle{:href=>"javascript:void(0)", :title=>"Pobability", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Probability that the prediction belongs to one of the given classes."}}
@@ -92,6 +97,10 @@
                         - if prediction[:probabilities].size == 2
                           %br
                           = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
+                    %p
+                      %b Confidence:
+                      %br
+                      = prediction[:confidence]
                   
                   / show warnings and info
                   %p

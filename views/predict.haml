@@ -1,6 +1,7 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet", :property=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 :javascript
+  // GET request
   var HttpClient = function() {
     this.get = function(aUrl, aCallback) {
     var anHttpRequest = new XMLHttpRequest();
@@ -23,6 +24,7 @@
     }
   });*/  
   
+  // get and check input
   function getInput(){
     identifier = document.getElementById("identifier").value.trim();
     fileselect = document.getElementById("fileselect").value;
@@ -34,6 +36,8 @@
     };
     return 0;
   };
+
+  // display wait animation
   function showcircle() {
     switch (getInput()){
       case 0:
@@ -64,6 +68,8 @@
     };
     return false;
   };
+
+  // check if a file was selected for upload
   function checkfile() {
     var fileinput = document.getElementById("fileselect");
     if(fileinput.value != "") {
@@ -73,6 +79,8 @@
     alert("Please select a file (csv).");
     return false;
   };
+
+  // check if a smiles string was entered
   function checksmiles () {
     getsmiles();
     if (document.form.identifier.value == "") {
@@ -83,6 +91,8 @@
     };
     return true;
   };
+
+  // check if a model was selected
   function checkboxes () {
     var checked = false;
     $('input[type="checkbox"]').each(function() {
@@ -97,6 +107,8 @@
     };
     return true;
   };
+
+  // display jsme editor with option
   function jsmeOnLoad() {
     jsmeApplet = new JSApplet.JSME("appletContainer", "380px", "340px", {
       //optional parameters
@@ -104,12 +116,15 @@
     });
   document.JME = jsmeApplet;
   };
+
+  // get and take smiles from jsme editor for input field
   function getsmiles() {
     if (document.JME.smiles() != '') {
       document.form.identifier.value = document.JME.smiles() ;
     };
   };
 
+  // show model details
   function loadDetails(id) {
     button = document.getElementById("link"+id);
     span = button.childNodes[1];
@@ -133,6 +148,7 @@
       });
     }
   }
+
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
 %form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
   %fieldset#top.card.bg-light
@@ -147,11 +163,13 @@
           %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
           string:
         %input.form-control{:type => 'text', :name => 'identifier', :id => 'identifier'}
-      %p{:style=>"display:none;"}
+      %p{:style=>("display:none;" unless ENV["BATCH_MODE"].to_boolean)}
         %label{:for=>"fileselect"}
           or upload a CSV file for batch predictions:
         %br
-        %input.form-control-file{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
+        %span.btn.btn-file{:style=>"background-color:white;"}
+          %input.form-control-file{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
+        %a.btn.btn-warning{:href => to("/help"), :rel => "external", :style=>"margin-left: 1em;"} Help
 
   %fieldset#middle.card.bg-light
     #models.card-body

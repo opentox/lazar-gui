@@ -37,7 +37,7 @@
                         - c = Compound.find(neighbor)
                         %td
                           %a.btn.btn-link{:href => "#details#{j+1}", data: { toggle: "modal", remote: to("/prediction/#{CGI.escape(c.id.to_s)}/details"), :id=>"link#{j+1}#{count}"}}
-                            = c.svg
+                            = embedded_svg(c.svg, :title=>"click for details")
                         %td
                           %p= c.smiles
                         
