@@ -1,4 +1,4 @@
-ENV["BATCH_MODE"] = "true"
+ENV["BATCH_MODE"] = "false"
 ENV["LAZAR_ENV"] = "production"
 require 'bundler'
 Bundler.require

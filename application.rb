@@ -113,7 +113,6 @@ get '/predict/modeldetails/:model' do
   }
 end
 
-#TODO fix update
 get "/predict/report/:id/?" do
   prediction_model = Model::Validation.find params[:id]
   bad_request_error "model with id: '#{params[:id]}' not found." unless prediction_model
