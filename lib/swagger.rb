@@ -1,5 +1,3 @@
-get "/" do
-  response['Content-Type'] = "text/html"
-  index_file = File.join(ENV['HOME'],"swagger-ui/dist/index.html")
-  File.read(index_file)
+get "/swagger" do
+  redirect("/api")
 end

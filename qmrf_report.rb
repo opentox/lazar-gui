@@ -1,9 +1,7 @@
 def qmrf_report id
   lazarpath = `gem path lazar`
   lazarpath = File.dirname lazarpath
-  lazarpath = File.dirname lazarpath
   qmrfpath = `gem path qsar-report`
-  qmrfpath = File.dirname qmrfpath
   qmrfpath = File.dirname qmrfpath
   prediction_model = Model::Validation.find id
 	model = prediction_model.model

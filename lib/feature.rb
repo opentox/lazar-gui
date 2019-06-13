@@ -1,5 +1,5 @@
 # Get all Features
-get "/feature/?" do
+get "/api/feature/?" do
   features = Feature.all
   case @accept
   when "text/uri-list"
@@ -16,7 +16,7 @@ get "/feature/?" do
 end
 
 # Get a feature
-get "/feature/:id/?" do
+get "/api/feature/:id/?" do
   case @accept
   when "application/json"
     feature = Feature.find :id => params[:id]

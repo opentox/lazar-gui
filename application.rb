@@ -3,7 +3,7 @@ require_relative 'qmrf_report.rb'
 require_relative 'task.rb'
 require_relative 'helper.rb'
 include OpenTox
-=begin
+
 [
   "api.rb",
   "compound.rb",
@@ -16,7 +16,6 @@ include OpenTox
   "swagger.rb",
   "validation.rb"
 ].each{ |f| require_relative "./lib/#{f}" }
-=end
 
 configure :production, :development do
   STDOUT.sync = true  
@@ -25,7 +24,6 @@ configure :production, :development do
   enable :reloader
   also_reload './helper.rb'
   also_reload './qmrf_report.rb'
-=begin
   [
     "api.rb",
     "compound.rb",
@@ -38,12 +36,10 @@ configure :production, :development do
     "swagger.rb",
     "validation.rb"
   ].each{ |f| also_reload "./lib/#{f}" }
-=end
 end
-=begin
+
 before do
   $paths = [
-  "/",
   "api",
   "compound",
   "dataset",
@@ -54,24 +50,20 @@ before do
   "substance",
   "swagger",
   "validation"]
-  if request.path == "/" || $paths.include?(request.path.split("/")[1])
-    @accept = request.env['HTTP_ACCEPT']
+  if request.path.split("/")[1] == "api" || $paths.include?(request.path.split("/")[2])
+    @accept = request.env['HTTP_ACCEPT'].split(",").first
     response['Content-Type'] = @accept
   else
     @version = File.read("VERSION").chomp
   end
 end
-=end
-before do
-  @version = File.read("VERSION").chomp
-end
 
 not_found do
   redirect to('/predict')
 end
-=begin
+
 error do
-  if request.path == "/" || $paths.include?(request.path.split("/")[1])
+  if request.path.split("/")[1] == "api" || $paths.include?(request.path.split("/")[2])
     @accept = request.env['HTTP_ACCEPT']
     response['Content-Type'] = @accept
     @accept == "text/plain" ? request.env['sinatra.error'] : request.env['sinatra.error'].to_json
@@ -80,20 +72,14 @@ error do
     haml :error
   end
 end
-=end
 
-error do
-  @error = request.env['sinatra.error']
-  haml :error
-end
-=begin
 # https://github.com/britg/sinatra-cross_origin#responding-to-options
 options "*" do
   response.headers["Allow"] = "HEAD,GET,PUT,POST,DELETE,OPTIONS"
   response.headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Cache-Control, Accept"
   200
 end
-=end
+
 get '/predict/?' do
   @models = OpenTox::Model::Validation.all
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq

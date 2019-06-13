@@ -19,5 +19,8 @@ helpers do
     doc.to_html.html_safe
   end
 
+  def is_mongoid?
+    self.match(/^[a-f\d]{24}$/i) ? true : false
+  end
 
 end

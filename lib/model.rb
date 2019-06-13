@@ -1,29 +1,29 @@
 # Get a list of all prediction models
 # @param [Header] Accept one of text/uri-list,
 # @return [text/uri-list] list of all prediction models
-get "/model/?" do
+get "/api/model/?" do
   models = Model::Validation.all
   case @accept
   when "text/uri-list"
-    uri_list = models.collect{|model| uri("/model/#{model.id}")}
+    uri_list = models.collect{|model| uri("/api/model/#{model.id}")}
     return uri_list.join("\n") + "\n"
   when "application/json"
     models = JSON.parse models.to_json
     list = []
-    models.each{|m| list << uri("/model/#{m["_id"]["$oid"]}")}
+    models.each{|m| list << uri("/api/model/#{m["_id"]["$oid"]}")}
     return list.to_json
   else
-    bad_request_error "Mime type #{@accept} is not supported."
+    halt 400, "Mime type #{@accept} is not supported."
   end
 end
 
-get "/model/:id/?" do
+get "/api/model/:id/?" do
   model = Model::Validation.find params[:id]
-  not_found_error "Model with id: #{params[:id]} not found." unless model
+  halt 400, "Model with id: #{params[:id]} not found." unless model
   return model.to_json
 end
 
-post "/model/:id/?" do
+post "/api/model/:id/?" do
   if request.content_type == "application/x-www-form-urlencoded"
     identifier = params[:identifier].strip.gsub(/\A"|"\Z/,'')
     compound = Compound.from_smiles identifier
@@ -146,6 +146,6 @@ post "/model/:id/?" do
     tid = @task.id.to_s
     return 202, to("/task/#{tid}").to_json
   else
-    bad_request_error "No accepted content type"
+    halt 400, "No accepted content type"
   end
 end
