@@ -41,135 +41,117 @@
 %div.card.bg-light
   %div.card-body
     - if type == "Classification"
-      %h6.card-text Independent crossvalidations:
+      %h6.card-title Independent crossvalidations:
     - else
-      %h6.card-text Independent crossvalidations (-log10 transformed):
-  - crossvalidations.each_with_index do |cv,idx|
-    %div.card.bg-light
-      %div.card-body
-        %h6.card-title= "Nr.#{idx+1}  |  Num folds:#{cv.folds}"
-        %p.card-text
-          / predictions nr
-          %div.row
-            %div.col-6
-              %h6
-                Predictions number:
-              - cv.nr_predictions.each do |key,value|
-                %div.row
-                  %div.col
-                    %h6
-                      = key
-                  %div.col
-                    = value
-          - if model.classification?
-            %hr
-            %div.row
-              / accuracy
-              %div.col-6
-                %h6
-                  Accuracy:
-                - cv.accuracy.each do |key, value|
-                  %div.row
-                    %div.col
-                      %h6
-                        = key
-                    %div.col
-                      = value.signif(3)
-            %hr
-            / matrixes
-            %div.row
-              - cv.confusion_matrix.each do |key,matrix|
-                %div.col-4
-                  %h6
-                    Confusion Matrix:
-                    %i= key
-                    %br
-                    %table.table.table-sm.table-borderless.col-4
-                      %tbody
-                        %tr
-                          %td
-                          %td
-                          %td 
-                            %h6 actual
-                          %td
-                        %tr
-                          %td
-                          %td
-                          %td active
-                          %td inactive
-                        %tr
-                          %td 
-                            %h6 predicted
-                          %td active
-                          %td 
-                            = matrix[0][0]
-                          %td 
-                            = matrix[0][1]
-                        %tr
-                          %td
-                          %td inactive
-                          %td 
-                            = matrix[1][0]
-                          %td 
-                            = matrix[1][1]
-                        %br
-          - if model.regression?
-            %hr
-            %div.row
-              %div.col
-                %h6
-                  %a.card-link{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
-                    RMSE:
-                - cv.rmse.each do |key,value|
-                  %div.row
-                    %div.col
-                      %h6
-                        = key
-                    %div.col
-                      = value.signif(3)
-              %div.col
-                %h6
-                  %a.card-link{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"}
-                    MAE:
-                - cv.mae.each do |key,value|
-                  %div.row
-                    %div.col
-                      %h6
-                        = key
-                    %div.col
-                      = value.signif(3)
-              %div.col
-                %h6
-                  %a.card-link{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
-                - cv.r_squared.each do |key,value|
-                  %div.row
-                    %div.col
-                      %h6.card-title
-                        = key
-                    %div.col
-                      = value.signif(3)
-            %hr
-            %div.row
-              %div.col
-                %h6
-                  Within prediction interval:
-                - cv.within_prediction_interval.each do |key,value|
-                  %div.row
-                    %div.col
-                      %h6
-                        = key
-                    %div.col
-                      = value
-              %div.col
-                %h6
-                  Out of prediction interval:
-                - cv.out_of_prediction_interval.each do |key,value|
-                  %div.row
-                    %div.col
-                      %h6
-                        = key
-                    %div.col
-                      = value
+      %h6.card-title Independent crossvalidations (-log10 transformed):
+    - crossvalidations.each_with_index do |cv,idx|
+      %p.card-text
+        - if model.classification?
+          / accuracy, confusion matrixes
+          - keys = cv.accuracy.collect{|key, value| key}
+          - acc = cv.accuracy.collect{|key, value| value.signif(3)}
+          %table.table.table-borderless.table-responsive
+            %tr
+              %td.text-right
+                = "Nr.#{idx+1}"
+              %td.text-center Accuracy:
+              / mimic vertical line
+              %td.border-right
+              %td.text-center Confusion matrix all:
+              %td.text-center Confusion matrix confidence high:
+              %td.text-center Confusion matrix confidence low:
+            %tr
+              %td
+                / accuracy key:
+                %table.table
+                  - keys.each_with_index do |key,idx|
+                    %tr
+                      %td.text-right.pr-0= key.gsub("_", " ")+":"
+              %td
+                / accuray value:
+                %table.table
+                  - keys.each_with_index do |key,idx|
+                    %tr
+                      %td.text-center= acc[idx]
+              
+              / mimic vertical line
+              %td.border-right
+
+              / confusion matrixes:
+              - keys.each do |key|
+                - matrix = cv.confusion_matrix[key]
+                %td
+                  %table.table-sm
+                    %tr
+                      %td
+                      %td
+                      %td 
+                        %h6 actual
+                      %td
+                    %tr
+                      %td
+                      %td
+                      %td active
+                      %td inactive
+                    %tr
+                      %td 
+                        %h6 predicted
+                      %td active
+                      %td 
+                        = matrix[0][0]
+                      %td 
+                        = matrix[0][1]
+                    %tr
+                      %td
+                      %td inactive
+                      %td 
+                        = matrix[1][0]
+                      %td 
+                        = matrix[1][1]
+        
+        / regression
+        - if model.regression?
+          / rmse, mae, r_squared, pred nr, within intv, out intv
+          - keys = cv.rmse.collect{|key, value| key}
+          - rmse = cv.rmse.collect{|key, value| value.signif(3)}
+          - mae = cv.mae.collect{|key, value| value.signif(3)}
+          - rsq = cv.r_squared.collect{|key, value| value.signif(3)}
+          - nrp = cv.nr_predictions.collect{|key,value| value}
+          - wpi = cv.within_prediction_interval.collect{|key,value| value}
+          - opi = cv.out_of_prediction_interval.collect{|key,value| value}
+          %table.table.table-borderless.table-responsive
+            %tr
+              %td.text-center
+                = "Nr.#{idx+1}  |  Num folds:#{cv.folds}"
+              %td.text-center
+                %a.card-link{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
+                  RMSE:
+              %td.text-center
+                %a.card-link{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"}
+                  MAE:
+              %td.text-center
+                %a.card-link{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
+              %td.text-center Number of predictions:
+              %td.text-center Within prediction interval:
+              %td.text-center Out of prediction interval:
+            - keys.each_with_index do |key,idx|
+              %tr
+                %td.text-right= key.gsub("_", " ")+":"
+                / rsme:
+                %td.text-center= rmse[idx]
+                / mae:
+                %td.text-center= mae[idx]
+                / r_squared:
+                %td.text-center= rsq[idx]
+                / Predictions number:
+                %td.text-center= nrp[idx]
+                / Within prediction interval:
+                %td.text-center= wpi[idx]
+                / Out of prediction interval:
+                %td.text-center= opi[idx]
+        - unless idx == 4
+          %hr
+
 %div.card.bg-light
   %div.card-body
     %h6.card-title QMRF:
