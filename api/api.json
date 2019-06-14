@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "servers": [
     {
-      "url": "https://lazar.in-silico.ch"
+      "url": "https://lazar.in-silico.ch/api"
     }
   ],
   "info": {
@@ -43,7 +43,7 @@
         }
       }
     },
-    "/api/compound/descriptor": {
+    "/compound/descriptor": {
       "get": {
         "tags": [
           "compound",
@@ -115,7 +115,7 @@
         }
       }
     },
-    "/api/compound/descriptor/{descriptor}": {
+    "/compound/descriptor/{descriptor}": {
       "get": {
         "tags": [
           "compound",
@@ -155,7 +155,7 @@
         }
       }
     },
-    "/api/compound/{InChI}": {
+    "/compound/{InChI}": {
       "get": {
         "tags": [
           "compound"
@@ -226,7 +226,7 @@
         }
       }
     },
-    "/api/dataset": {
+    "/dataset": {
       "get": {
         "tags": [
           "dataset"
@@ -256,7 +256,7 @@
         }
       }
     },
-    "/api/dataset/{id}": {
+    "/dataset/{id}": {
       "get": {
         "tags": [
           "dataset"
@@ -298,7 +298,7 @@
         }
       }
     },
-    "/api/dataset/{id}/{attribute}": {
+    "/dataset/{id}/{attribute}": {
       "get": {
         "tags": [
           "dataset"
@@ -348,7 +348,7 @@
         }
       }
     },
-    "/api/endpoint": {
+    "/endpoint": {
       "get": {
         "tags": [
           "endpoint"
@@ -378,7 +378,7 @@
         }
       }
     },
-    "/api/endpoint/{endpoint}": {
+    "/endpoint/{endpoint}": {
       "get": {
         "tags": [
           "endpoint"
@@ -411,7 +411,7 @@
         }
       }
     },
-    "/api/feature": {
+    "/feature": {
       "get": {
         "tags": [
           "feature"
@@ -441,7 +441,7 @@
         }
       }
     },
-    "/api/feature/{id}": {
+    "/feature/{id}": {
       "get": {
         "tags": [
           "feature"
@@ -477,7 +477,7 @@
         }
       }
     },
-    "/api/model": {
+    "/model": {
       "get": {
         "tags": [
           "model"
@@ -507,7 +507,7 @@
         }
       }
     },
-    "/api/model/{id}": {
+    "/model/{id}": {
       "get": {
         "tags": [
           "model"
@@ -582,7 +582,7 @@
         }
       }
     },
-    "/api/report": {
+    "/report": {
       "get": {
         "tags": [
           "report"
@@ -612,7 +612,7 @@
         }
       }
     },
-    "/api/report/{id}": {
+    "/report/{id}": {
       "get": {
         "tags": [
           "report"
@@ -652,7 +652,7 @@
         }
       }
     },
-    "/api/substance": {
+    "/substance": {
       "get": {
         "tags": [
           "substance"
@@ -682,7 +682,7 @@
         }
       }
     },
-    "/api/substance/{id}": {
+    "/substance/{id}": {
       "get": {
         "tags": [
           "substance"
@@ -718,7 +718,7 @@
         }
       }
     },
-    "/api/validation": {
+    "/validation": {
       "get": {
         "tags": [
           "validation"
@@ -748,7 +748,7 @@
         }
       }
     },
-    "/api/validation/{validationtype}": {
+    "/validation/{validationtype}": {
       "get": {
         "tags": [
           "validation"
@@ -784,7 +784,7 @@
         }
       }
     },
-    "/api/validation/{validationtype}/{id}": {
+    "/validation/{validationtype}/{id}": {
       "get": {
         "tags": [
           "validation"
