@@ -63,13 +63,13 @@
             %tr
               %td
                 / accuracy key:
-                %table.table
+                %table.table-sm
                   - keys.each_with_index do |key,idx|
                     %tr
                       %td.text-right.pr-0= key.gsub("_", " ")+":"
               %td
                 / accuray value:
-                %table.table
+                %table.table-sm
                   - keys.each_with_index do |key,idx|
                     %tr
                       %td.text-center= acc[idx]
