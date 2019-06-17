@@ -113,10 +113,10 @@
                       %br
                       %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
                     - if !prediction[:warnings].blank?
+                      - warning = prediction[:warnings].last
                       %b Warnings:
-                      - prediction[:warnings].uniq.each do |warning|
-                        %p=warning #.sub(/,/, ",<br>")
-                        /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
+                      %br
+                      %p=warning#.sub(/,/, ",<br>")
                 - else
                   %br
                   - if !prediction[:info].blank?
@@ -124,10 +124,10 @@
                     %br
                     %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
                   - if !prediction[:warnings].blank?
+                    - warning = prediction[:warnings].last
                     %b Warnings:
-                    - prediction[:warnings].uniq.each do |warning|
-                      %br
-                      %p=warning.sub(/,/, ",<br>")
+                    %br
+                    %p=warning#.sub(/,/, ",<br>")
 
 / always show the neighbors table, message is given there  
 = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit
