@@ -3,6 +3,7 @@ require_relative 'qmrf_report.rb'
 require_relative 'task.rb'
 require_relative 'helper.rb'
 include OpenTox
+PUBCHEM_CID_URI = PUBCHEM_URI.split("/")[0..-3].join("/")+"/compound/"
 
 [
   "api.rb",
