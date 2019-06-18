@@ -16,7 +16,7 @@ get "/api/dataset/:id/?" do
   halt 400, "Dataset with id: #{params[:id]} not found." unless dataset
   case @accept
   when "text/csv", "application/csv"
-    return dataset.to_csv
+    return File.read dataset.source
   else
     bad_request_error "Mime type #{@accept} is not supported."
   end

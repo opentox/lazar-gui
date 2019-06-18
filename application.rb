@@ -94,7 +94,7 @@ get '/predict/modeldetails/:model' do
   model = OpenTox::Model::Validation.find params[:model]
   training_dataset = model.model.training_dataset
   data_entries = training_dataset.data_entries
-  crossvalidations = OpenTox::Validation::RepeatedCrossValidation.find(model.repeated_crossvalidation_id).crossvalidations
+  crossvalidations = model.crossvalidations
 
   return haml :model_details, :layout=> false, :locals => {:model => model, 
                                                            :crossvalidations => crossvalidations, 
@@ -122,7 +122,7 @@ end
 get '/predict/dataset/:name' do
   response['Content-Type'] = "text/csv"
   dataset = Dataset.find_by(:name=>params[:name])
-  csv = dataset.to_csv
+  csv = File.read dataset.source
   t = Tempfile.new
   t << csv
   name = params[:name] + ".csv"

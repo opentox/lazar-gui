@@ -20,6 +20,7 @@ end
 get "/api/model/:id/?" do
   model = Model::Validation.find params[:id]
   halt 400, "Model with id: #{params[:id]} not found." unless model
+  model["training_dataset"] = model.model.training_dataset.id.to_s
   return model.to_json
 end
 
