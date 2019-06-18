@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "servers": [
     {
-      "url": "https://lazar.in-silico.ch/api"
+      "url": "https://SERVER_URI/api"
     }
   ],
   "info": {
@@ -24,7 +24,7 @@
     "url": "https://github.com/OpenRiskNet/home/blob/master/openshift/deployments/lazar/README.md"
   },
   "paths": {
-    "/api": {
+    "/api.json": {
       "get": {
         "tags": [
           "api"

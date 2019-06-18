@@ -51,11 +51,14 @@ before do
   "substance",
   "swagger",
   "validation"]
-  if request.path.split("/")[1] == "api" || $paths.include?(request.path.split("/")[2])
+  if request.path =~ /predict/
     @accept = request.env['HTTP_ACCEPT'].split(",").first
     response['Content-Type'] = @accept
-  else
+    halt 400, "Mime type #{@accept} is not supported." unless @accept == "text/html" || "*/*"
     @version = File.read("VERSION").chomp
+  else
+    @accept = request.env['HTTP_ACCEPT'].split(",").first
+    response['Content-Type'] = @accept
   end
 end
 
@@ -253,7 +256,7 @@ get '/prediction/:neighbor/details/?' do
   haml :details, :layout => false
 end
 
-get '/license' do
+get '/predict/license' do
   @license = RDiscount.new(File.read("LICENSE.md")).to_html
   haml :license, :layout => false
 end
@@ -263,7 +266,7 @@ get '/predict/faq' do
   haml :faq#, :layout => false
 end
 
-get '/help' do
+get '/predict/help' do
   haml :help
 end
 
@@ -273,7 +276,7 @@ get '/style.css' do
 end
 
 # for swagger representation
-get '/swagger-ui.css' do
+get '/api/swagger-ui.css' do
   headers 'Content-Type' => 'text/css; charset=utf-8'
   scss :style
 end
