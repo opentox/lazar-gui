@@ -93,3 +93,9 @@ supporters{
     margin: 1em;
   }
 }
+
+.table td.fit,
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
+}

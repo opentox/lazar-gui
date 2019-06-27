@@ -135,7 +135,7 @@ get '/predict/batch/download/?' do
   prediction_dataset = Dataset.find task.dataset_id
   filename = prediction_dataset.name
   tempfile = Tempfile.new
-  tempfile << prediction_dataset.to_csv
+  tempfile << prediction_dataset.to_prediction_csv
   tempfile.rewind
   response['Content-Type'] = "text/csv"
   send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{filename}.csv", :type => "text/csv", :disposition => "attachment"
@@ -171,7 +171,7 @@ post '/predict/?' do
         t.update_percent(90)
         prediction[model_id] = prediction_dataset.id.to_s
         t[:predictions] = prediction
-        t[:csv] = prediction_dataset.to_csv
+        t[:csv] = prediction_dataset.to_prediction_csv
         t.update_percent(100)
         t.save
       end
