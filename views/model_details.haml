@@ -50,29 +50,66 @@
           / accuracy, confusion matrixes
           - keys = cv.accuracy.collect{|key, value| key}
           - acc = cv.accuracy.collect{|key, value| value.signif(3)}
+          - tpr = cv.true_rate.collect{|key, hash| hash[cv.accept_values[0]].signif(3)}
+          - fpr = cv.true_rate.collect{|key, hash| hash[cv.accept_values[1]].signif(3)}
+          - pp = cv.predictivity.collect{|key, hash| hash[cv.accept_values[0]].signif(3)}
+          - np = cv.predictivity.collect{|key, hash| hash[cv.accept_values[1]].signif(3)}
           %table.table.table-borderless.table-responsive
             %tr
               %td.text-right
                 = "Nr.#{idx+1}"
-              %td.text-center Accuracy:
+              %td.text-center.fit Accuracy:
+              %td.text-right.fit True positive rate:
+              %td.text-right.fit True negative rate:
+              %td.text-right.fit Positive predictiv value:
+              %td.text-right.fit Negative predictiv value:
               / mimic vertical line
               %td.border-right
-              %td.text-center Confusion matrix all:
-              %td.text-center Confusion matrix confidence high:
-              %td.text-center Confusion matrix confidence low:
+              %td.text-center.fit Confusion matrix all:
+              %td.text-center.fit Confusion matrix confidence high:
+              %td.text-center.fit Confusion matrix confidence low:
             %tr
-              %td
-                / accuracy key:
+              %td.fit
+                / keys:
                 %table.table-sm
                   - keys.each_with_index do |key,idx|
                     %tr
                       %td.fit.text-right.pr-0= key.gsub("_", " ")+":"
-              %td
-                / accuray value:
+              %td.fit
+                / acc,accuray value:
                 %table.table-sm
                   - keys.each_with_index do |key,idx|
                     %tr
-                      %td.text-center= acc[idx]
+                      %td.text-left= acc[idx]
+
+              %td.fit
+                / tpr,true positive rate
+                %table.table-sm
+                  - keys.each_with_index do |key,idx|
+                    %tr
+                      %td.text-left= tpr[idx]
+
+              %td.fit
+                / fpr,false positive rate
+                %table.table-sm
+                  - keys.each_with_index do |key,idx|
+                    %tr
+                      %td.text-left= fpr[idx]
+
+              %td.fit
+                / pp,positive predictions
+                %table.table-sm
+                  - keys.each_with_index do |key,idx|
+                    %tr
+                      %td.text-left= pp[idx]
+
+              %td.fit
+                / np,negative predictions
+                %table.table-sm
+                  - keys.each_with_index do |key,idx|
+                    %tr
+                      %td.text-left= np[idx]
+
               
               / mimic vertical line
               %td.border-right
