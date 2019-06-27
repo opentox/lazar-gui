@@ -48,21 +48,22 @@
       %p.card-text
         - if model.classification?
           / accuracy, confusion matrixes
+          - av = cv.accept_values
           - keys = cv.accuracy.collect{|key, value| key}
           - acc = cv.accuracy.collect{|key, value| value.signif(3)}
-          - tpr = cv.true_rate.collect{|key, hash| hash[cv.accept_values[0]].signif(3)}
-          - fpr = cv.true_rate.collect{|key, hash| hash[cv.accept_values[1]].signif(3)}
-          - pp = cv.predictivity.collect{|key, hash| hash[cv.accept_values[0]].signif(3)}
-          - np = cv.predictivity.collect{|key, hash| hash[cv.accept_values[1]].signif(3)}
+          - tpr = cv.true_rate.collect{|key, hash| hash[av[0]].signif(3)}
+          - fpr = cv.true_rate.collect{|key, hash| hash[av[1]].signif(3)}
+          - pp = cv.predictivity.collect{|key, hash| hash[av[0]].signif(3)}
+          - np = cv.predictivity.collect{|key, hash| hash[av[1]].signif(3)}
           %table.table.table-borderless.table-responsive
             %tr
               %td.text-right
                 = "Nr.#{idx+1}"
               %td.text-center.fit Accuracy:
-              %td.text-right.fit True positive rate:
-              %td.text-right.fit True negative rate:
-              %td.text-right.fit Positive predictiv value:
-              %td.text-right.fit Negative predictiv value:
+              %td.text-right.fit True rate #{av[0]}:
+              %td.text-right.fit True rate #{av[1]}:
+              %td.text-right.fit #{av[0]} predictiv value:
+              %td.text-right.fit #{av[1]} predictiv value:
               / mimic vertical line
               %td.border-right
               %td.text-center.fit Confusion matrix all:
