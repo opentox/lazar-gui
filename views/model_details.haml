@@ -66,8 +66,12 @@
               %td
                 %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
                   True #{av[1] =~ /^non/ ? "negative" : "positive"} rate
-              %td #{av[0] =~ /^non/ ? "Negative" : "Positive"} predictiv value
-              %td #{av[1] =~ /^non/ ? "Negative" : "Positive"} predictiv value
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values", :rel=>"external"}
+                  #{av[0] =~ /^non/ ? "Negative" : "Positive"} predictiv value
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values", :rel=>"external"}
+                  #{av[1] =~ /^non/ ? "Negative" : "Positive"} predictiv value
             - keys.each_with_index do |key,idx|
               %tr
                 / keys

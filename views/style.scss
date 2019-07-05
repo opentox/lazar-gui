@@ -66,9 +66,6 @@ ul.share-buttons{
   margin-top:3em;
 }
 .single-batch{
-  width: 100%;
-}
-.single-batch{
   table-layout: fixed;
   width: 100%;
 }
@@ -98,4 +95,8 @@ supporters{
 .table th.fit {
     white-space: nowrap;
     width: 1%;
+}
+
+.modal-body p {
+  word-wrap: break-word;
 }
