@@ -41,9 +41,9 @@
 %div.card.bg-light
   %div.card-body
     - if type == "Classification"
-      %h6.card-title Independent crossvalidations:
+      %h6.card-title #{crossvalidations.size} independent 10-fold crossvalidations:
     - else
-      %h6.card-title Independent crossvalidations (-log10 transformed):
+      %h6.card-title #{crossvalidations.size} independent 10-fold crossvalidations (-log10 transformed):
     - crossvalidations.each_with_index do |cv,idx|
       %p.card-text
         - if model.classification?
@@ -57,95 +57,72 @@
           - np = cv.predictivity.collect{|key, hash| hash[av[1]].signif(3)}
           %table.table.table-borderless.table-responsive
             %tr
-              %td.text-right
+              %td.text-center
                 = "Nr.#{idx+1}"
-              %td.text-center.fit Accuracy:
-              %td.text-right.fit True #{av[0] =~ /^non/ ? "negative" : "positive"} rate:
-              %td.text-right.fit True #{av[1] =~ /^non/ ? "negative" : "positive"} rate:
-              %td.text-right.fit #{av[0] =~ /^non/ ? "Negative" : "Positive"} predictiv value:
-              %td.text-right.fit #{av[1] =~ /^non/ ? "Negative" : "Positive"} predictiv value:
-              / mimic vertical line
-              %td.border-right
-              %td.text-center.fit Confusion matrix all:
-              %td.text-center.fit Confusion matrix confidence high:
-              %td.text-center.fit Confusion matrix confidence low:
-            %tr
-              %td.fit
-                / keys:
-                %table.table-sm
-                  - keys.each_with_index do |key,idx|
-                    %tr
-                      %td.fit.text-right.pr-0= key.gsub("_", " ")+":"
-              %td.fit
+              %td Accuracy
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
+                  True #{av[0] =~ /^non/ ? "negative" : "positive"} rate
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
+                  True #{av[1] =~ /^non/ ? "negative" : "positive"} rate
+              %td #{av[0] =~ /^non/ ? "Negative" : "Positive"} predictiv value
+              %td #{av[1] =~ /^non/ ? "Negative" : "Positive"} predictiv value
+            - keys.each_with_index do |key,idx|
+              %tr
+                / keys
+                %td.fit.text-right.pr-0= key.gsub("_", " ")
                 / acc,accuray value:
-                %table.table-sm
-                  - keys.each_with_index do |key,idx|
-                    %tr
-                      %td.text-left= acc[idx]
-
-              %td.fit
+                %td= acc[idx]
                 / tpr,true positive rate
-                %table.table-sm
-                  - keys.each_with_index do |key,idx|
-                    %tr
-                      %td.text-left= tpr[idx]
-
-              %td.fit
+                %td= tpr[idx]
                 / fpr,false positive rate
-                %table.table-sm
-                  - keys.each_with_index do |key,idx|
-                    %tr
-                      %td.text-left= fpr[idx]
-
-              %td.fit
+                %td= fpr[idx]
                 / pp,positive predictions
-                %table.table-sm
-                  - keys.each_with_index do |key,idx|
-                    %tr
-                      %td.text-left= pp[idx]
-
-              %td.fit
+                %td= pp[idx]
                 / np,negative predictions
-                %table.table-sm
-                  - keys.each_with_index do |key,idx|
-                    %tr
-                      %td.text-left= np[idx]
-
-              
-              / mimic vertical line
-              %td.border-right
-
-              / confusion matrixes:
-              - keys.each do |key|
-                - matrix = cv.confusion_matrix[key]
-                %td
-                  %table.table-sm
-                    %tr
-                      %td
-                      %td
-                      %td 
-                        %h6 actual
-                      %td
-                    %tr
-                      %td
-                      %td
-                      %td active
-                      %td inactive
-                    %tr
-                      %td 
-                        %h6 predicted
-                      %td active
-                      %td 
-                        = matrix[0][0]
-                      %td 
-                        = matrix[0][1]
-                    %tr
-                      %td
-                      %td inactive
-                      %td 
-                        = matrix[1][0]
-                      %td 
-                        = matrix[1][1]
+                %td= np[idx]
+          %div.row
+            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#matrix#{idx}"}, :aria=>{:expanded=>"false", :controls=>"matrix#{idx}"}, :style=>"font-size:small;"}
+              Confusion matrix:
+          %div.collapse{:id=>"matrix#{idx}"}
+            %table.table.table-borderless.table-responsive
+              %tr
+                %td.fit.text-center all
+                %td.fit.text-center confidence high
+                %td.fit.text-center confidence low
+              %tr
+                / confusion matrix
+                - keys.each do |key|
+                  - matrix = cv.confusion_matrix[key]
+                  %td.fit.text-right
+                    %table.table-sm
+                      %tr
+                        %td
+                        %td
+                        %td
+                          %h6 actual
+                        %td
+                      %tr
+                        %td
+                        %td
+                        %td active
+                        %td inactive
+                      %tr
+                        %td
+                          %h6 predicted
+                        %td active
+                        %td
+                          = matrix[0][0]
+                        %td
+                          = matrix[0][1]
+                      %tr
+                        %td
+                        %td inactive
+                        %td
+                          = matrix[1][0]
+                        %td
+                          = matrix[1][1]
         
         / regression
         - if model.regression?
@@ -160,34 +137,35 @@
           %table.table.table-borderless.table-responsive
             %tr
               %td.text-center
-                = "Nr.#{idx+1}  |  Num folds:#{cv.folds}"
-              %td.text-center
-                %a.card-link{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
-                  RMSE:
-              %td.text-center
-                %a.card-link{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"}
-                  MAE:
-              %td.text-center
-                %a.card-link{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
-              %td.text-center Number of predictions:
-              %td.text-center Within prediction interval:
-              %td.text-center Out of prediction interval:
+                = "Nr.#{idx+1}"
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
+                  RMSE
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"}
+                  MAE
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"
+              %td Number of predictions
+              %td Within prediction interval
+              %td Out of prediction interval
             - keys.each_with_index do |key,idx|
               %tr
-                %td.text-right= key.gsub("_", " ")+":"
+                / keys
+                %td.fit.text-right.pr-0= key.gsub("_", " ")
                 / rsme:
-                %td.text-center= rmse[idx]
+                %td= rmse[idx]
                 / mae:
-                %td.text-center= mae[idx]
+                %td= mae[idx]
                 / r_squared:
-                %td.text-center= rsq[idx]
+                %td= rsq[idx]
                 / Predictions number:
-                %td.text-center= nrp[idx]
+                %td= nrp[idx]
                 / Within prediction interval:
-                %td.text-center= wpi[idx]
+                %td= wpi[idx]
                 / Out of prediction interval:
-                %td.text-center= opi[idx]
-        - unless idx == 4
+                %td= opi[idx]
+        - unless idx == crossvalidations.size-1
           %hr
 
 %div.card.bg-light

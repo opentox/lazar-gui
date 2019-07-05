@@ -120,25 +120,26 @@ end
 
 # download training dataset
 get '/predict/dataset/:name' do
-  response['Content-Type'] = "text/csv"
   dataset = Dataset.find_by(:name=>params[:name])
   csv = File.read dataset.source
+  name = params[:name] + ".csv"
   t = Tempfile.new
   t << csv
-  name = params[:name] + ".csv"
+  t.rewind
+  response['Content-Type'] = "text/csv"
   send_file t.path, :filename => name, :type => "text/csv", :disposition => "attachment"
 end
 
 # download batch predicton file
 get '/predict/batch/download/?' do
   task = Task.find params[:tid]
-  prediction_dataset = Dataset.find task.dataset_id
-  filename = prediction_dataset.name
-  tempfile = Tempfile.new
-  tempfile << prediction_dataset.to_prediction_csv
-  tempfile.rewind
+  dataset = Dataset.find task.dataset_id
+  name = dataset.name + ".csv"
+  t = Tempfile.new
+  t << dataset.to_prediction_csv
+  t.rewind
   response['Content-Type'] = "text/csv"
-  send_file tempfile, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{filename}.csv", :type => "text/csv", :disposition => "attachment"
+  send_file t.path, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{name}", :type => "text/csv", :disposition => "attachment"
 end
 
 post '/predict/?' do
