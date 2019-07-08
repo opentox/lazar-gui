@@ -24,6 +24,23 @@ get "/model/:id/?" do
   return model.to_json
 end
 
+get "/model/:id/consensus/?" do
+  model = Model::Validation.find params[:id]
+  not_found_error "Model with id: #{params[:id]} not found." unless model
+  cvs = model.crossvalidations
+  out = {}
+  cvs.each_with_index do |cv,idx|
+    out[idx] = {"accuracy" => cv.accuracy}
+    cv.true_rate.each do |key,value|
+      key =~ /^non/ ? out[idx].merge!({"true_negative_rate" => value}) : out[idx].merge!({"true_positive_rate" => value})
+    end
+    cv.predictivity.each do |key,value|
+      key =~ /^non/ ? out[idx].merge!({"negative_predictiv_value" => value}) : out[idx].merge!({"positive_predictiv_value" => value})
+    end
+  end
+  return out.to_json
+end
+
 post "/model/:id/?" do
   if request.content_type == "application/x-www-form-urlencoded"
     identifier = params[:identifier].strip.gsub(/\A"|"\Z/,'')
