@@ -1009,6 +1009,39 @@
         }
       }
     },
+    "/model/{id}/consensus": {
+      "get": {
+        "x-orn-@type": "x-orn:Model",
+        "x-orn:path": "https://lazar.prod.openrisknet.org/model",
+        "x-orn:method": "Get",
+        "tags": [
+          "model"
+        ],
+        "description": "Get a list of all prediction models",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/subjectid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/report": {
       "get": {
         "x-orn-@type": "x-orn:Report",
