@@ -27,9 +27,9 @@
     var est = document.getElementById("est_"+id);
     var now = new Date().getTime();
     if ( type == "true" ){
-      var approximate = new Date(tasktime*1000 + #{@compounds_size*1000});
+      var approximate = new Date(tasktime*1000 + #{@compounds_size*100}*(id+1));
     } else {
-      var approximate = new Date(tasktime*1000 + #{@compounds_size*100});
+      var approximate = new Date(tasktime*1000 + #{@compounds_size*1000}*(id+1));
     }
     var remain = approximate - now;
     var minutes = Math.floor((remain % (1000 * 60 * 60)) / (1000 * 60));
