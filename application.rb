@@ -168,10 +168,13 @@ post '/predict/?' do
         model = Model::Validation.find model_id
         t.update_percent(10)
         prediction_dataset = model.predict input
+        t.update_percent(70)
         t[:dataset_id] = prediction_dataset.id
-        t.update_percent(90)
+        t.update_percent(75)
         prediction[model_id] = prediction_dataset.id.to_s
+        t.update_percent(80)
         t[:predictions] = prediction
+        t.update_percent(90)
         t[:csv] = prediction_dataset.to_prediction_csv
         t.update_percent(100)
         t.save
@@ -208,6 +211,7 @@ end
 get '/prediction/task/?' do
   if params[:turi]
     task = Task.find(params[:turi].to_s)
+    response['Content-Type'] = "application/json"
     return JSON.pretty_generate(:percent => task.percent)
   elsif params[:predictions]
     task = Task.find(params[:predictions])
@@ -239,6 +243,7 @@ get '/prediction/task/?' do
     end
     string += "</tr>"
     string += "</table></td>"
+    response['Content-Type'] = "application/json"
     return JSON.pretty_generate(:prediction => [string])
   end
 end
