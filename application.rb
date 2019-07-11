@@ -96,6 +96,7 @@ get '/predict/modeldetails/:model' do
   data_entries = training_dataset.data_entries
   crossvalidations = model.crossvalidations
 
+  response['Content-Type'] = "text/html"
   return haml :model_details, :layout=> false, :locals => {:model => model, 
                                                            :crossvalidations => crossvalidations, 
                                                            :training_dataset => training_dataset,

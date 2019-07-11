@@ -37,6 +37,142 @@ var HttpClient = function() {
 
 // functions used in predict.haml
 
+// GET request
+/*$(function() {
+  $('a[data-toggle="tab"]').on('click', function (e) {
+    localStorage.setItem('lastTab', $(e.target).attr('href'));
+  });
+  var lastTab = localStorage.getItem('lastTab');
+  if (lastTab) {
+    $('a[href="'+lastTab+'"]').click();
+  }
+});*/
+
+// get and check input
+function getInput(){
+  identifier = document.getElementById("identifier").value.trim();
+  fileselect = document.getElementById("fileselect").value;
+  if (fileselect != ""){
+    return 1;
+  };
+  if (identifier != ""){
+    return 2;
+  };
+  return 0;
+};
+
+// display wait animation
+function showcircle() {
+  switch (getInput()){
+    case 0:
+      alert("Please draw or insert a chemical structure.");
+      return false;
+      break;
+    case 1:
+      if (checkfile() && checkboxes()){
+        button = document.getElementById("submit");
+        image = document.getElementById("circle");
+        button.parentNode.replaceChild(image, button);
+        $("img.circle").show();
+        return true;
+      };
+      return false;
+      break;
+    case 2:
+      if (checksmiles() && checkboxes()){
+        button = document.getElementById("submit");
+        image = document.getElementById("circle");
+        button.parentNode.replaceChild(image, button);
+        $("img.circle").show();
+        return true;
+      };
+      return false;
+      break;
+    default: false;
+  };
+  return false;
+};
+
+// check if a file was selected for upload
+function checkfile() {
+  var fileinput = document.getElementById("fileselect");
+  if(fileinput.value != "") {
+    //TODO check file type is csv
+    return true;
+  };
+  alert("Please select a file (csv).");
+  return false;
+};
+
+// check if a smiles string was entered
+function checksmiles () {
+  getsmiles();
+  if (document.form.identifier.value == "") {
+    alert("Please draw or insert a chemical structure.");
+    document.form.identifier.focus();
+    $("img.circle").hide();
+    return false;
+  };
+  return true;
+};
+
+// check if a model was selected
+function checkboxes () {
+  var checked = false;
+  $('input[type="checkbox"]').each(function() {
+    if ($(this).is(":checked")) {
+      checked = true;
+    };
+  });
+  if (checked == false){
+    alert("Please select an endpoint.");
+    $("img.circle").hide();
+    return false;
+  };
+  return true;
+};
+
+// display jsme editor with option
+function jsmeOnLoad() {
+  jsmeApplet = new JSApplet.JSME("appletContainer", "380px", "340px", {
+    //optional parameters
+    "options" : "polarnitro"
+  });
+document.JME = jsmeApplet;
+};
+
+// get and take smiles from jsme editor for input field
+function getsmiles() {
+  if (document.JME.smiles() != '') {
+    document.form.identifier.value = document.JME.smiles() ;
+  };
+};
+
+// show model details
+function loadDetails(id, model_url) {
+  button = document.getElementById("link"+id);
+  span = button.childNodes[1];
+  if (span.className == "fa fa-caret-right"){
+    span.className = "fa fa-caret-down";
+  } else if (span.className = "fa fa-caret-down"){
+    span.className = "fa fa-caret-right";
+  };
+  image = document.getElementById("circle"+id);
+  if ($('modeldetails'+id).length == 0) {
+    $(button).hide();
+    $(image).show();
+    aClient = new HttpClient();
+    aClient.get(model_url, function(response) {
+      var details = document.createElement("modeldetails"+id);
+      details.innerHTML = response;
+      document.getElementById("details"+id).appendChild(details);
+      $(button).show();
+      $(image).hide();
+      addExternalLinks();
+    });
+  }
+}
+
 
 // functions used in batch.haml
 
