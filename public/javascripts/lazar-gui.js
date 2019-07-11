@@ -61,7 +61,8 @@ function getInput(){
   return 0;
 };
 
-// display wait animation
+// display wait animation after click on predict button
+// check form fields, input file or SMILES, endpoint selection
 function showcircle() {
   switch (getInput()){
     case 0:
@@ -97,7 +98,6 @@ function showcircle() {
 function checkfile() {
   var fileinput = document.getElementById("fileselect");
   if(fileinput.value != "") {
-    //TODO check file type is csv
     return true;
   };
   alert("Please select a file (csv).");
@@ -116,7 +116,7 @@ function checksmiles () {
   return true;
 };
 
-// check if a model was selected
+// check if an endpoint was selected
 function checkboxes () {
   var checked = false;
   $('input[type="checkbox"]').each(function() {
@@ -190,14 +190,9 @@ progress = function(value,id) {
   };
 };
 
-remaining = function(id,tasktime,type,compoundsSize) {
+remaining = function(id,approximate) {
   var est = document.getElementById("est_"+id);
   var now = new Date().getTime();
-  if ( type == "true" ){
-    var approximate = new Date(tasktime*1000 + compoundsSize*100*(id+1));
-  } else {
-    var approximate = new Date(tasktime*1000 + compoundsSize*1000*(id+1));
-  }
   var remain = approximate - now;
   var minutes = Math.floor((remain % (1000 * 60 * 60)) / (1000 * 60));
   var seconds = Math.floor((remain % (1000 * 60)) / 1000);
@@ -209,7 +204,7 @@ remaining = function(id,tasktime,type,compoundsSize) {
   est.innerHTML = newtime;
 };
 
-renderTask = function(task_uri,model_id,id) {
+renderTask = function(task_uri,id) {
   var uri = task_uri;
   var aClient = new HttpClient();
   aClient.get(uri, function(res) {

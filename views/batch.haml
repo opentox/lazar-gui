@@ -6,9 +6,20 @@
   %div.card-body
     %h3.card-title="Batch prediction results for:  #{@filename}"
 
+    // prepare variable values for javascript
+    // increase timer interval for large datasets
+    - ctimer = ((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
+    - approx = {}
+    - sum_approx = 0
+    // process batch predictions
     - @models.each_with_index do |model,idx|
       - m = Model::Validation.find model
       - task = @tasks[idx].id
+      - tasktime = task.generation_time.to_i
+      // assume single compound prediction time: classification=0.1s,regression=0.5s
+      - task_approx = m.classification? ? (tasktime*1000 + @compounds_size*100) : (tasktime*1000 + @compounds_size*500)
+      - approx[idx] = task_approx + sum_approx
+      - sum_approx += (m.classification? ? @compounds_size*100 : @compounds_size*1000)
       #result.card.bg-light{:id=>idx}
         %div.card-body
           %div.row
@@ -26,31 +37,29 @@
             %div{:id=>"bar_#{idx}", :style=>"background-color: #4CAF50;width:10px;height:3px;position:absolute;"}
           %p{:id=>"est_#{idx}"}
             waiting ...
-          - # increase interval timer for large datasets 
-          - ctimer = ((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
           :javascript
-            var timer = #{ctimer};
-            var tasktime = #{task.generation_time.to_i};
-            var compoundsSize = #{@compounds_size};
-            var task_uri = "#{to("/prediction/task/?turi=#{task}")}";
-            $(document).ready(function(){
-              // check button class before execute a task
-              if (#{idx} > 0){
-                markers[#{idx}] = setInterval(function(){
-                  var button = document.getElementById("detailsbutton_#{idx-1}");
-                  if(!button.classList.contains('disabled')){
-                    renderTask(task_uri,'#{model}',#{idx});
-                    remaining(#{idx},tasktime,#{m.classification?},compoundsSize);
-                  }
-                }, timer );
-              }else{
-                markers[#{idx}] = setInterval(function(){
-                  renderTask(task_uri,'#{model}',#{idx});
-                  remaining(#{idx},tasktime,#{m.classification?},compoundsSize);
-                }, timer );
-              };
+            $(document).ready(function() {
+              taskProgress('#{idx}','#{ctimer}','#{approx[idx]}','#{to("/prediction/task/?turi=#{task}")}');
             });
           #data-container.card.d-none.table-responsive{:id=>idx}
+    :javascript
+      taskProgress = function(idx,timer,approximate,task_uri){
+        // wait until previous task is completed
+        if (idx > 0){
+          markers[idx] = setInterval(function(){
+            var button = document.getElementById("detailsbutton_"+(idx-1));
+            if(!button.classList.contains('disabled')){
+              renderTask(task_uri,idx);
+              remaining(idx,approximate);
+            }
+          }, timer );
+        }else{
+          markers[idx] = setInterval(function(){
+            renderTask(task_uri,idx);
+            remaining(idx,approximate);
+          }, timer );
+        };
+      };
 %div.modal.fade{:id=>"details", :tabindex=>"-1", :role=>"dialog"}
   %div.modal-dialog.modal-lg{:role=>"document"}
     %div.modal-content

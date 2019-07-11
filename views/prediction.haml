@@ -1,15 +1,3 @@
-:javascript
-  $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
-    $('.modal').on('hidden.bs.modal', function () {
-      $(this).removeData('bs.modal');
-    });
-    $('.modal').on('show.bs.modal', function(e){
-      var button = $(e.relatedTarget);
-      var modal = $(this);
-      modal.find('.modal-content').load(button.data("remote"));
-    });
-  });
 %div.card
   %a.btn.btn-outline-info{:href => to('/predict')}
     %span.fa.fa-caret-left

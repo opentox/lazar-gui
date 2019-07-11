@@ -85,6 +85,13 @@ options "*" do
 end
 
 get '/predict/?' do
+  if params[:tpid]
+    begin
+      Process.kill(9,params[:tpid].to_i) if !params[:tpid].blank?
+    rescue
+      nil
+    end
+  end
   @models = OpenTox::Model::Validation.all
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
   @models.count > 0 ? (haml :predict) : (haml :info)

@@ -8,7 +8,7 @@
           / get predictionFeature type
           - m = Model::Lazar.find model.model_id.to_s
           %li.nav-item
-            %a.nav-link{:class => ("active" if i ==0), :href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}, :onclick=>"sortTable('#{i+1}');"}
+            %a.nav-link{:class => ("active" if i ==0), :href => "#results_#{i+1}", :id => "linkTab#{i+1}", data: {toggle:"tab"}}
               = "#{model.endpoint} (#{model.species})"
       %div.tab-content
         - @predictions.each_with_index do |prediction,j|
