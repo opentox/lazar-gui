@@ -1,3 +1,12 @@
+:javascript
+  // kill task pid if page is reloaded, `false` makes the request synchronous
+  window.addEventListener('unload', ktpid, false);
+  function ktpid() {
+    var client = new XMLHttpRequest();
+    client.open("GET", "#{to("/prediction/task?ktpid=#{@pid}")}", false);
+    client.setRequestHeader("Content-Type", "application/json");
+    client.send(null);
+  };
 %div.card
   %a.btn.btn-outline-info{:href => to("/predict?tpid=#{@pid}")}
     %span.fa.fa-caret-left{:aria=>{:hidden=>"true"}}

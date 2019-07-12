@@ -221,6 +221,14 @@ get '/prediction/task/?' do
     task = Task.find(params[:turi].to_s)
     response['Content-Type'] = "application/json"
     return JSON.pretty_generate(:percent => task.percent)
+  elsif params[:ktpid]
+    begin
+      Process.kill(9,params[:ktpid].to_i) if !params[:ktpid].blank?
+    rescue
+      nil
+    end
+    response['Content-Type'] = "application/json"
+    return JSON.pretty_generate(:ktpid => params[:ktpid])
   elsif params[:predictions]
     task = Task.find(params[:predictions])
     pageSize = params[:pageSize].to_i - 1
