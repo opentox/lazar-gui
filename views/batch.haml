@@ -42,10 +42,11 @@
               %a.btn.btn-outline-info.btn-sm.disabled{:id => "downbutton_#{idx}", :href=>"#{to("/predict/batch/download?tid=#{task}")}", :title=>"download"}
                 %span.fa.fa-download
                 CSV
-          %div{:id=>"progress_#{idx}", :style=>"width:100%;height:3px;position:relative;background-color:#ccc;"}
+          -#%div{:id=>"progress_#{idx}", :style=>"width:100%;height:3px;position:relative;background-color:#ccc;"}
             %div{:id=>"bar_#{idx}", :style=>"background-color: #4CAF50;width:10px;height:3px;position:absolute;"}
           %p{:id=>"est_#{idx}"}
             waiting ...
+          %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_#{idx}", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
           :javascript
             $(document).ready(function() {
               taskProgress('#{idx}','#{ctimer}','#{approx[idx]}','#{to("/prediction/task/?turi=#{task}")}');
@@ -59,13 +60,17 @@
             var button = document.getElementById("detailsbutton_"+(idx-1));
             if(!button.classList.contains('disabled')){
               renderTask(task_uri,idx);
-              remaining(idx,approximate);
+              //remaining(idx,approximate);
+              $("#est_"+idx).hide();
+              $("#circle_"+idx).show();
             }
           }, timer );
         }else{
           markers[idx] = setInterval(function(){
             renderTask(task_uri,idx);
-            remaining(idx,approximate);
+            //remaining(idx,approximate);
+            $("#est_"+idx).hide();
+            $("#circle_"+idx).show();
           }, timer );
         };
       };

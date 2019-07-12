@@ -209,7 +209,7 @@ renderTask = function(task_uri,id) {
   var aClient = new HttpClient();
   aClient.get(uri, function(res) {
     var response = JSON.parse(res);
-    progress(response['percent'],id);
+    //progress(response['percent'],id);
     if (response['percent'] == 100){
       window.clearInterval(markers[id]);
       $("a#downbutton_"+id).removeClass("disabled");
@@ -218,6 +218,7 @@ renderTask = function(task_uri,id) {
       $("a#detailsbutton_"+id).removeClass("btn-outline-info");
       $("a#downbutton_"+id).addClass("btn-info");
       $("a#detailsbutton_"+id).addClass("btn-info");
+      $("#circle_"+id).hide();
     };
   });
 };
