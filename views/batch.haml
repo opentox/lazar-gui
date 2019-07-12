@@ -28,7 +28,7 @@
       // assume single compound prediction time: classification=0.1s,regression=0.5s
       - task_approx = m.classification? ? (tasktime*1000 + @compounds_size*100) : (tasktime*1000 + @compounds_size*500)
       - approx[idx] = task_approx + sum_approx
-      - sum_approx += (m.classification? ? @compounds_size*100 : @compounds_size*1000)
+      - sum_approx += (m.classification? ? @compounds_size*100 : @compounds_size*500)
       #result.card.bg-light{:id=>idx}
         %div.card-body
           %div.row
