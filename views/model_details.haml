@@ -87,9 +87,11 @@
                 / np,negative predictions
                 %td= np[idx]
           %div.row
-            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#matrix#{idx}"}, :aria=>{:expanded=>"false", :controls=>"matrix#{idx}"}, :style=>"font-size:small;"}
-              Confusion matrix:
-          %div.collapse{:id=>"matrix#{idx}"}
+            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#pplot#{model.id}#{idx}"}, :aria=>{:expanded=>"false", :controls=>"pplot#{model.id}#{idx}"}, :style=>"font-size:small;"}
+              Probability plot
+            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#matrix#{model.id}#{idx}"}, :aria=>{:expanded=>"false", :controls=>"matrix#{model.id}#{idx}"}, :style=>"font-size:small;"}
+              Confusion matrix
+          %div.collapse{:id=>"matrix#{model.id}#{idx}"}
             %table.table.table-borderless.table-responsive
               %tr
                 %td.fit.text-center all
@@ -128,6 +130,10 @@
                         %td
                           = matrix[1][1]
         
+          %div.row
+            %div.collapse.plot.mx-auto{:id=>"pplot#{model.id}#{idx}"}
+              = embedded_svg(cv.probability_plot(format: "svg"))
+
         / regression
         - if model.regression?
           / rmse, mae, r_squared, pred nr, within intv, out intv
@@ -169,6 +175,12 @@
                 %td= wpi[idx]
                 / Out of prediction interval:
                 %td= opi[idx]
+          %div.row
+            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#cplot#{model.id}#{idx}"}, :aria=>{:expanded=>"false", :controls=>"cplot#{model.id}#{idx}"}, :style=>"font-size:small;"}
+              Correlation plot
+          %div.row
+            %div.collapse.plot.mx-auto{:id=>"cplot#{model.id}#{idx}"}
+              = embedded_svg(cv.correlation_plot(format: "svg"))
         - unless idx == crossvalidations.size-1
           %hr
 
