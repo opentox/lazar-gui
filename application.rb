@@ -102,6 +102,19 @@ get '/predict/modeldetails/:model' do
   training_dataset = model.model.training_dataset
   data_entries = training_dataset.data_entries
   crossvalidations = model.crossvalidations
+  if model.classification?
+    crossvalidations.each do |cv|
+      File.open(File.join('public', "#{cv.id}.png"), 'w') do |file|
+        file.write(cv.probability_plot(format: "png"))
+      end unless File.exists? File.join('public', "#{cv.id}.png")
+    end
+  else
+    crossvalidations.each do |cv|
+      File.open(File.join('public', "#{cv.id}.png"), 'w') do |file|
+        file.write(cv.correlation_plot(format: "png"))
+      end unless File.exists? File.join('public', "#{cv.id}.png")
+    end
+  end
 
   response['Content-Type'] = "text/html"
   return haml :model_details, :layout=> false, :locals => {:model => model, 

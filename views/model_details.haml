@@ -132,7 +132,7 @@
         
           %div.row
             %div.collapse.plot.mx-auto{:id=>"pplot#{model.id}#{idx}"}
-              = embedded_svg(cv.probability_plot(format: "svg"))
+              %img{:src=>"/#{cv.id}.png", :alt=>"#{cv.id}.png"}
 
         / regression
         - if model.regression?
@@ -180,7 +180,7 @@
               Correlation plot
           %div.row
             %div.collapse.plot.mx-auto{:id=>"cplot#{model.id}#{idx}"}
-              = embedded_svg(cv.correlation_plot(format: "svg"))
+              %img{:src=>"/#{cv.id}.png", :alt=>"#{cv.id}.png"}
         - unless idx == crossvalidations.size-1
           %hr
 
