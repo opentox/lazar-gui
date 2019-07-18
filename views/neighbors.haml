@@ -44,10 +44,11 @@
                           - else
                             - if !neighbor[:measurement].nil?
                               = (type == "Regression") ? "#{neighbor[:measurement].delog10.signif(3)} (#{unit})</br>#{c.mmol_to_mg(neighbor[:measurement].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : neighbor[:measurement]
-                          %p
-                            %a{:href=>PUBCHEM_CID_URI+c.cid, :rel => "external"}
-                              PubChem
-                              %span.fa.fa-xs.fa-external-link
+                          - if c.cid && c.cid != "0"
+                            %p
+                              %a{:href=>PUBCHEM_CID_URI+c.cid, :rel => "external"}
+                                PubChem
+                                %span.fa.fa-xs.fa-external-link
                         / Similarity = tanimoto
                         %td
                           = neighbor[:similarity].round(3)

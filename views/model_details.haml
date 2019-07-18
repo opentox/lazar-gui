@@ -48,34 +48,42 @@
       %p.card-text
         - if model.classification?
           / accuracy, confusion matrixes
-          - av = cv.accept_values
+          - accept_values = cv.accept_values
+          - av = []
+          - if accept_values[1] =~ /^non/
+            - av << accept_values[0]
+            - av << accept_values[1]
+          - else
+            - av = accept_values
           - keys = cv.accuracy.collect{|key, value| key}
           - acc = cv.accuracy.collect{|key, value| value.signif(3)}
           - tpr = cv.true_rate.collect{|key, hash| hash[av[0]].signif(3)}
           - fpr = cv.true_rate.collect{|key, hash| hash[av[1]].signif(3)}
           - pp = cv.predictivity.collect{|key, hash| hash[av[0]].signif(3)}
           - np = cv.predictivity.collect{|key, hash| hash[av[1]].signif(3)}
-          %table.table.table-borderless.table-responsive
+          %table.table.table-bordered.table-responsive.text-center.bg-white
             %tr
-              %td.text-center
+              %td.text-center.bg-light
                 = "Nr.#{idx+1}"
-              %td Accuracy
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Accuracy_and_precision", :rel=>"external"}
+                  Accuracy
               %td
                 %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
-                  True #{av[0] =~ /^non/ ? "negative" : "positive"} rate
+                  True positive rate (Sensitivity, Recall)
               %td
                 %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
-                  True #{av[1] =~ /^non/ ? "negative" : "positive"} rate
+                  True negative rate (Specificity)
               %td
                 %a{:href=>"https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values", :rel=>"external"}
-                  #{av[0] =~ /^non/ ? "Negative" : "Positive"} predictiv value
+                  Positive predictive value (Precision)
               %td
                 %a{:href=>"https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values", :rel=>"external"}
-                  #{av[1] =~ /^non/ ? "Negative" : "Positive"} predictiv value
+                  Negative predictive value
             - keys.each_with_index do |key,idx|
               %tr
                 / keys
-                %td.fit.text-right.pr-0= key.gsub("_", " ")
+                %td.fit.text-right= key.gsub("_", " ")
                 / acc,accuray value:
                 %td= acc[idx]
                 / tpr,true positive rate
@@ -86,52 +94,48 @@
                 %td= pp[idx]
                 / np,negative predictions
                 %td= np[idx]
-          %div.row
-            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#pplot#{model.id}#{idx}"}, :aria=>{:expanded=>"false", :controls=>"pplot#{model.id}#{idx}"}, :style=>"font-size:small;"}
-              Probability plot
-            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#matrix#{model.id}#{idx}"}, :aria=>{:expanded=>"false", :controls=>"matrix#{model.id}#{idx}"}, :style=>"font-size:small;"}
-              Confusion matrix
-          %div.collapse{:id=>"matrix#{model.id}#{idx}"}
+          %div.row.justify-content-center
+            %h6 Confusion matrix
+          %div.row{:id=>"matrix#{model.id}#{idx}"}
             %table.table.table-borderless.table-responsive
               %tr
                 %td.fit.text-center all
                 %td.fit.text-center confidence high
                 %td.fit.text-center confidence low
-              %tr
+              %tr.justify-content-around
                 / confusion matrix
                 - keys.each do |key|
                   - matrix = cv.confusion_matrix[key]
-                  %td.fit.text-right
-                    %table.table-sm
+                  %td
+                    %table.table-sm.text-center
                       %tr
                         %td
                         %td
-                        %td
-                          %h6 actual
+                        %td actual
                         %td
                       %tr
                         %td
                         %td
-                        %td active
-                        %td inactive
+                        %td.border.bg-secondary.text-white active
+                        %td.border.bg-secondary.text-white inactive
                       %tr
-                        %td
-                          %h6 predicted
-                        %td active
-                        %td
-                          = matrix[0][0]
-                        %td
+                        %td predicted
+                        %td.border.bg-secondary.text-white active
+                        %td.border.bg-white
+                          %b= matrix[0][0]
+                        %td.border.bg-white
                           = matrix[0][1]
                       %tr
                         %td
-                        %td inactive
-                        %td
+                        %td.border.bg-secondary.text-white inactive
+                        %td.border.bg-white
                           = matrix[1][0]
-                        %td
-                          = matrix[1][1]
-        
+                        %td.border.bg-white
+                          %b= matrix[1][1]
+          %div.row.justify-content-center
+            %h6 Probability plot
           %div.row
-            %div.collapse.plot.mx-auto{:id=>"pplot#{model.id}#{idx}"}
+            %div.plot.mx-auto{:id=>"pplot#{model.id}#{idx}"}
               %img{:src=>"/#{cv.id}.png", :alt=>"#{cv.id}.png"}
 
         / regression
@@ -144,9 +148,9 @@
           - nrp = cv.nr_predictions.collect{|key,value| value}
           - wpi = cv.within_prediction_interval.collect{|key,value| value}
           - opi = cv.out_of_prediction_interval.collect{|key,value| value}
-          %table.table.table-borderless.table-responsive
+          %table.table.table-bordered.table-responsive.text-center.bg-white
             %tr
-              %td.text-center
+              %td.text-center.bg-light
                 = "Nr.#{idx+1}"
               %td
                 %a{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
@@ -162,7 +166,7 @@
             - keys.each_with_index do |key,idx|
               %tr
                 / keys
-                %td.fit.text-right.pr-0= key.gsub("_", " ")
+                %td.fit.text-right= key.gsub("_", " ")
                 / rsme:
                 %td= rmse[idx]
                 / mae:
@@ -175,11 +179,10 @@
                 %td= wpi[idx]
                 / Out of prediction interval:
                 %td= opi[idx]
+          %div.row.justify-content-center
+            %h6 Correlation plot
           %div.row
-            %button.btn.btn-outline-info.mx-auto{:type=>"button", :data=>{:toggle=>"collapse", :target=>"#cplot#{model.id}#{idx}"}, :aria=>{:expanded=>"false", :controls=>"cplot#{model.id}#{idx}"}, :style=>"font-size:small;"}
-              Correlation plot
-          %div.row
-            %div.collapse.plot.mx-auto{:id=>"cplot#{model.id}#{idx}"}
+            %div.plot.mx-auto{:id=>"cplot#{model.id}#{idx}"}
               %img{:src=>"/#{cv.id}.png", :alt=>"#{cv.id}.png"}
         - unless idx == crossvalidations.size-1
           %hr

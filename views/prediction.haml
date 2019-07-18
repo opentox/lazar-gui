@@ -13,10 +13,11 @@
               %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: to("/prediction/#{@compound.id}/details"), :id=>"link01"}}
                 = embedded_svg(@compound.svg, :title=>"click for details")
               %p= @compound.smiles
-              %p
-                %a{:href=>PUBCHEM_CID_URI+@compound.cid, :rel => "external"}
-                  PubChem
-                  %span.fa.fa-xs.fa-external-link
+              - if @compound.cid && @compound.cid != "0"
+                %p
+                  %a{:href=>PUBCHEM_CID_URI+@compound.cid, :rel => "external"}
+                    PubChem
+                    %span.fa.fa-xs.fa-external-link
             - @model_types = {}
             - @dbhit = {}
             - @predictions.each_with_index do |prediction,i|
@@ -93,25 +94,25 @@
                       %b Confidence:
                       %br
                       = prediction[:confidence]
-                  
+
                   / show warnings and info
                   %p
-                    - if !prediction[:info].blank?
+                    - unless @dbhit[i] || prediction[:info].blank?
                       %b Info:
                       %br
                       %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                    - if !prediction[:warnings].blank?
+                    - unless prediction[:warnings].blank?
                       - warning = prediction[:warnings].last
                       %b Warnings:
                       %br
                       %p=warning#.sub(/,/, ",<br>")
                 - else
                   %br
-                  - if !prediction[:info].blank?
+                  - unless @dbhit[i] || prediction[:info].blank?
                     %b Info:
                     %br
                     %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                  - if !prediction[:warnings].blank?
+                  - unless prediction[:warnings].blank?
                     - warning = prediction[:warnings].last
                     %b Warnings:
                     %br
