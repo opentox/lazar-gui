@@ -111,7 +111,7 @@
                       %tr
                         %td
                         %td
-                        %td actual
+                        %td{:colspan=>"2"} measured
                         %td
                       %tr
                         %td
@@ -119,14 +119,14 @@
                         %td.border.bg-secondary.text-white active
                         %td.border.bg-secondary.text-white inactive
                       %tr
-                        %td predicted
+                        %td.align-middle{:rowspan=>"2"} predicted
                         %td.border.bg-secondary.text-white active
                         %td.border.bg-white
                           %b= matrix[0][0]
                         %td.border.bg-white
                           = matrix[0][1]
                       %tr
-                        %td
+                        //%td
                         %td.border.bg-secondary.text-white inactive
                         %td.border.bg-white
                           = matrix[1][0]
