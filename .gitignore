@@ -1,2 +1,5 @@
 Gemfile.lock
 .sass-cache/
+.bundle/
+public/swagger*
+public/*.png
