@@ -18,17 +18,17 @@
     // prepare variable values for javascript
     // increase timer interval for large datasets
     - ctimer = ((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
-    - approx = {}
-    - sum_approx = 0
+    //- approx = {}
+    //- sum_approx = 0
     // process batch predictions
     - @models.each_with_index do |model,idx|
       - m = Model::Validation.find model
       - task = @tasks[idx].id
-      - tasktime = task.generation_time.to_i
+      //- tasktime = task.generation_time.to_i
       // assume single compound prediction time: classification=0.1s,regression=0.5s
-      - task_approx = m.classification? ? (tasktime*1000 + @compounds_size*100) : (tasktime*1000 + @compounds_size*500)
-      - approx[idx] = task_approx + sum_approx
-      - sum_approx += (m.classification? ? @compounds_size*100 : @compounds_size*500)
+      //- task_approx = m.classification? ? (tasktime*1000 + @compounds_size*100) : (tasktime*1000 + @compounds_size*500)
+      //- approx[idx] = task_approx + sum_approx
+      //- sum_approx += (m.classification? ? @compounds_size*100 : @compounds_size*500)
       #result.card.bg-light{:id=>idx}
         %div.card-body
           %div.row
@@ -49,11 +49,11 @@
           %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_#{idx}", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
           :javascript
             $(document).ready(function() {
-              taskProgress('#{idx}','#{ctimer}','#{approx[idx]}','#{to("/prediction/task/?turi=#{task}")}');
+              taskProgress('#{idx}','#{ctimer}','#{to("/prediction/task/?turi=#{task}")}');
             });
           #data-container.card.d-none.table-responsive{:id=>idx}
     :javascript
-      taskProgress = function(idx,timer,approximate,task_uri){
+      taskProgress = function(idx,timer,task_uri){
         // wait until previous task is completed
         if (idx > 0){
           markers[idx] = setInterval(function(){

@@ -178,7 +178,7 @@ function loadDetails(id, model_url) {
 
 var markers = [];
 
-progress = function(value,id) {
+/*progress = function(value,id) {
   var percent = Math.round(value);
   var bar = document.getElementById("bar_"+id);
   var est = document.getElementById("est_"+id);
@@ -188,9 +188,9 @@ progress = function(value,id) {
     prog.style.display = "none";
     est.style.display = "none";
   };
-};
+};*/
 
-remaining = function(id,approximate) {
+/*remaining = function(id,approximate) {
   var est = document.getElementById("est_"+id);
   var now = new Date().getTime();
   var remain = approximate - now;
@@ -202,7 +202,7 @@ remaining = function(id,approximate) {
     var newtime = minutes + "m " + seconds + "s ";
   }
   est.innerHTML = newtime;
-};
+};*/
 
 renderTask = function(task_uri,id) {
   var uri = task_uri;

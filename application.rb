@@ -157,7 +157,9 @@ get '/predict/batch/download/?' do
   dataset = Dataset.find task.dataset_id
   name = dataset.name + ".csv"
   t = Tempfile.new
-  t << dataset.to_prediction_csv
+  # to_prediction_csv takes too much time; use task.csv instead which is the same
+  #t << dataset.to_prediction_csv
+  t << task.csv
   t.rewind
   response['Content-Type'] = "text/csv"
   send_file t.path, :filename => "#{Time.now.strftime("%Y-%m-%d")}_lazar_batch_prediction_#{name}", :type => "text/csv", :disposition => "attachment"
@@ -253,21 +255,21 @@ get '/prediction/task/?' do
     cansmi = 0
     header.each_with_index do |h,idx|
       cansmi = idx if h =~ /Canonical SMILES/
-      string += "<th>#{h}</th>"
+      string += "<th class=\"fit\">#{h}</th>"
     end
     string += "</tr>"
     string += "<tr>"
     csv[pageNumber].each_with_index do |line,idx|
       if idx == cansmi
         c = Compound.from_smiles line
-        string += "<td>#{line}</br>" \
+        string += "<td class=\"fit\">#{line}</br>" \
                   "<a class=\"btn btn-link\" data-id=\"link\" " \
                   "data-remote=\"#{to("/prediction/#{c.id}/details")}\" data-toggle=\"modal\" " \
                   "href=#details>" \
                   "#{embedded_svg(c.svg, title: "click for details")}" \
                   "</td>"
       else
-        string += "<td>#{line.numeric? && line.include?(".") ? line.to_f.signif(3) : line}</td>"
+        string += "<td nowrap>#{line.numeric? && line.include?(".") ? line.to_f.signif(3) : (line.nil? ? line : line.gsub(" ","<br />"))}</td>"
       end
     end
     string += "</tr>"
