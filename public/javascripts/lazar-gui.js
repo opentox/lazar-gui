@@ -204,6 +204,19 @@ var markers = [];
   est.innerHTML = newtime;
 };*/
 
+uploadDataset = function(task_uri) {
+  var uri = task_uri;
+  var aClient = new HttpClient();
+  aClient.get(uri, function(res) {
+    var response = JSON.parse(res);
+    if (response['percent'] == 100){
+      window.clearInterval(uploadInterval);
+      var element = document.getElementById("uploadDataset");
+      element.parentNode.removeChild(element);
+    };
+  });
+};
+
 renderTask = function(task_uri,id) {
   var uri = task_uri;
   var aClient = new HttpClient();
@@ -232,39 +245,48 @@ simpleTemplating = function(data) {
   return html;
 };
 
-pagePredictions = function(task_uri,model_id,id,compoundsSize){
+pagePredictions = function(task_uri,model_id,id, compounds_uri){
   button = document.getElementById("detailsbutton_"+id);
   span = button.childNodes[1];
-  if (span.className == "fa fa-caret-right"){
-    span.className = "fa fa-caret-down";
-    $('#data-container_'+id).removeClass("d-none");
-    $('#data-container_'+id).show();
-    $('#pager_'+id).show();
-    $('#pager_'+id).pagination({
-      dataSource: task_uri,
-      locator: 'prediction',
-      totalNumber: compoundsSize,
-      pageSize: 1,
-      showPageNumbers: true,
-      showGoInput: true,
-      formatGoInput: 'go to <%= input %>',
-      formatAjaxError: function(jqXHR, textStatus, errorThrown) {
-        $('#data-container_'+id).html(errorThrown);
-      },
-      /*ajax: {
-        beforeSend: function() {
-          $('#data-container_'+id).html('Loading content ...');
+  // get compounds size first
+  var compoundsSize = 0;
+  var aClient = new HttpClient();
+  aClient.get(compounds_uri, function(res) {
+    var response = JSON.parse(res);
+    compoundsSize = response['size']
+    // handle pager in callback function
+    // ensures compoundsSize is > 0
+    if (span.className == "fa fa-caret-right"){
+      span.className = "fa fa-caret-down";
+      $('#data-container_'+id).removeClass("d-none");
+      $('#data-container_'+id).show();
+      $('#pager_'+id).show();
+      $('#pager_'+id).pagination({
+        dataSource: task_uri,
+        locator: 'prediction',
+        totalNumber: compoundsSize,
+        pageSize: 1,
+        showPageNumbers: true,
+        showGoInput: true,
+        formatGoInput: 'go to <%= input %>',
+        formatAjaxError: function(jqXHR, textStatus, errorThrown) {
+          $('#data-container_'+id).html(errorThrown);
+        },
+        /*ajax: {
+          beforeSend: function() {
+            $('#data-container_'+id).html('Loading content ...');
+          }
+        },*/
+        callback: function(data, pagination) {
+          var html = simpleTemplating(data);
+          $('#data-container_'+id).html(html);
+          //$('#data-container_'+id).css("min-height", $(window).height() + "px" );
         }
-      },*/
-      callback: function(data, pagination) {
-        var html = simpleTemplating(data);
-        $('#data-container_'+id).html(html);
-        //$('#data-container_'+id).css("min-height", $(window).height() + "px" );
-      }
-    });
-  } else if (span.className = "fa fa-caret-down"){
-    span.className = "fa fa-caret-right";
-    $('#data-container_'+id).hide();
-    $('#pager_'+id).hide();
-  };
+      });
+    } else if (span.className = "fa fa-caret-down"){
+      span.className = "fa fa-caret-right";
+      $('#data-container_'+id).hide();
+      $('#pager_'+id).hide();
+    };
+  });
 };

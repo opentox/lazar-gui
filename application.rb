@@ -167,7 +167,7 @@ end
 
 post '/predict/?' do
   # process batch prediction
-  if !params[:fileselect].blank?
+  unless params[:fileselect].blank?
     if params[:fileselect][:filename] !~ /\.csv$/
       bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
     end
@@ -175,9 +175,20 @@ post '/predict/?' do
     File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
     end
-    input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename])
-    $logger.debug "Processing '#{params[:fileselect][:filename]}'"
-    @compounds_size = input.compounds.size
+    uploadTask = Task.new
+    uploadTask.save
+    uploadDataset = Task.run do
+      t = uploadTask
+      t.update_percent(1)
+      $logger.debug "Processing '#{params[:fileselect][:filename]}'"
+      @input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename])
+      t.update_percent(100)
+      t.save
+    end
+    @upid = uploadTask.id
+
+    #TODO route for compound size
+    @compounds_size = 0 #@input.compounds.size
     @models = params[:selection].keys
     @tasks = []
     @models.each{|m| t = Task.new; t.save; @tasks << t}
@@ -190,6 +201,10 @@ post '/predict/?' do
         prediction = {}
         model = Model::Validation.find model_id
         t.update_percent(10)
+        input = Dataset.find_by(:source => "tmp/"+@filename)
+        until input
+          sleep 1
+        end
         prediction_dataset = model.predict input
         t.update_percent(70)
         t[:dataset_id] = prediction_dataset.id
@@ -232,10 +247,18 @@ post '/predict/?' do
 end
 
 get '/prediction/task/?' do
+  # returns task progress in percentage
   if params[:turi]
     task = Task.find(params[:turi].to_s)
     response['Content-Type'] = "application/json"
-    return JSON.pretty_generate(:percent => task.percent)
+    if task.dataset_id
+      d = Dataset.find task.dataset_id
+      size = d.compounds.size
+      return JSON.pretty_generate(:percent => task.percent, :size => size)
+    else
+      return JSON.pretty_generate(:percent => task.percent)
+    end
+  # kills task process id
   elsif params[:ktpid]
     begin
       Process.kill(9,params[:ktpid].to_i) if !params[:ktpid].blank?
@@ -244,6 +267,7 @@ get '/prediction/task/?' do
     end
     response['Content-Type'] = "application/json"
     return JSON.pretty_generate(:ktpid => params[:ktpid])
+  # returns task details
   elsif params[:predictions]
     task = Task.find(params[:predictions])
     pageSize = params[:pageSize].to_i - 1
