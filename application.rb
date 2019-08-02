@@ -204,6 +204,7 @@ post '/predict/?' do
         input = Dataset.find_by(:source => "tmp/"+@filename)
         until input
           sleep 1
+          input = Dataset.find_by(:source => "tmp/"+@filename)
         end
         prediction_dataset = model.predict input
         t.update_percent(70)
