@@ -210,7 +210,7 @@ uploadDataset = function(task_uri) {
   aClient.get(uri, function(res) {
     var response = JSON.parse(res);
     if (response['percent'] == 100){
-      window.clearInterval(uploadInterval);
+      clearInterval(uploadInterval);
       var element = document.getElementById("uploadDataset");
       element.parentNode.removeChild(element);
     };
@@ -224,7 +224,7 @@ renderTask = function(task_uri,id) {
     var response = JSON.parse(res);
     //progress(response['percent'],id);
     if (response['percent'] == 100){
-      window.clearInterval(markers[id]);
+      clearInterval(markers[id]);
       $("a#downbutton_"+id).removeClass("disabled");
       $("a#detailsbutton_"+id).removeClass("disabled");
       $("a#downbutton_"+id).removeClass("btn-outline-info");

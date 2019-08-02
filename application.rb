@@ -180,14 +180,14 @@ post '/predict/?' do
     uploadDataset = Task.run do
       t = uploadTask
       t.update_percent(1)
-      $logger.debug "Processing '#{params[:fileselect][:filename]}'"
-      @input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename])
+      puts "Processing '#{params[:fileselect][:filename]}'"
+      input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename])
+      t[:dataset_id] = input.id
       t.update_percent(100)
       t.save
     end
     @upid = uploadTask.id
 
-    #TODO route for compound size
     @compounds_size = 0 #@input.compounds.size
     @models = params[:selection].keys
     @tasks = []
@@ -201,12 +201,12 @@ post '/predict/?' do
         prediction = {}
         model = Model::Validation.find model_id
         t.update_percent(10)
-        input = Dataset.find_by(:source => "tmp/"+@filename)
-        until input
+        until uploadTask.dataset_id
           sleep 1
-          input = Dataset.find_by(:source => "tmp/"+@filename)
+          uploadTask = Task.find @upid
         end
-        prediction_dataset = model.predict input
+        @input = Dataset.find uploadTask.dataset_id
+        prediction_dataset = model.predict @input
         t.update_percent(70)
         t[:dataset_id] = prediction_dataset.id
         t.update_percent(75)

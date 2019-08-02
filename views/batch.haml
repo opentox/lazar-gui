@@ -26,7 +26,7 @@
 
     // prepare variable values for javascript
     // increase timer interval for large datasets
-    - ctimer = 1000#((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
+    - ctimer = 2000#((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
     // process batch predictions
     - @models.each_with_index do |model,idx|
       - m = Model::Validation.find model
