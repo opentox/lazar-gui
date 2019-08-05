@@ -213,6 +213,10 @@ uploadDataset = function(task_uri) {
       clearInterval(uploadInterval);
       var element = document.getElementById("uploadDataset");
       element.parentNode.removeChild(element);
+      // unset js var
+      element = undefined;
+      // delete js var
+      delete(element);
     };
   });
 };
