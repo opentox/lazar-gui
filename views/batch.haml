@@ -3,12 +3,12 @@
   window.addEventListener('unload', ktpid, false);
   function ktpid() {
     var client = new XMLHttpRequest();
-    client.open("GET", "#{to("/prediction/task?ktpid=#{@pid}")}", false);
+    client.open("GET", '//#{ENV['VIRTUAL_HOST']}/prediction/task?ktpid=#{@pid}', false);
     client.setRequestHeader("Content-Type", "application/json");
     client.send(null);
   };
 %div.card
-  %a.btn.btn-outline-info{:href => to("/predict?tpid=#{@pid}")}
+  %a.btn.btn-outline-info{:href => "//#{ENV['VIRTUAL_HOST']}/predict?tpid=#{@pid}"}
     %span.fa.fa-caret-left{:aria=>{:hidden=>"true"}}
     New Prediction
 %div.card.bg-light{:id=>"uploadDataset"}
@@ -17,7 +17,7 @@
     %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_upload", :class=>"circle", :alt=>"processing"}
     :javascript
       uploadInterval = setInterval(function(){
-        uploadDataset('#{to("/prediction/task/?turi=#{@upid}")}');
+        uploadDataset('//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{@upid}');
       }, 1000 );
 
 %div.card.bg-light
@@ -38,10 +38,10 @@
               %h5.card-title="#{m.endpoint} (#{m.species})"
               #pager{:id=>idx}
             %div.col-6
-              %a.btn.btn-outline-info.btn-sm.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('#{to("/prediction/task/?predictions=#{task}")}','#{model}','#{idx}','#{to("/prediction/task/?turi=#{task}")}')"}
+              %a.btn.btn-outline-info.btn-sm.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('//#{ENV['VIRTUAL_HOST']}/prediction/task/?predictions=#{task}','#{model}','#{idx}','//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{task}')"}
                 %span.fa.fa-caret-right
                 Details
-              %a.btn.btn-outline-info.btn-sm.disabled{:id => "downbutton_#{idx}", :href=>"#{to("/predict/batch/download?tid=#{task}")}", :title=>"download"}
+              %a.btn.btn-outline-info.btn-sm.disabled{:id => "downbutton_#{idx}", :href=>"//#{ENV['VIRTUAL_HOST']}/predict/batch/download?tid=#{task}", :title=>"download"}
                 %span.fa.fa-download
                 CSV
           %p{:id=>"est_#{idx}"}
@@ -49,7 +49,7 @@
           %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_#{idx}", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
           :javascript
             $(document).ready(function() {
-              taskProgress('#{idx}','#{ctimer}','#{to("/prediction/task/?turi=#{task}")}');
+              taskProgress('#{idx}','#{ctimer}','//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{task}');
             });
           #data-container.card.d-none.table-responsive{:id=>idx}
     :javascript
