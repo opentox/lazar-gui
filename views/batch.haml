@@ -26,7 +26,7 @@
 
     // prepare variable values for javascript
     // increase timer interval for large datasets
-    - ctimer = 2000#((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
+    - ctimer = 10000#((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
     // process batch predictions
     - @models.each_with_index do |model,idx|
       - m = Model::Validation.find model
@@ -66,14 +66,16 @@
           }, timer );
         }else{
           markers[idx] = setInterval(function(){
-            renderTask(task_uri,idx);
             // check that dataset parsing is completed
             if (document.getElementById("uploadDataset")){
               $("#est_"+idx).show();
               $("#circle_"+idx).hide();
             } else {
-              $("#est_"+idx).hide();
-              $("#circle_"+idx).show();
+              renderTask(task_uri,idx);
+              if ( $("#est_"+idx).is(":visible") ){
+                $("#est_"+idx).hide();
+                $("#circle_"+idx).show();
+              }
             }
           }, timer );
         };
