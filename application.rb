@@ -67,13 +67,21 @@ not_found do
 end
 
 error do
+  # API errors
   if request.path.split("/")[1] == "api" || $paths.include?(request.path.split("/")[2])
     @accept = request.env['HTTP_ACCEPT']
     response['Content-Type'] = @accept
     @accept == "text/plain" ? request.env['sinatra.error'] : request.env['sinatra.error'].to_json
+  # batch dataset error
+  elsif request.env['sinatra.error.params']['batchfile'] && request.env['REQUEST_METHOD'] == "POST"
+    @error = request.env['sinatra.error']
+    response['Content-Type'] = "text/html"
+    status 200
+    return haml :error
+  # basic error
   else
     @error = request.env['sinatra.error']
-    haml :error
+    return haml :error
   end
 end
 
@@ -85,13 +93,17 @@ options "*" do
 end
 
 get '/predict/?' do
+  # handle user click on back button while batch prediction
   if params[:tpid]
     begin
       Process.kill(9,params[:tpid].to_i) if !params[:tpid].blank?
     rescue
       nil
     end
+    # remove data helper method
+    remove_task_data(params[:tpid])
   end
+  # regular request on '/predict' page
   @models = OpenTox::Model::Validation.all
   @endpoints = @models.collect{|m| m.endpoint}.sort.uniq
   @models.count > 0 ? (haml :predict) : (haml :info)
@@ -169,27 +181,31 @@ post '/predict/?' do
   # process batch prediction
   unless params[:fileselect].blank?
     if params[:fileselect][:filename] !~ /\.csv$/
-      bad_request_error "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
+      raise "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
     end
     @filename = params[:fileselect][:filename]
     File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
     end
-    uploadTask = Task.new
-    uploadTask.save
-    uploadDataset = Task.run do
-      t = uploadTask
-      t.update_percent(1)
-      puts "Processing '#{params[:fileselect][:filename]}'"
-      input = Dataset.from_csv_file File.join("tmp", params[:fileselect][:filename])
-      t[:dataset_id] = input.id
-      t.update_percent(100)
-      t.save
-    end
-    @upid = uploadTask.id
+    # check CSV structure by parsing and header check
+    csv = CSV.read File.join("tmp", @filename)
+    header = csv.shift
+    accepted = ["SMILES","InChI"]
+    raise "CSV header does not include 'SMILES' or 'InChI'. Please read the <a href='https://dg.in-silico.ch/predict/help' rel='external'> HELP </a> page." unless header.any?(/smiles|inchi/i)
+    @models = params[:selection].keys.join(",")
+    return haml :upload
+  end
 
-    @compounds_size = 0 #@input.compounds.size
-    @models = params[:selection].keys
+  unless params[:batchfile].blank?
+    dataset = Dataset.from_csv_file File.join("tmp", params[:batchfile])
+    response['Content-Type'] = "application/json"
+    return {:dataset_id => dataset.id.to_s, :models => params[:models]}.to_json
+  end
+
+  unless params[:models].blank?
+    dataset = Dataset.find params[:dataset_id]
+    @compounds_size = dataset.compounds.size
+    @models = params[:models].split(",")
     @tasks = []
     @models.each{|m| t = Task.new; t.save; @tasks << t}
     @predictions = {}
@@ -201,12 +217,7 @@ post '/predict/?' do
         prediction = {}
         model = Model::Validation.find model_id
         t.update_percent(10)
-        until uploadTask.dataset_id
-          sleep 1
-          uploadTask = Task.find @upid
-        end
-        @input = Dataset.find uploadTask.dataset_id
-        prediction_dataset = model.predict @input
+        prediction_dataset = model.predict dataset
         t.update_percent(70)
         t[:dataset_id] = prediction_dataset.id
         t.update_percent(75)
@@ -219,7 +230,11 @@ post '/predict/?' do
         t.save
       end
     end
+    maintask[:subTasks] = @tasks.collect{|t| t.id}
+    maintask.save
     @pid = maintask.pid
+    File.delete File.join(dataset.source)
+    response['Content-Type'] = "text/html"
     return haml :batch
   else
     # single compound prediction
@@ -248,17 +263,11 @@ post '/predict/?' do
 end
 
 get '/prediction/task/?' do
-  # returns task progress in percentage
+  # returns task progress in percent
   if params[:turi]
     task = Task.find(params[:turi].to_s)
     response['Content-Type'] = "application/json"
-    if task.dataset_id
-      d = Dataset.find task.dataset_id
-      size = d.compounds.size
-      return JSON.pretty_generate(:percent => task.percent, :size => size)
-    else
-      return JSON.pretty_generate(:percent => task.percent)
-    end
+    return JSON.pretty_generate(:percent => task.percent)
   # kills task process id
   elsif params[:ktpid]
     begin
@@ -266,6 +275,7 @@ get '/prediction/task/?' do
     rescue
       nil
     end
+    #remove_task_data(params[:ktpid]) deletes also the source file
     response['Content-Type'] = "application/json"
     return JSON.pretty_generate(:ktpid => params[:ktpid])
   # returns task details

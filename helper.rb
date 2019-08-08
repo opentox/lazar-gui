@@ -23,4 +23,25 @@ helpers do
     self.match(/^[a-f\d]{24}$/i) ? true : false
   end
 
+  def remove_task_data(pid)
+    task = Task.find_by(:pid => pid)
+    if task and !task.subTasks.blank?
+      task.subTasks.each_with_index do |task_id,idx|
+        t = Task.find task_id
+        predictionDataset = Dataset.find t.dataset_id if t.dataset_id
+        if predictionDataset && idx == 0
+          trainingDataset = Dataset.find predictionDataset.source
+          source = trainingDataset.source
+          trainingDataset.delete
+          File.delete File.join(source) if File.exists? File.join(source)
+          predictionDataset.delete
+        elsif predictionDataset
+          predictionDataset.delete
+        end
+        t.delete
+      end
+    end
+    task.delete if task
+  end
+
 end

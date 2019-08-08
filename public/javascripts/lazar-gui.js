@@ -33,6 +33,20 @@ var HttpClient = function() {
     anHttpRequest.open( "GET", aUrl, true );
     anHttpRequest.send( null );
   }
+  this.post = function(aUrl, params, aCallback) {
+  var anHttpRequest = new XMLHttpRequest();
+  anHttpRequest.onreadystatechange = function() {
+    //alert(anHttpRequest.status);
+  if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+    aCallback(anHttpRequest);
+  }
+  if (anHttpRequest.readyState == 4 && anHttpRequest.status == 400){
+    aCallback(anHttpRequest);
+  }
+  anHttpRequest.open( "POST", aUrl, true );
+  anHttpRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  anHttpRequest.send( params );
+  }
 };  
 
 // functions used in predict.haml
@@ -240,6 +254,29 @@ renderTask = function(task_uri,id) {
   });
 };
 
+taskProgress = function(idx,timer,task_uri){
+  // wait until previous task is completed
+  if (idx > 0){
+    markers[idx] = setInterval(function(){
+      var button = document.getElementById("detailsbutton_"+(idx-1));
+      if(!button.classList.contains('disabled')){
+        renderTask(task_uri,idx);
+        $("#est_"+idx).hide();
+        $("#circle_"+idx).show();
+      }
+    }, timer );
+  }else{
+    if ( $("#est_"+idx).is(":visible") ){
+      $("#est_"+idx).hide();
+      $("#circle_"+idx).show();
+    }
+    renderTask(task_uri,idx);
+    markers[idx] = setInterval(function(){
+      renderTask(task_uri,idx);
+    }, timer );
+  };
+};
+
 simpleTemplating = function(data) {
   var html = '<ul class=pagination>';
   $.each(data, function(index, item){
@@ -249,48 +286,39 @@ simpleTemplating = function(data) {
   return html;
 };
 
-pagePredictions = function(task_uri,model_id,id, compounds_uri){
+pagePredictions = function(task_uri,model_id,id, compoundsSize){
   button = document.getElementById("detailsbutton_"+id);
   span = button.childNodes[1];
-  // get compounds size first
-  var compoundsSize = 0;
-  var aClient = new HttpClient();
-  aClient.get(compounds_uri, function(res) {
-    var response = JSON.parse(res);
-    compoundsSize = response['size']
-    // handle pager in callback function
-    // ensures compoundsSize is > 0
-    if (span.className == "fa fa-caret-right"){
-      span.className = "fa fa-caret-down";
-      $('#data-container_'+id).removeClass("d-none");
-      $('#data-container_'+id).show();
-      $('#pager_'+id).show();
-      $('#pager_'+id).pagination({
-        dataSource: task_uri,
-        locator: 'prediction',
-        totalNumber: compoundsSize,
-        pageSize: 1,
-        showPageNumbers: true,
-        showGoInput: true,
-        formatGoInput: 'go to <%= input %>',
-        formatAjaxError: function(jqXHR, textStatus, errorThrown) {
-          $('#data-container_'+id).html(errorThrown);
-        },
-        /*ajax: {
-          beforeSend: function() {
-            $('#data-container_'+id).html('Loading content ...');
-          }
-        },*/
-        callback: function(data, pagination) {
-          var html = simpleTemplating(data);
-          $('#data-container_'+id).html(html);
-          //$('#data-container_'+id).css("min-height", $(window).height() + "px" );
+  if (span.className == "fa fa-caret-right"){
+    span.className = "fa fa-caret-down";
+    $('#data-container_'+id).removeClass("d-none");
+    $('#data-container_'+id).show();
+    $('#pager_'+id).show();
+    $('#pager_'+id).pagination({
+      dataSource: task_uri,
+      locator: 'prediction',
+      totalNumber: compoundsSize,
+      pageSize: 1,
+      showPageNumbers: true,
+      showGoInput: true,
+      formatGoInput: 'go to <%= input %>',
+      formatAjaxError: function(jqXHR, textStatus, errorThrown) {
+        $('#data-container_'+id).html(errorThrown);
+      },
+      ajax: {
+        beforeSend: function() {
+          $('#data-container_'+id).html('Loading content ...');
         }
-      });
-    } else if (span.className = "fa fa-caret-down"){
-      span.className = "fa fa-caret-right";
-      $('#data-container_'+id).hide();
-      $('#pager_'+id).hide();
-    };
-  });
+      },
+      callback: function(data, pagination) {
+        var html = simpleTemplating(data);
+        $('#data-container_'+id).html(html);
+        //$('#data-container_'+id).css("min-height", $(window).height() + "px" );
+      }
+    });
+  } else if (span.className = "fa fa-caret-down"){
+    span.className = "fa fa-caret-right";
+    $('#data-container_'+id).hide();
+    $('#pager_'+id).hide();
+  };
 };

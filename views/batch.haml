@@ -11,22 +11,13 @@
   %a.btn.btn-outline-info{:href => "//#{ENV['VIRTUAL_HOST']}/predict?tpid=#{@pid}"}
     %span.fa.fa-caret-left{:aria=>{:hidden=>"true"}}
     New Prediction
-%div.card.bg-light{:id=>"uploadDataset"}
-  %div.card-body
-    %h3.card-title="Processing file #{@filename} to dataset."
-    %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_upload", :class=>"circle", :alt=>"processing"}
-    :javascript
-      uploadInterval = setInterval(function(){
-        uploadDataset('//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{@upid}');
-      }, 1000 );
-
 %div.card.bg-light
   %div.card-body
-    %h3.card-title="Batch prediction results for:  #{@filename}"
+    %h3.card-title="Batch prediction results for: #{@filename}"
 
     // prepare variable values for javascript
     // increase timer interval for large datasets
-    - ctimer = 10000#((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
+    - timer = 10000#((@compounds_size/1000) == 0 ? 1000 : ((@compounds_size/1000)*1000))
     // process batch predictions
     - @models.each_with_index do |model,idx|
       - m = Model::Validation.find model
@@ -38,7 +29,7 @@
               %h5.card-title="#{m.endpoint} (#{m.species})"
               #pager{:id=>idx}
             %div.col-6
-              %a.btn.btn-outline-info.btn-sm.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('//#{ENV['VIRTUAL_HOST']}/prediction/task/?predictions=#{task}','#{model}','#{idx}','//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{task}')"}
+              %a.btn.btn-outline-info.btn-sm.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('//#{ENV['VIRTUAL_HOST']}/prediction/task/?predictions=#{task}','#{model}','#{idx}','#{@compounds_size}')"}
                 %span.fa.fa-caret-right
                 Details
               %a.btn.btn-outline-info.btn-sm.disabled{:id => "downbutton_#{idx}", :href=>"//#{ENV['VIRTUAL_HOST']}/predict/batch/download?tid=#{task}", :title=>"download"}
@@ -49,37 +40,10 @@
           %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_#{idx}", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
           :javascript
             $(document).ready(function() {
-              taskProgress('#{idx}','#{ctimer}','//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{task}');
+              taskProgress('#{idx}','#{timer}','//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{task}');
             });
           #data-container.card.d-none.table-responsive{:id=>idx}
     :javascript
-      taskProgress = function(idx,timer,task_uri){
-        // wait until previous task is completed
-        if (idx > 0){
-          markers[idx] = setInterval(function(){
-            var button = document.getElementById("detailsbutton_"+(idx-1));
-            if(!button.classList.contains('disabled')){
-              renderTask(task_uri,idx);
-              $("#est_"+idx).hide();
-              $("#circle_"+idx).show();
-            }
-          }, timer );
-        }else{
-          markers[idx] = setInterval(function(){
-            // check that dataset parsing is completed
-            if (document.getElementById("uploadDataset")){
-              $("#est_"+idx).show();
-              $("#circle_"+idx).hide();
-            } else {
-              renderTask(task_uri,idx);
-              if ( $("#est_"+idx).is(":visible") ){
-                $("#est_"+idx).hide();
-                $("#circle_"+idx).show();
-              }
-            }
-          }, timer );
-        };
-      };
 %div.modal.fade{:id=>"details", :tabindex=>"-1", :role=>"dialog"}
   %div.modal-dialog.modal-lg{:role=>"document"}
     %div.modal-content
