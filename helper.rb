@@ -31,10 +31,11 @@ helpers do
         predictionDataset = Dataset.find t.dataset_id if t.dataset_id
         if predictionDataset && idx == 0
           trainingDataset = Dataset.find predictionDataset.source
-          source = trainingDataset.source
-          trainingDataset.delete
-          File.delete File.join(source) if File.exists? File.join(source)
           predictionDataset.delete
+          # delete training dataset unless it is one used for prediction models
+          models = Model::Validation.all
+          training_datasets = models.collect{|m| m.training_dataset.id.to_s}
+          trainingDataset.delete unless training_datasets.include?(trainingDataset.id.to_s)
         elsif predictionDataset
           predictionDataset.delete
         end

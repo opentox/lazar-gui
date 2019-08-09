@@ -184,7 +184,7 @@ post '/predict/?' do
       raise "Wrong file extension for '#{params[:fileselect][:filename]}'. Please upload a CSV file."
     end
     @filename = params[:fileselect][:filename]
-    File.open('tmp/' + params[:fileselect][:filename], "w") do |f|
+    File.open('tmp/' + @filename, "w") do |f|
       f.write(params[:fileselect][:tempfile].read)
     end
     # check CSV structure by parsing and header check
@@ -198,6 +198,7 @@ post '/predict/?' do
 
   unless params[:batchfile].blank?
     dataset = Dataset.from_csv_file File.join("tmp", params[:batchfile])
+    raise "No compounds in Dataset. Please read the <a href='https://dg.in-silico.ch/predict/help' rel='external'> HELP </a> page." if dataset.compounds.size == 0
     response['Content-Type'] = "application/json"
     return {:dataset_id => dataset.id.to_s, :models => params[:models]}.to_json
   end
@@ -233,7 +234,6 @@ post '/predict/?' do
     maintask[:subTasks] = @tasks.collect{|t| t.id}
     maintask.save
     @pid = maintask.pid
-    File.delete File.join(dataset.source)
     response['Content-Type'] = "text/html"
     return haml :batch
   else
