@@ -1,5 +1,5 @@
 %div.card
-  %a.btn.btn-outline-info{:href => "//#{ENV['VIRTUAL_HOST']}/predict"}
+  %a.btn.btn-outline-info{:href => "//#{$host_with_port}/predict"}
     %span.fa.fa-caret-left
     New Prediction
 %div.card.bg-light
@@ -10,7 +10,7 @@
         %tbody
           %tr
             %td.align-items-center{:id=>"compound"}
-              %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: "//#{ENV['VIRTUAL_HOST']}/prediction/#{@compound.id}/details", :id=>"link01"}}
+              %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: "//#{$host_with_port}/prediction/#{@compound.id}/details", :id=>"link01"}}
                 = embedded_svg(@compound.svg, :title=>"click for details")
               %p= @compound.smiles
               - if @compound.cid && @compound.cid != "0"

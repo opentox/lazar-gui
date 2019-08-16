@@ -3,12 +3,12 @@
   window.addEventListener('unload', ktpid, false);
   function ktpid() {
     var client = new XMLHttpRequest();
-    client.open("GET", '//#{ENV['VIRTUAL_HOST']}/prediction/task?ktpid=#{@pid}', false);
+    client.open("GET", '//#{$host_with_port}/prediction/task?ktpid=#{@pid}', false);
     client.setRequestHeader("Content-Type", "application/json");
     client.send(null);
   };
 %div.card
-  %a.btn.btn-outline-info{:href => "//#{ENV['VIRTUAL_HOST']}/predict?tpid=#{@pid}"}
+  %a.btn.btn-outline-info{:href => "//#{$host_with_port}/predict?tpid=#{@pid}"}
     %span.fa.fa-caret-left{:aria=>{:hidden=>"true"}}
     New Prediction
 %div.card.bg-light
@@ -29,10 +29,10 @@
               %h5.card-title="#{m.endpoint} (#{m.species})"
               #pager{:id=>idx}
             %div.col-6
-              %a.btn.btn-outline-info.btn-sm.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('//#{ENV['VIRTUAL_HOST']}/prediction/task/?predictions=#{task}','#{model}','#{idx}','#{@compounds_size}')"}
+              %a.btn.btn-outline-info.btn-sm.disabled{:id => "detailsbutton_#{idx}", :data=>{:toggle=>"collapse"}, :href=>"javascript:void(0)", :onclick=>"pagePredictions('//#{$host_with_port}/prediction/task/?predictions=#{task}','#{model}','#{idx}','#{@compounds_size}')"}
                 %span.fa.fa-caret-right
                 Details
-              %a.btn.btn-outline-info.btn-sm.disabled{:id => "downbutton_#{idx}", :href=>"//#{ENV['VIRTUAL_HOST']}/predict/batch/download?tid=#{task}", :title=>"download"}
+              %a.btn.btn-outline-info.btn-sm.disabled{:id => "downbutton_#{idx}", :href=>"//#{$host_with_port}/predict/batch/download?tid=#{task}", :title=>"download"}
                 %span.fa.fa-download
                 CSV
           %p{:id=>"est_#{idx}"}
@@ -40,7 +40,7 @@
           %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle_#{idx}", :class=>"circle", :alt=>"wait", :style=>"display:none;"}
           :javascript
             $(document).ready(function() {
-              taskProgress('#{idx}','#{timer}','//#{ENV['VIRTUAL_HOST']}/prediction/task/?turi=#{task}');
+              taskProgress('#{idx}','#{timer}','//#{$host_with_port}/prediction/task/?turi=#{task}');
             });
           #data-container.card.d-none.table-responsive{:id=>idx}
     :javascript

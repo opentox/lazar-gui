@@ -145,7 +145,7 @@ post "/api/model/:id/?" do
       @task.save
     end#main task
     tid = @task.id.to_s
-    return 202, "//#{ENV['VIRTUAL_HOST']}/task/#{tid}".to_json
+    return 202, "//#{$host_with_port}/task/#{tid}".to_json
   else
     halt 400, "No accepted content type"
   end

@@ -13,7 +13,7 @@
     = data_entries.count/3
     %br
     = "Training dataset:\t"
-    %a{:href=>"//#{ENV['VIRTUAL_HOST']}/predict/dataset/#{training_dataset.name}"}
+    %a{:href=>"//#{$host_with_port}/predict/dataset/#{training_dataset.name}"}
       = training_dataset.name
 
 %div.card.bg-light
@@ -190,7 +190,7 @@
 %div.card.bg-light
   %div.card-body
     %h6.card-title QMRF:
-    %a.btn.btn-outline-info{:href=>"//#{ENV['VIRTUAL_HOST']}/predict/report/#{model.id}", :id=>"report#{model.id}", :style=>"font-size:small;"}
+    %a.btn.btn-outline-info{:href=>"//#{$host_with_port}/predict/report/#{model.id}", :id=>"report#{model.id}", :style=>"font-size:small;"}
       %span.fa.fa-download
       XML
 %br

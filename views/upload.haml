@@ -1,5 +1,5 @@
 %div.card
-  %a.btn.btn-outline-info{:href => "//#{ENV['VIRTUAL_HOST']}/predict"}
+  %a.btn.btn-outline-info{:href => "//#{$host_with_port}/predict"}
     %span.fa.fa-caret-left{:aria=>{:hidden=>"true"}}
     New Prediction
 %div.card.bg-light{:id=>"uploadDataset"}
@@ -9,7 +9,7 @@
     :javascript
       $(document).ready(function() {
         var aClient = new HttpClient();
-        aClient.post('//#{ENV['VIRTUAL_HOST']}/predict', 'models=#{@models}&batchfile=#{@filename}', function(res1) {
+        aClient.post('//#{$host_with_port}/predict', 'models=#{@models}&batchfile=#{@filename}', function(res1) {
           var contentType = res1.getResponseHeader('content-type');
           if (contentType == "application/json"){
             var response = JSON.parse(res1.responseText);
@@ -17,7 +17,7 @@
             var response = res1.responseText;
           }
           if (res1.status == 200 && response['models'] && response['dataset_id']){
-            aClient.post('//#{ENV['VIRTUAL_HOST']}/predict', 'models='+response['models']+'&dataset_id='+response['dataset_id'], function(res2) {
+            aClient.post('//#{$host_with_port}/predict', 'models='+response['models']+'&dataset_id='+response['dataset_id'], function(res2) {
               $("body").html(res2.responseText);
             });
           }

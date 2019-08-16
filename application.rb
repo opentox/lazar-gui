@@ -40,6 +40,9 @@ configure :production, :development do
 end
 
 before do
+  # use this hostname method instead to('/')
+  # allowes to set https for xhr requests
+  $host_with_port = request.host =~ /localhost/ ? request.host_with_port : request.host
   $paths = [
   "api",
   "compound",

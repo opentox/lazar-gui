@@ -1,7 +1,7 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet", :property=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions.
-%form{:name => "form", :action => "//#{ENV['VIRTUAL_HOST']}/predict", :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
+%form{:name => "form", :action => "//#{$host_with_port}/predict", :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
   %fieldset#top.card.bg-light
     #insert.card-body
       %h2.card-title 1. Draw a chemical structure
@@ -20,7 +20,7 @@
         %br
         %span.btn.btn-file{:style=>"background-color:white;"}
           %input.form-control-file{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
-        %a.btn.btn-outline-info{:href => "//#{ENV['VIRTUAL_HOST']}/predict/help", :rel => "external", :style=>"margin-left: 1em;"} Help
+        %a.btn.btn-outline-info{:href => "//#{$host_with_port}/predict/help", :rel => "external", :style=>"margin-left: 1em;"} Help
 
   %fieldset#middle.card.bg-light
     #models.card-body
@@ -37,7 +37,7 @@
                   %label{:for => "selection[#{model.species.gsub(/\s+/, "_")}]"}
                     = model.species
                 %span.col-6
-                  %a.btn.btn-outline-info{:role=>"button", :data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :aria=>{:expanded=>"false", :controls=>"details#{model.id}"}, :onclick=>"loadDetails('#{model.id}','//#{ENV['VIRTUAL_HOST']}/predict/modeldetails/#{model.id}')", :id => "link#{model.id}", :style=>"font-size:small;"}
+                  %a.btn.btn-outline-info{:role=>"button", :data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :aria=>{:expanded=>"false", :controls=>"details#{model.id}"}, :onclick=>"loadDetails('#{model.id}','//#{$host_with_port}/predict/modeldetails/#{model.id}')", :id => "link#{model.id}", :style=>"font-size:small;"}
                     %span.fa.fa-caret-right
                     Details | Validation
                   %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle#{model.id}", :class=>"circle#{model.id}", :alt=>"wait", :style=>"display:none;"}

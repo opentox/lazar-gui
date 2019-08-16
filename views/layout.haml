@@ -37,14 +37,14 @@
           Problems, bugs, ideas for improvements ? Please report at our
           %a{:href => 'https://github.com/opentox/lazar-gui/issues', :rel => "external"} issue tracker
           , check out the 
-          %a{:href=> "//#{ENV['VIRTUAL_HOST']}/predict/faq"} FAQ
+          %a{:href=> "//#{$host_with_port}/predict/faq"} FAQ
           page or send us an email.
           %a{ :href=>"mailto:info@in-silico.ch?subject=[lazar v#{@version}]", :target=>"_top"}
             %span.fa.fa-envelope
           [version: #{@version}]
         %p
           A graphical overview of the service API can be found
-          %a{:href => "//#{ENV['VIRTUAL_HOST']}/api", :rel => "external"} here.
+          %a{:href => "//#{$host_with_port}/api", :rel => "external"} here.
           Please cite
           %a{ :href=>"https://doi.org/10.3389/fphar.2013.00038", :rel=>"external"}
             %img{ :src=>"https://zenodo.org/badge/DOI/10.3389/zenodo.10.3389.svg", :alt=>"DOI"}
@@ -66,7 +66,7 @@
               &copy; 
               %a{:href => 'http://www.in-silico.ch', :rel => "external"} <i style="font-family: serife">in silico</i> toxicology gmbh 2004 - #{Time.now.year.to_s}
               |
-              %a{:href => "//#{ENV['VIRTUAL_HOST']}/predict/license", :rel => "external"} GPL3 License
+              %a{:href => "//#{$host_with_port}/predict/license", :rel => "external"} GPL3 License
         %supporters.row
           %div.card-body.text-center
             %div.card-title
