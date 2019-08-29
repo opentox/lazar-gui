@@ -13,14 +13,14 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "lazar-gui"
   s.files       = `git ls-files`.split("\n")
 
-  s.add_runtime_dependency "lazar"
+  s.add_runtime_dependency "lazar", "~> 1.1"
+  s.add_runtime_dependency "qsar-report", "~> 1.0"
   s.add_runtime_dependency "sinatra"
   s.add_runtime_dependency "sinatra-reloader"
   s.add_runtime_dependency "rdiscount"
   s.add_runtime_dependency "haml"
   s.add_runtime_dependency "sass"
   s.add_runtime_dependency "unicorn"
-  s.add_runtime_dependency "qsar-report"
   s.add_runtime_dependency "gem-path"
 
   s.post_install_message = %q{
