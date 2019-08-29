@@ -18,13 +18,30 @@ PUBCHEM_CID_URI = PUBCHEM_URI.split("/")[0..-3].join("/")+"/compound/"
   "validation.rb"
 ].each{ |f| require_relative "./lib/#{f}" }
 
-configure :production, :development do
+configure :development do
   STDOUT.sync = true  
   $logger = Logger.new(STDOUT)
   $logger.level = Logger::DEBUG
   enable :reloader
   also_reload './helper.rb'
   also_reload './qmrf_report.rb'
+  [
+    "api.rb",
+    "compound.rb",
+    "dataset.rb",
+    "endpoint.rb",
+    "feature.rb",
+    "model.rb",
+    "report.rb",
+    "substance.rb",
+    "swagger.rb",
+    "validation.rb"
+  ].each{ |f| also_reload "./lib/#{f}" }
+end
+
+configure :production do
+  STDOUT.sync = true  
+  $logger = Logger.new(STDOUT)
   [
     "api.rb",
     "compound.rb",
