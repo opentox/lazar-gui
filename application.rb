@@ -42,18 +42,6 @@ end
 configure :production do
   STDOUT.sync = true  
   $logger = Logger.new(STDOUT)
-  [
-    "api.rb",
-    "compound.rb",
-    "dataset.rb",
-    "endpoint.rb",
-    "feature.rb",
-    "model.rb",
-    "report.rb",
-    "substance.rb",
-    "swagger.rb",
-    "validation.rb"
-  ].each{ |f| also_reload "./lib/#{f}" }
 end
 
 before do
