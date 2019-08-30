@@ -21,7 +21,7 @@ PUBCHEM_CID_URI = PUBCHEM_URI.split("/")[0..-3].join("/")+"/compound/"
 configure :production, :development do
   STDOUT.sync = true  
   $logger = Logger.new(STDOUT)
-  $logger.level = Logger::DEBUG
+  #$logger.level = Logger::DEBUG
 end
 
 before do
@@ -42,7 +42,7 @@ before do
   if request.path =~ /predict/
     @accept = request.env['HTTP_ACCEPT'].split(",").first
     response['Content-Type'] = @accept
-    halt 400, "Mime type #{@accept} is not supported." unless @accept == "text/html" || "*/*"
+    halt 400, "Mime type #{@accept} is not supported." unless @accept == "text/html" or @accept == "*/*"
     @version = File.read("VERSION").chomp
   else
     @accept = request.env['HTTP_ACCEPT'].split(",").first
