@@ -11,16 +11,7 @@
   "servers": [
     {
       "url": "SERVER_URI",
-      "description": "The API server",
-      "variables": {
-        "env": {
-          "enum": [
-            "prod",
-            "dev"
-          ],
-          "default": "prod"
-        }
-      }
+      "description": "The API server"
     }
   ],
   "info": {
