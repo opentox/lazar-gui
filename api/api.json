@@ -1,6 +1,6 @@
 {
   "openapi": "3.0.0",
-  "x-orn-@id": "https://lazar.prod.openrisknet.org",
+  "x-orn-@id": "SERVER_URI",
   "x-orn-@type": "x-orn:Service",
   "x-orn-@context": {
     "@vocab": "http://openrisknet.org/schema#",
@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "https://lazar.{env}.openrisknet.org/",
+      "url": "SERVER_URI",
       "description": "The API server",
       "variables": {
         "env": {
@@ -64,7 +64,7 @@
     "/compound/descriptor": {
       "get": {
         "x-orn-@type": "x-orn:Descriptor",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/descriptor",
+        "x-orn:path": "SERVER_URI/compound/descriptor",
         "x-orn:method": "Get",
         "x-orn:returns": {
 					"Openbabel.HBA1": "Number of Hydrogen Bond Acceptors 1 (JoelLib)",
@@ -445,7 +445,7 @@
       },
       "post": {
         "x-orn-@type": "x-orn:Prediction",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/descriptor",
+        "x-orn:path": "SERVER_URI/compound/descriptor",
         "x-orn:method": "Post",
         "tags": [
           "compound",
@@ -492,7 +492,7 @@
     "/compound/descriptor/{descriptor}": {
       "get": {
         "x-orn-@type": "x-orn:Descriptor",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/descriptor/{descriptor}",
+        "x-orn:path": "SERVER_URI/compound/descriptor/{descriptor}",
         "x-orn:method": "Get",
         "tags": [
           "compound",
@@ -535,7 +535,7 @@
     "/compound/{InChI}": {
       "get": {
         "x-orn-@type": "x-orn:Compound",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/compound/{InChI}",
+        "x-orn:path": "SERVER_URI/compound/{InChI}",
         "x-orn:method": "Get",
         "tags": [
           "compound"
@@ -623,7 +623,7 @@
     "/dataset": {
       "get": {
         "x-orn-@type": "x-orn:Dataset",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/dataset",
+        "x-orn:path": "SERVER_URI/dataset",
         "x-orn:method": "Get",
         "tags": [
           "dataset"
@@ -656,7 +656,7 @@
     "/dataset/{id}": {
       "get": {
         "x-orn-@type": "x-orn:Dataset",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/dataset/{id}",
+        "x-orn:path": "SERVER_URI/dataset/{id}",
         "x-orn:method": "Get",
         "tags": [
           "dataset"
@@ -703,7 +703,7 @@
     "/dataset/{id}/{attribute}": {
       "get": {
         "x-orn-@type": "x-orn:Dataset",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/dataset/{id}/{attribute}",
+        "x-orn:path": "SERVER_URI/dataset/{id}/{attribute}",
         "x-orn:method": "Get",
         "tags": [
           "dataset"
@@ -756,7 +756,7 @@
     "/endpoint": {
       "get": {
         "x-orn-@type": "x-orn:Endpoint",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/endpoint",
+        "x-orn:path": "SERVER_URI/endpoint",
         "x-orn:method": "Get",
         "tags": [
           "endpoint"
@@ -789,7 +789,7 @@
     "/endpoint/{endpoint}": {
       "get": {
         "x-orn-@type": "x-orn:Endpoint",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/endpoint",
+        "x-orn:path": "SERVER_URI/endpoint",
         "x-orn:method": "Get",
         "tags": [
           "endpoint"
@@ -825,7 +825,7 @@
     "/feature": {
       "get": {
         "x-orn-@type": "x-orn:Feature",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/feature",
+        "x-orn:path": "SERVER_URI/feature",
         "x-orn:method": "Get",
         "tags": [
           "feature"
@@ -858,7 +858,7 @@
     "/feature/{id}": {
       "get": {
         "x-orn-@type": "x-orn:Feature",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/feature/{id}",
+        "x-orn:path": "SERVER_URI/feature/{id}",
         "x-orn:method": "Get",
         "tags": [
           "feature"
@@ -897,7 +897,7 @@
     "/model": {
       "get": {
         "x-orn-@type": "x-orn:Model",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/model",
+        "x-orn:path": "SERVER_URI/model",
         "x-orn:method": "Get",
         "tags": [
           "model"
@@ -930,7 +930,7 @@
     "/model/{id}": {
       "get": {
         "x-orn-@type": "x-orn:Model",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/model",
+        "x-orn:path": "SERVER_URI/model",
         "x-orn:method": "Get",
         "tags": [
           "model"
@@ -964,7 +964,7 @@
       },
       "post": {
         "x-orn-@type": "x-orn:Prediction",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/model/{id}",
+        "x-orn:path": "SERVER_URI/model/{id}",
         "x-orn:method": "Post",
         "tags": [
           "model"
@@ -1012,7 +1012,7 @@
     "/model/{id}/consensus": {
       "get": {
         "x-orn-@type": "x-orn:Model",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/model",
+        "x-orn:path": "SERVER_URI/model",
         "x-orn:method": "Get",
         "tags": [
           "model"
@@ -1048,7 +1048,7 @@
     "/report": {
       "get": {
         "x-orn-@type": "x-orn:Report",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/report",
+        "x-orn:path": "SERVER_URI/report",
         "x-orn:method": "Get",
         "tags": [
           "report"
@@ -1081,7 +1081,7 @@
     "/report/{id}": {
       "get": {
         "x-orn-@type": "x-orn:Report",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/report/{id}",
+        "x-orn:path": "SERVER_URI/report/{id}",
         "x-orn:method": "Get",
         "tags": [
           "report"
@@ -1117,7 +1117,7 @@
     "/substance": {
       "get": {
         "x-orn-@type": "x-orn:Substance",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/substance",
+        "x-orn:path": "SERVER_URI/substance",
         "x-orn:method": "Get",
         "tags": [
           "substance"
@@ -1150,7 +1150,7 @@
     "/substance/{id}": {
       "get": {
         "x-orn-@type": "x-orn:Substance",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/substance/{id}",
+        "x-orn:path": "SERVER_URI/substance/{id}",
         "x-orn:method": "Get",
         "tags": [
           "substance"
@@ -1189,7 +1189,7 @@
     "/validation": {
       "get": {
         "x-orn-@type": "x-orn:Validation",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/validation",
+        "x-orn:path": "SERVER_URI/validation",
         "x-orn:method": "Get",
         "tags": [
           "validation"
@@ -1222,7 +1222,7 @@
     "/validation/{validationtype}": {
       "get": {
         "x-orn-@type": "x-orn:Validation",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/validation/{validationtype}",
+        "x-orn:path": "SERVER_URI/validation/{validationtype}",
         "x-orn:method": "Get",
         "tags": [
           "validation"
@@ -1261,7 +1261,7 @@
     "/validation/{validationtype}/{id}": {
       "get": {
         "x-orn-@type": "x-orn:Validation",
-        "x-orn:path": "https://lazar.prod.openrisknet.org/validation/{validationtype}/{id}",
+        "x-orn:path": "SERVER_URI/validation/{validationtype}/{id}",
         "x-orn:method": "Get",
         "tags": [
           "validation"
