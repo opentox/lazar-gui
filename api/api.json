@@ -666,10 +666,16 @@
             "description": "OK",
             "content": {
               "text/csv": {
-                "x-orn:returns": "text/csv"
+                "x-orn:returns": "text/csv",
+                "schema": {
+                  "type": "object"
+                }
               },
-              "application/csv": {
-                "x-orn:returns": "text/csv"
+              "application/json": {
+                "x-orn:returns": "application/json",
+                "schema": {
+                  "type": "object"
+                }
               }
             }
           },
