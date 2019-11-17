@@ -52,6 +52,80 @@
         }
       }
     },
+    "/authenticate/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Login against SSO to get an access token. To get an authentication token you will need a password. To set one up go to your [account page](https://sso.prod.openrisknet.org/auth/realms/openrisknet/account), login through the GitHub or LinkedIn Identity Provider, and then you can set yourself a password (goto the Password section). Then you should be able to obtain an API token with that username and password. It also allowes you to configure 2FA.",
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        },
+        "requestBody": {
+          "description": "`onetimetoken` is an **optional** parameter and used if you enabled 2FA.\n",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "x-orn:schema": "application/x-www-form-urlencoded",
+              "schema": {
+                "$ref": "#/components/schemas/postlogin"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/authenticate/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "description": "Logout",
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        },
+        "requestBody": {
+          "description": "Credentials.\n",
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "x-orn:schema": "application/x-www-form-urlencoded",
+              "schema": {
+                "$ref": "#/components/schemas/postlogout"
+              }
+            }
+          }
+        }
+      }
+    },
     "/compound/descriptor": {
       "get": {
         "x-orn-@type": "x-orn:Descriptor",
@@ -1304,6 +1378,10 @@
       "description": "Swagger API representation in JSON"
     },
     {
+      "name": "auth",
+      "description": "Authorization"
+    },
+    {
       "name": "compound",
       "description": "Compound"
     },
@@ -1366,6 +1444,28 @@
             "example": "Openbabel.MW,Openbabel.atoms"
           }
         }
+      },
+      "postlogin": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "onetimetoken": {
+            "type": "string"
+          }
+        }
+      },
+      "postlogout": {
+        "type": "object",
+        "properties": {
+          "subjectid": {
+            "type": "string"
+          }
+        }
       }
     },
     "parameters": {
@@ -1415,6 +1515,30 @@
         "in": "header",
         "name": "subjectid",
         "description": "authorization token",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "username": {
+        "in": "header",
+        "name": "username",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "password": {
+        "in": "header",
+        "name": "password",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "onetimetoken": {
+        "in": "header",
+        "name": "onetimetoken",
         "required": false,
         "schema": {
           "type": "string"

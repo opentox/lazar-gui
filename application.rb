@@ -7,6 +7,7 @@ require_relative 'helper.rb'
 include OpenTox
 
 [
+  "aa.rb",
   "api.rb",
   "compound.rb",
   "dataset.rb",
@@ -29,6 +30,7 @@ configure :production, :development do
   also_reload './prediction.rb'
   also_reload './batch.rb'
   [
+    "aa.rb",
     "api.rb",
     "compound.rb",
     "dataset.rb",
@@ -46,6 +48,7 @@ before do
   $paths = [
   "/",
   "api",
+  "authenticate",
   "compound",
   "dataset",
   "endpoint",
@@ -58,6 +61,11 @@ before do
   if request.path == "/" || $paths.include?(request.path.split("/")[1])
     @accept = request.env['HTTP_ACCEPT']
     response['Content-Type'] = @accept
+    auths = ["compound","dataset","endpoint","feature","model","report","substance","validation"]
+    if auths.include?(request.path.split("/")[1])
+      valid = Authorization.is_token_valid(request.env['HTTP_SUBJECTID'])
+      bad_request_error "Not authorized." unless valid
+    end
   else
     @version = File.read("VERSION").chomp
   end
