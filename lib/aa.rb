@@ -2,9 +2,9 @@ post "/authenticate/login/?" do
   bad_request_error "Please send formdata username." unless params[:username]
   bad_request_error "Please send formdata password." unless params[:password]
   if OpenTox::Authorization.authenticate(params[:username], params[:password], params[:onetimetoken])
-    return "Successfully logged in.\n Baerer Token: #{OpenTox::RestClientWrapper.subjectid}".to_json
+    return {"subjectid": "#{OpenTox::RestClientWrapper.subjectid}"}.to_json
   else
-    return "nil".to_json
+    unauthorized_error "Unable to register user."
   end
 end
 
@@ -14,7 +14,7 @@ post "/authenticate/logout/?" do
   if OpenTox::Authorization.logout
     return "Successfully logged out. \n".to_json
   else
-    return "Logout failed.\n".to_json
+    unauthorized_error "Logout failed."
   end
 end
 

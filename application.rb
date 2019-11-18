@@ -64,7 +64,7 @@ before do
     auths = ["compound","dataset","endpoint","feature","model","report","substance","validation"]
     if auths.include?(request.path.split("/")[1])
       valid = Authorization.is_token_valid(request.env['HTTP_SUBJECTID'])
-      bad_request_error "Not authorized." unless valid
+      unauthorized_error "Unauthorized." unless valid
     end
   else
     @version = File.read("VERSION").chomp
