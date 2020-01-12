@@ -1,5 +1,9 @@
 %link{ :href=>"/jsme/jsa.css", :rel=>"stylesheet", :property=>"stylesheet"}
 %script{:src=>"/jsme/jsme.nocache.js"}
+%script{ :src=>"/javascripts/keycloak.min.js"}
+:javascript
+  var keycloak = Keycloak();
+  keycloak.init({ onLoad: 'login-required'})
 // whole site content needs to be in one form. Input and checkboxes are proofed by js functions.
 %form{:name => "form", :action => "//#{$host_with_port}/predict", :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
   %fieldset#top.card.bg-light

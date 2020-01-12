@@ -2,10 +2,12 @@ require 'rdiscount'
 require_relative 'qmrf_report.rb'
 require_relative 'task.rb'
 require_relative 'helper.rb'
+require_relative 'rest-client-wrapper-helper.rb'
 include OpenTox
 PUBCHEM_CID_URI = PUBCHEM_URI.split("/")[0..-3].join("/")+"/compound/"
 
 [
+  "aa.rb",
   "api.rb",
   "compound.rb",
   "dataset.rb",
@@ -18,33 +20,26 @@ PUBCHEM_CID_URI = PUBCHEM_URI.split("/")[0..-3].join("/")+"/compound/"
   "validation.rb"
 ].each{ |f| require_relative "./lib/#{f}" }
 
-configure :production, :development do
+configure :production do
+  STDOUT.sync = true  
+  $logger = Logger.new(STDOUT)
+end
+
+configure :development do
   STDOUT.sync = true  
   $logger = Logger.new(STDOUT)
   $logger.level = Logger::DEBUG
-  enable :reloader
-  also_reload './helper.rb'
-  also_reload './qmrf_report.rb'
-  [
-    "api.rb",
-    "compound.rb",
-    "dataset.rb",
-    "endpoint.rb",
-    "feature.rb",
-    "model.rb",
-    "report.rb",
-    "substance.rb",
-    "swagger.rb",
-    "validation.rb"
-  ].each{ |f| also_reload "./lib/#{f}" }
 end
 
 before do
   # use this hostname method instead to('/')
   # allowes to set https for xhr requests
-  $host_with_port = request.host =~ /localhost/ ? request.host_with_port : request.host
+  #$host_with_port = request.host =~ /localhost/ ? request.host_with_port : request.host
+  $host_with_port = request.host_with_port
   $paths = [
+  "/",
   "api",
+  "authenticate",
   "compound",
   "dataset",
   "endpoint",
@@ -54,14 +49,16 @@ before do
   "substance",
   "swagger",
   "validation"]
-  if request.path =~ /predict/
+  if request.path == "/" || $paths.include?(request.path.split("/")[1])
     @accept = request.env['HTTP_ACCEPT'].split(",").first
     response['Content-Type'] = @accept
-    halt 400, "Mime type #{@accept} is not supported." unless @accept == "text/html" || "*/*"
-    @version = File.read("VERSION").chomp
+    auths = ["compound","dataset","endpoint","feature","model","report","substance","validation"]
+    if auths.include?(request.path.split("/")[1])
+      valid = Authorization.is_token_valid(request.env['HTTP_SUBJECTID'])
+      halt 401, "Unauthorized." unless valid
+    end
   else
-    @accept = request.env['HTTP_ACCEPT'].split(",").first
-    response['Content-Type'] = @accept
+    @version = File.read("VERSION").chomp
   end
 end
 

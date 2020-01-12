@@ -1,0 +1,8 @@
+{
+  "realm": "openrisknet",
+  "auth-server-url": "https://sso.prod.openrisknet.org/auth",
+  "ssl-required": "external",
+  "resource": "lazar",
+  "public-client": true,
+  "confidential-port": 0
+}

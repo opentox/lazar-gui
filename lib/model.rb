@@ -5,23 +5,40 @@ get "/api/model/?" do
   models = Model::Validation.all
   case @accept
   when "text/uri-list"
-    uri_list = models.collect{|model| uri("/api/model/#{model.id}")}
+    uri_list = models.collect{|model| uri("/model/#{model.id}")}
     return uri_list.join("\n") + "\n"
   when "application/json"
     models = JSON.parse models.to_json
     list = []
-    models.each{|m| list << uri("/api/model/#{m["_id"]["$oid"]}")}
+    models.each{|m| list << uri("/model/#{m["_id"]["$oid"]}")}
     return list.to_json
   else
-    halt 400, "Mime type #{@accept} is not supported."
+    bad_request_error "Mime type #{@accept} is not supported."
   end
 end
 
 get "/api/model/:id/?" do
   model = Model::Validation.find params[:id]
-  halt 400, "Model with id: #{params[:id]} not found." unless model
+  not_found_error "Model with id: #{params[:id]} not found." unless model
   model["training_dataset"] = model.model.training_dataset.id.to_s
   return model.to_json
+end
+
+get "/api/model/:id/consensus/?" do
+  model = Model::Validation.find params[:id]
+  not_found_error "Model with id: #{params[:id]} not found." unless model
+  cvs = model.crossvalidations
+  out = {}
+  cvs.each_with_index do |cv,idx|
+    out[idx] = {"accuracy" => cv.accuracy}
+    cv.true_rate.each do |key,value|
+      key =~ /^non/ ? out[idx].merge!({"true_negative_rate" => value}) : out[idx].merge!({"true_positive_rate" => value})
+    end
+    cv.predictivity.each do |key,value|
+      key =~ /^non/ ? out[idx].merge!({"negative_predictiv_value" => value}) : out[idx].merge!({"positive_predictiv_value" => value})
+    end
+  end
+  return out.to_json
 end
 
 post "/api/model/:id/?" do
@@ -145,8 +162,8 @@ post "/api/model/:id/?" do
       @task.save
     end#main task
     tid = @task.id.to_s
-    return 202, "//#{$host_with_port}/task/#{tid}".to_json
+    return 202, to("/task/#{tid}").to_json
   else
-    halt 400, "No accepted content type"
+    bad_request_error "No accepted content type"
   end
 end
