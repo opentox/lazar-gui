@@ -2,7 +2,7 @@
 # @param [Header] Accept one of text/plain, application/json
 # @param [Path] Descriptor name or descriptor ID (e.G.: Openbabel.HBA1, 5755f8eb3cf99a00d8fedf2f)
 # @return [text/plain, application/json] list of all prediction models
-get "/compound/descriptor/?:descriptor?" do
+get "/api/compound/descriptor/?:descriptor?" do
   case @accept
   when "application/json"
     return "#{JSON.pretty_generate PhysChem::DESCRIPTORS} "  unless params[:descriptor]
@@ -15,7 +15,7 @@ get "/compound/descriptor/?:descriptor?" do
   end
 end
 
-post "/compound/descriptor/?" do
+post "/api/compound/descriptor/?" do
   bad_request_error "Missing Parameter " unless params[:identifier] && params[:descriptor]
   descriptors = params['descriptor'].split(',')
   compound = Compound.from_smiles params[:identifier]
@@ -38,7 +38,7 @@ post "/compound/descriptor/?" do
   end
 end
 
-get %r{/compound/(InChI.+)} do |input|
+get %r{/api/compound/(InChI.+)} do |input|
   compound = Compound.from_inchi URI.unescape(input)
   if compound
     response['Content-Type'] = @accept

@@ -1,9 +1,7 @@
 def qmrf_report id
   lazarpath = `gem path lazar`
   lazarpath = File.dirname lazarpath
-  lazarpath = File.dirname lazarpath
   qmrfpath = `gem path qsar-report`
-  qmrfpath = File.dirname qmrfpath
   qmrfpath = File.dirname qmrfpath
   prediction_model = Model::Validation.find id
 	model = prediction_model.model
@@ -153,24 +151,76 @@ def qmrf_report id
     crossvalidations.each do |cv|
       block += "<p>
                   <p>Num folds: #{cv.folds}</p>
-                  <p>Num instances: #{cv.nr_instances}</p>
-                  <p>Num unpredicted: #{cv.nr_unpredicted}</p>"
+                  <p>Predictions number:</p>
+                    <p>all:#{cv.nr_predictions["all"]}</p>
+                    <p>confidence high: #{cv.nr_predictions["confidence_high"]}</p>
+                    <p>confidence low: #{cv.nr_predictions["confidence_low"]}</p>
+                  </p>"
       if model_type =~ /classification/i
-				block += "<p>Accuracy: #{cv.accuracy.signif(3)}</p>
-									<p>Weighted accuracy: #{cv.weighted_accuracy.signif(3)}</p>
-              		<p>True positive rate: #{cv.true_rate[cv.accept_values[0]].signif(3)}</p>
-              		<p>True negative rate: #{cv.true_rate[cv.accept_values[1]].signif(3)}</p>
-              		<p>Positive predictive value: #{cv.predictivity[cv.accept_values[0]].signif(3)}</p>
-              		<p>Negative predictive value: #{cv.predictivity[cv.accept_values[1]].signif(3)}</p>"
+				block += "<p>Accuracy:
+                    <p>all:#{cv.accuracy["all"].signif(3)}</p>
+                    <p>confidence high:#{cv.accuracy["confidence_high"].signif(3)}</p>
+                    <p>confidence_low:#{cv.accuracy["confidence_low"].signif(3)}</p>
+                  </p>
+              		<p>True rate:
+                    <p>all:
+                      <p>#{cv.accept_values[0]}:#{cv.true_rate["all"][cv.accept_values[0]].signif(3)}</p>
+              		    <p>#{cv.accept_values[1]}:#{cv.true_rate["all"][cv.accept_values[1]].signif(3)}</p>
+                    </p>
+                    <p>confidence high:
+                      <p>#{cv.accept_values[0]}:#{cv.true_rate["confidence_high"][cv.accept_values[0]].signif(3)}</p>
+              		    <p>#{cv.accept_values[1]}:#{cv.true_rate["confidence_high"][cv.accept_values[1]].signif(3)}</p>
+                    </p>
+                    <p>confidence low:
+                      <p>#{cv.accept_values[0]}:#{cv.true_rate["confidence_low"][cv.accept_values[0]].signif(3)}</p>
+              		    <p>#{cv.accept_values[1]}:#{cv.true_rate["confidence_low"][cv.accept_values[1]].signif(3)}</p>
+                    </p>
+                  </p>
+              		<p>Predictivity:
+                    <p>all:
+                      <p>#{cv.accept_values[0]}:#{cv.predictivity["all"][cv.accept_values[0]].signif(3)}</p>
+              		    <p>#{cv.accept_values[1]}:#{cv.predictivity["all"][cv.accept_values[1]].signif(3)}</p>
+                    </p>
+                    <p>confidence high:
+                      <p>#{cv.accept_values[0]}:#{cv.predictivity["confidence_high"][cv.accept_values[0]].signif(3)}</p>
+              		    <p>#{cv.accept_values[1]}:#{cv.predictivity["confidence_high"][cv.accept_values[1]].signif(3)}</p>
+                    </p>
+                    <p>confidence low:
+                      <p>#{cv.accept_values[0]}:#{cv.predictivity["confidence_low"][cv.accept_values[0]].signif(3)}</p>
+              		    <p>#{cv.accept_values[1]}:#{cv.predictivity["confidence_low"][cv.accept_values[1]].signif(3)}</p>
+                    </p>
+                  </p>"
 			end
 			if model_type =~ /regression/i
-      	block += "<p>RMSE: #{cv.rmse.signif(3)}</p>
-        					<p>MAE: #{cv.mae.signif(3)}</p>
-        					<p>R<sup>2</sup>: #{cv.r_squared.signif(3)}</p>"
+      	block += "<p>RMSE:
+                    <p>all:#{cv.rmse["all"].signif(3)}</p>
+                    <p>confidence high:#{cv.rmse["confidence_high"].signif(3)}</p>
+                    <p>confidence low:#{cv.rmse["confidence_low"].signif(3)}</p>
+                  </p>
+        					<p>MAE:
+                    <p>all:#{cv.mae["all"].signif(3)}</p>
+                    <p>confidence high:#{cv.mae["confidence_high"].signif(3)}</p>
+                    <p>confidence low:#{cv.mae["confidence_low"].signif(3)}</p>
+                  </p>
+        					<p>R<sup>2</sup>:
+                    <p>all:#{cv.r_squared["all"].signif(3)}</p>
+                    <p>confidence high:#{cv.r_squared["confidence_high"].signif(3)}</p>
+                    <p>confidence low:#{cv.r_squared["confidence_low"].signif(3)}</p>
+                  </p>
+        					<p>Within prediction interval:
+                    <p>all:#{cv.within_prediction_interval["all"]}</p>
+                    <p>confidence high:#{cv.within_prediction_interval["confidence_high"]}</p>
+                    <p>confidence low:#{cv.within_prediction_interval["confidence_low"]}</p>
+                  </p>
+        					<p>Out of prediction interval:
+                    <p>all:#{cv.out_of_prediction_interval["all"]}</p>
+                    <p>confidence high:#{cv.out_of_prediction_interval["confidence_high"]}</p>
+                    <p>confidence low:#{cv.out_of_prediction_interval["confidence_low"]}</p>
+                  </p>"
       end
 			block += "</p>"
 		end 
-    report.value "lmo", "<html><head></head><body><b>3 independent 10-fold crossvalidations:</b>"+block+"</body></html>"
+    report.value "lmo", "<html><head></head><body><b>5 independent 10-fold crossvalidations:</b>"+block+"</body></html>"
   end
 
   # Availability of the external validation set 7.1

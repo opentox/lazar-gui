@@ -16,7 +16,7 @@
   ],
   "info": {
     "description": "REST API webservice for lazar. \n\n*lazar* (lazy structure–activity relationships) is a modular framework for\npredictive toxicology.",
-    "version": "1.4.0",
+    "version": "1.4.2",
     "title": "Lazar REST Service",
     "contact": {
       "name": "in silico toxicology gmbh",
@@ -33,7 +33,7 @@
     "url": "https://github.com/OpenRiskNet/home/blob/master/openshift/deployments/lazar/README.md"
   },
   "paths": {
-    "/api/api.json": {
+    "/api.json": {
       "get": {
         "tags": [
           "api"

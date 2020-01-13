@@ -4,141 +4,8 @@
 :javascript
   var keycloak = Keycloak();
   keycloak.init({ onLoad: 'login-required'})
-
-  var HttpClient = function() {
-    this.get = function(aUrl, aCallback) {
-    var anHttpRequest = new XMLHttpRequest();
-    anHttpRequest.onreadystatechange = function() {
-    if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-      aCallback(anHttpRequest.responseText);
-    }
-      anHttpRequest.open( "GET", aUrl, true );
-      anHttpRequest.send( null );
-    }
-  };
-
-  /*$(function() { 
-    $('a[data-toggle="tab"]').on('click', function (e) {
-      localStorage.setItem('lastTab', $(e.target).attr('href'));
-    });
-    var lastTab = localStorage.getItem('lastTab');
-    if (lastTab) {
-      $('a[href="'+lastTab+'"]').click();
-    }
-  });*/  
-  
-  function getInput(){
-    identifier = document.getElementById("identifier").value.trim();
-    fileselect = document.getElementById("fileselect").value;
-    if (fileselect != ""){
-      return 1;
-    };
-    if (identifier != ""){
-      return 2;
-    };
-    return 0;
-  };
-  function showcircle() {
-    switch (getInput()){
-      case 0:
-        alert("Please draw or insert a chemical structure.");
-        return false;
-        break;
-      case 1:
-        if (checkfile() && checkboxes()){
-          button = document.getElementById("submit");
-          image = document.getElementById("circle");
-          button.parentNode.replaceChild(image, button);
-          $("img.circle").show();
-          return true;
-        };
-        return false;
-        break;
-      case 2:
-        if (checksmiles() && checkboxes()){
-          button = document.getElementById("submit");
-          image = document.getElementById("circle");
-          button.parentNode.replaceChild(image, button);
-          $("img.circle").show();
-          return true;
-        };
-        return false;
-        break;
-      default: false;
-    };
-    return false;
-  };
-  function checkfile() {
-    var fileinput = document.getElementById("fileselect");
-    if(fileinput.value != "") {
-      //TODO check file type is csv
-      return true;
-    };
-    alert("Please select a file (csv).");
-    return false;
-  };
-  function checksmiles () {
-    getsmiles();
-    if (document.form.identifier.value == "") {
-      alert("Please draw or insert a chemical structure.");
-      document.form.identifier.focus();
-      $("img.circle").hide();
-      return false;
-    };
-    return true;
-  };
-  function checkboxes () {
-    var checked = false;
-    $('input[type="checkbox"]').each(function() {
-      if ($(this).is(":checked")) {
-        checked = true;
-      };
-    });
-    if (checked == false){
-      alert("Please select an endpoint.");
-      $("img.circle").hide();
-      return false;
-    };
-    return true;
-  };
-  function jsmeOnLoad() {
-    jsmeApplet = new JSApplet.JSME("appletContainer", "380px", "340px", {
-      //optional parameters
-      "options" : "polarnitro"
-    });
-  document.JME = jsmeApplet;
-  };
-  function getsmiles() {
-    if (document.JME.smiles() != '') {
-      document.form.identifier.value = document.JME.smiles() ;
-    };
-  };
-
-  function loadDetails(id) {
-    button = document.getElementById("link"+id);
-    span = button.childNodes[1];
-    if (span.className == "fa fa-caret-right"){
-      span.className = "fa fa-caret-down";
-    } else if (span.className = "fa fa-caret-down"){
-      span.className = "fa fa-caret-right";
-    };
-    image = document.getElementById("circle"+id);
-    if ($('modeldetails'+id).length == 0) {
-      $(button).hide();
-      $(image).show();
-      aClient = new HttpClient();
-      aClient.get("#{to("/predict/modeldetails/")}"+id, function(response) {
-        var details = document.createElement("modeldetails"+id);
-        details.innerHTML = response;
-        document.getElementById("details"+id).appendChild(details);
-        $(button).show();
-        $(image).hide();
-        addExternalLinks();
-      });
-    }
-  }
-// whole site content needs to be in one form. Input and checkboxes are proofed by js functions. 
-%form{:name => "form", :action => to('/predict'), :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
+// whole site content needs to be in one form. Input and checkboxes are proofed by js functions.
+%form{:name => "form", :action => "//#{$host_with_port}/predict", :method => "post", :enctype => "multipart/form-data", :onsubmit => "return !!(showcircle())" }
   %fieldset#top.card.bg-light
     #insert.card-body
       %h2.card-title 1. Draw a chemical structure
@@ -151,11 +18,13 @@
           %a{:href => "http://en.wikipedia.org/wiki/Simplified_molecular_input_line_entry_specification", :rel => "external"} SMILES
           string:
         %input.form-control{:type => 'text', :name => 'identifier', :id => 'identifier'}
-      %p{:style=>"display:none;"}
+      %p{:style=>("display:none;" unless ENV["BATCH_MODE"].to_boolean)}
         %label{:for=>"fileselect"}
           or upload a CSV file for batch predictions:
         %br
-        %input.form-control-file{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
+        %span.btn.btn-file{:style=>"background-color:white;"}
+          %input.form-control-file{:type=>"file", :name=> "fileselect", :id=>"fileselect", :accept=>"text/csv"}
+        %a.btn.btn-outline-info{:href => "//#{$host_with_port}/predict/help", :rel => "external", :style=>"margin-left: 1em;"} Help
 
   %fieldset#middle.card.bg-light
     #models.card-body
@@ -172,7 +41,7 @@
                   %label{:for => "selection[#{model.species.gsub(/\s+/, "_")}]"}
                     = model.species
                 %span.col-6
-                  %a.btn.btn-outline-info{:role=>"button", :data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :aria=>{:expanded=>"false", :controls=>"details#{model.id}"}, :onclick=>"loadDetails('#{model.id}')", :id => "link#{model.id}", :style=>"font-size:small;"}
+                  %a.btn.btn-outline-info{:role=>"button", :data=>{:toggle=>"collapse"}, :href=>"#details#{model.id}", :aria=>{:expanded=>"false", :controls=>"details#{model.id}"}, :onclick=>"loadDetails('#{model.id}','//#{$host_with_port}/predict/modeldetails/#{model.id}')", :id => "link#{model.id}", :style=>"font-size:small;"}
                     %span.fa.fa-caret-right
                     Details | Validation
                   %img.h2{:src=>"/images/wait30trans.gif", :id=>"circle#{model.id}", :class=>"circle#{model.id}", :alt=>"wait", :style=>"display:none;"}

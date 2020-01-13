@@ -36,8 +36,8 @@ img {
 }
 
 .plot {
-  height: 300px;
-  width: 300px;
+  height: 50%;
+  width: 50%;
 }
 .faq {
   text-align: block;
@@ -66,9 +66,37 @@ ul.share-buttons{
   margin-top:3em;
 }
 .single-batch{
-  width: 100%;
-}
-.single-batch{
   table-layout: fixed;
   width: 100%;
+}
+.help table, .help th, .help td {
+  background-color: white;
+  border: 1px solid black;
+  border-bottom: none;
+  width: 100%;
+}
+.help th, .help td {
+  padding: 10px;
+  text-align: left;
+}
+/*img.supporters {
+  width: 150px;
+  height: 150px;
+}*/
+supporters{
+  background-color: #fff;
+  img{
+    width: 200px;
+    margin: 1em;
+  }
+}
+
+.table td.fit,
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
+}
+
+.modal-body p {
+  word-wrap: break-word;
 }

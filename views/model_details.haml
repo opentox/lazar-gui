@@ -9,149 +9,188 @@
     = "Type:\t"
     = type
     %br
-    - training_dataset = OpenTox::Dataset.find model.model.training_dataset_id
     = "Training compounds:\t"
-    = training_dataset.data_entries.size
+    = data_entries.count/3
     %br
     = "Training dataset:\t"
-    %a{:href=>"#{to("/predict/dataset/#{training_dataset.name}")}"}
+    %a{:href=>"//#{$host_with_port}/predict/dataset/#{training_dataset.name}"}
       = training_dataset.name
 
 %div.card.bg-light
   %div.card-body
     %h6.card-title Algorithms:
-    Similarity:
-    %a{:href=> "http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["similarity"]["method"].sub("::", "%2F")}", :rel=>"external"}
-      = model.model.algorithms["similarity"]["method"]
-    = ", min: #{model.model.algorithms["similarity"]["min"]}"
-    %br
-    Prediction:
-    - if model.model.algorithms["prediction"]["method"] !~ /Caret/
-      %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
-        = model.model.algorithms["prediction"]["method"]
-    - else
-      %a{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox/Algorithm/Caret", :rel=>"external"}
-        = model.model.algorithms["prediction"]["method"]
+    %p.card-text
+      Similarity:
+      %a.card-link{:href=> "http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["similarity"]["method"].sub("::", "%2F")}", :rel=>"external"}
+        = model.model.algorithms["similarity"]["method"]
+      = ", min: #{model.model.algorithms["similarity"]["min"]}"
+      %br
+      Prediction:
+      - if model.model.algorithms["prediction"]["method"] !~ /Caret/
+        %a.card-link{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox%2F#{model.model.algorithms["prediction"]["method"].sub("::","%2f")}", :rel=>"external"}
+          = model.model.algorithms["prediction"]["method"]
+      - else
+        %a.card-link{:href=>"http://www.rubydoc.info/gems/lazar/OpenTox/Algorithm/Caret", :rel=>"external"}
+          = model.model.algorithms["prediction"]["method"]
 
-    %br
-    Descriptors:
-    = model.model.algorithms["descriptors"]["method"]+","
-    = model.model.algorithms["descriptors"]["type"]
+      %br
+      Descriptors:
+      = model.model.algorithms["descriptors"]["method"]+","
+      = model.model.algorithms["descriptors"]["type"]
 
 %div.card.bg-light
   %div.card-body
     - if type == "Classification"
-      %h6.card-title Independent crossvalidations:
+      %h6.card-title #{crossvalidations.size} independent 10-fold crossvalidations:
     - else
-      %h6.card-title Independent crossvalidations (-log10 transformed):
-    %div.row{:id=>"validations#{model.id}"}
-      - crossvalidations.each do |cv|
-        %span.col-4
-          = "Num folds:\t"
-          = cv.folds
-          %br
-          = "Num instances:\t"
-          = cv.nr_instances
-          %br
-          = "Num unpredicted"
-          = cv.nr_unpredicted
-          - if model.classification? 
-            %br
-            = "Accuracy:\t"
-            = cv.accuracy.round(3) if cv.accuracy
-            %br
-            = "Weighted accuracy:\t"
-            = cv.weighted_accuracy.round(3) if cv.weighted_accuracy
-            - if cv.true_rate
-              %br
-              = "True positive rate:\t"
-              = cv.true_rate[cv.accept_values[0]].round(3)
-              %br
-              = "True negative rate:\t"
-              = cv.true_rate[cv.accept_values[1]].round(3)
-            - if cv.predictivity
-              %br 
-              = "Positive predictive value:\t"
-              = cv.predictivity[cv.accept_values[0]].round(3)
-              %br
-              = "Negative predictive value:\t"
-              = cv.predictivity[cv.accept_values[1]].round(3)
-            %p
-            - ["confusion_matrix", "weighted_confusion_matrix"].each_with_index do |matrix,idx|
-              %b= (idx == 0 ? "Confusion Matrix" : "Weighted Confusion Matrix")
-              %div.table-responsive
-                %table.table.table-sm.table-borderless
-                  %tbody
-                    %tr
-                      %td
-                      %td
-                      %td 
-                        %b actual
-                      %td
-                      %td
-                    %tr
-                      %td
-                      %td
-                      %td active
-                      %td inactive
-                      -#%td total
-                    %tr
-                      %td 
-                        %b predicted
-                      %td active
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[0][0].round(3) : cv.send(matrix)[0][0])
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[0][1].round(3) : cv.send(matrix)[0][1])
-                      -#%td 
-                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[0][1]
-                    %tr
-                      %td
-                      %td inactive
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[1][0].round(3) : cv.send(matrix)[1][0])
-                      %td 
-                        =( idx == 1 ? cv.send(matrix)[1][1].round(3) : cv.send(matrix)[1][1])
-                      -#%td 
-                        =cv.confusion_matrix[1][0]+cv.confusion_matrix[1][1]
-                    -#%tr
-                      %td
-                      %td total
-                      %td
-                        =cv.confusion_matrix[0][0]+cv.confusion_matrix[1][0]
-                      %td
-                        =cv.confusion_matrix[0][1]+cv.confusion_matrix[1][1]
-                      %td
-                        -#= "Confusion Matrix:\t"
-                        -#= cv.confusion_matrix
-                    %br
-            %br
-            /= "Confidence plot:"
-            /%p.plot
-            /  %img{:src=>"confp#{cv.id}.svg"}
-          - if model.regression?
-            %br
-            %a{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"} RMSE:
-            = cv.rmse.round(3) if cv.rmse
-            %br
-            %a{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"} MAE:
-            = cv.mae.round(3) if cv.mae
-            %br 
-            %a{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"+":"
-            = cv.r_squared.round(3) if cv.r_squared
-            %br
-            /= "Confidence plot:"
-            /%p.plot
-            /  %img{:src=>"/confp#{cv.id}.svg"}
-            /%br
-            /= "Correlation plot"
-            /%p.plot
-            /  %img{:src=>"/corrp#{cv.id}.svg"}
-          
+      %h6.card-title #{crossvalidations.size} independent 10-fold crossvalidations (-log10 transformed):
+    - crossvalidations.each_with_index do |cv,idx|
+      %p.card-text
+        - if model.classification?
+          / accuracy, confusion matrixes
+          - accept_values = cv.accept_values
+          - av = []
+          - if accept_values[1] =~ /^non/
+            - av << accept_values[0]
+            - av << accept_values[1]
+          - else
+            - av = accept_values
+          - keys = cv.accuracy.collect{|key, value| key}
+          - acc = cv.accuracy.collect{|key, value| value.signif(3)}
+          - tpr = cv.true_rate.collect{|key, hash| hash[av[0]].signif(3)}
+          - fpr = cv.true_rate.collect{|key, hash| hash[av[1]].signif(3)}
+          - pp = cv.predictivity.collect{|key, hash| hash[av[0]].signif(3)}
+          - np = cv.predictivity.collect{|key, hash| hash[av[1]].signif(3)}
+          %table.table.table-bordered.table-responsive.text-center.bg-white
+            %tr
+              %td.text-center.bg-light
+                = "Nr.#{idx+1}"
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Accuracy_and_precision", :rel=>"external"}
+                  Accuracy
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
+                  True positive rate (Sensitivity, Recall)
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Sensitivity_and_specificity", :rel=>"external"}
+                  True negative rate (Specificity)
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values", :rel=>"external"}
+                  Positive predictive value (Precision)
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Positive_and_negative_predictive_values", :rel=>"external"}
+                  Negative predictive value
+            - keys.each_with_index do |key,idx|
+              %tr
+                / keys
+                %td.fit.text-right= key.gsub("_", " ")
+                / acc,accuray value:
+                %td= acc[idx]
+                / tpr,true positive rate
+                %td= tpr[idx]
+                / fpr,false positive rate
+                %td= fpr[idx]
+                / pp,positive predictions
+                %td= pp[idx]
+                / np,negative predictions
+                %td= np[idx]
+          %div.row.justify-content-center
+            %h6 Confusion matrix
+          %div.row{:id=>"matrix#{model.id}#{idx}"}
+            %table.table.table-borderless.table-responsive
+              %tr
+                %td.fit.text-center all
+                %td.fit.text-center confidence high
+                %td.fit.text-center confidence low
+              %tr.justify-content-around
+                / confusion matrix
+                - keys.each do |key|
+                  - matrix = cv.confusion_matrix[key]
+                  %td
+                    %table.table-sm.text-center
+                      %tr
+                        %td
+                        %td
+                        %td{:colspan=>"2"} measured
+                        %td
+                      %tr
+                        %td
+                        %td
+                        %td.border.bg-secondary.text-white active
+                        %td.border.bg-secondary.text-white inactive
+                      %tr
+                        %td.align-middle{:rowspan=>"2"} predicted
+                        %td.border.bg-secondary.text-white active
+                        %td.border.bg-white
+                          %b= matrix[0][0]
+                        %td.border.bg-white
+                          = matrix[0][1]
+                      %tr
+                        //%td
+                        %td.border.bg-secondary.text-white inactive
+                        %td.border.bg-white
+                          = matrix[1][0]
+                        %td.border.bg-white
+                          %b= matrix[1][1]
+          %div.row.justify-content-center
+            %h6 Probability plot
+          %div.row
+            %div.plot.mx-auto{:id=>"pplot#{model.id}#{idx}"}
+              %img{:src=>"/#{cv.id}.png", :alt=>"#{cv.id}.png"}
+
+        / regression
+        - if model.regression?
+          / rmse, mae, r_squared, pred nr, within intv, out intv
+          - keys = cv.rmse.collect{|key, value| key}
+          - rmse = cv.rmse.collect{|key, value| value.signif(3)}
+          - mae = cv.mae.collect{|key, value| value.signif(3)}
+          - rsq = cv.r_squared.collect{|key, value| value.signif(3)}
+          - nrp = cv.nr_predictions.collect{|key,value| value}
+          - wpi = cv.within_prediction_interval.collect{|key,value| value}
+          - opi = cv.out_of_prediction_interval.collect{|key,value| value}
+          %table.table.table-bordered.table-responsive.text-center.bg-white
+            %tr
+              %td.text-center.bg-light
+                = "Nr.#{idx+1}"
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Root-mean-square_deviation", :rel=>"external"}
+                  RMSE
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Mean_absolute_error", :rel=>"external"}
+                  MAE
+              %td
+                %a{:href=>"https://en.wikipedia.org/wiki/Coefficient_of_determination", :rel=>"external"}= "R"+"<sup>2</sup>"
+              %td Number of predictions
+              %td Within prediction interval
+              %td Out of prediction interval
+            - keys.each_with_index do |key,idx|
+              %tr
+                / keys
+                %td.fit.text-right= key.gsub("_", " ")
+                / rsme:
+                %td= rmse[idx]
+                / mae:
+                %td= mae[idx]
+                / r_squared:
+                %td= rsq[idx]
+                / Predictions number:
+                %td= nrp[idx]
+                / Within prediction interval:
+                %td= wpi[idx]
+                / Out of prediction interval:
+                %td= opi[idx]
+          %div.row.justify-content-center
+            %h6 Correlation plot
+          %div.row
+            %div.plot.mx-auto{:id=>"cplot#{model.id}#{idx}"}
+              %img{:src=>"/#{cv.id}.png", :alt=>"#{cv.id}.png"}
+        - unless idx == crossvalidations.size-1
+          %hr
+
 %div.card.bg-light
   %div.card-body
     %h6.card-title QMRF:
-    %a.btn.btn-outline-info{:href=>"#{to("/predict/report/#{model.id}")}", :id=>"report#{model.id}", :style=>"font-size:small;"}
+    %a.btn.btn-outline-info{:href=>"//#{$host_with_port}/predict/report/#{model.id}", :id=>"report#{model.id}", :style=>"font-size:small;"}
       %span.fa.fa-download
       XML
 %br

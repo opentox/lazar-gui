@@ -14,8 +14,9 @@ module OpenTox
     field :csv, type: String
     field :dataset_id, type: BSON::ObjectId
     field :model_id, type: BSON::ObjectId
+    field :subTasks, type: Array, default:[]
 
-    attr_accessor :pid, :percent, :predictions, :csv, :dataset_id, :model_id
+    attr_accessor :pid, :percent, :predictions, :csv, :dataset_id, :model_id, :subTasks
 
     def pid
       self[:pid]
@@ -41,6 +42,10 @@ module OpenTox
       self[:model_id]
     end
     
+    def subTasks
+      self[:subTasks]
+    end
+
     def update_percent(percent)
       self[:percent] = percent
       save

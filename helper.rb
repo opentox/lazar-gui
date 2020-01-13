@@ -8,123 +8,41 @@ helpers do
       svg['class'] = options[:class]
     end
     if options[:title].present?
-      title.children.remove
-      text_node = Nokogiri::XML::Text.new(options[:title], doc)
-      title.add_child(text_node)
+      if options[:title] == "x"
+        title.children.remove
+      else
+        title.children.remove
+        text_node = Nokogiri::XML::Text.new(options[:title], doc)
+        title.add_child(text_node)
+      end
     end
     doc.to_html.html_safe
   end
 
-  def prediction_to_csv(m,c,p)
-    model = m
-    model_name = "#{model.endpoint.gsub('_', ' ')} (#{model.species})"
-    model_unit = model.regression? ? "(#{model.unit})" : ""
-    converted_model_unit = model.regression? ? "#{model.unit =~ /\b(mmol\/L)\b/ ? "(mg/L)" : "(mg/kg_bw/day)"}" : ""
-
-    csv = ""
-    compound = c
-    prediction = p
-    output = {}
-    line = ""
-    output["model_name"] = model_name
-    output["model_unit"] = model_unit
-    output["converted_model_unit"] = converted_model_unit
-
-    if prediction[:value]
-      inApp = (prediction[:warnings].join(" ") =~ /Cannot/ ? "no" : (prediction[:warnings].join(" ") =~ /may|Insufficient|Weighted/ ? "maybe" : "yes"))
-      if prediction[:info] =~ /\b(identical)\b/i
-        prediction[:info] = "This compound was part of the training dataset. All information "\
-          "from this compound was removed from the training data before the "\
-          "prediction to obtain unbiased results."
-      end
-      note = "\"#{prediction[:warnings].uniq.join(" ")}\""
-
-      output["prediction_value"] = model.regression? ? "#{prediction[:value].delog10.signif(3)}" : "#{prediction[:value]}"
-      output["converted_value"] = model.regression? ? "#{compound.mmol_to_mg(prediction[:value].delog10).signif(3)}" : nil
-
-      if prediction[:measurements].is_a?(Array)
-        output["measurements"] = model.regression? ? prediction[:measurements].collect{|value| "#{value.delog10.signif(3)}"} : prediction[:measurements].collect{|value| "#{value}"}
-        output["converted_measurements"] = model.regression? ? prediction[:measurements].collect{|value| "#{compound.mmol_to_mg(value.delog10).signif(3)}"} : false
-      else
-        output["measurements"] = model.regression? ? "#{prediction[:measurements].delog10.signif(3)}" : "#{prediction[:measurements]}"
-        output["converted_measurements"] = model.regression? ? "#{compound.mmol_to_mg(prediction[:measurements].delog10).signif(3)}" : false
-
-      end #db_hit
-
-      if model.regression?
-
-        if !prediction[:prediction_interval].blank?
-          interval = prediction[:prediction_interval]
-          output['interval'] = []
-          output['converted_interval'] = []
-          output['interval'] << interval[1].delog10.signif(3)
-          output['interval'] << interval[0].delog10.signif(3)
-          output['converted_interval'] << compound.mmol_to_mg(interval[1].delog10).signif(3)
-          output['converted_interval'] << compound.mmol_to_mg(interval[0].delog10).signif(3)
-        end #prediction interval
-
-        line += "#{output['model_name']},#{compound.smiles},"\
-          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
-          "#{!output['prediction_value'].blank? ? output['prediction_value'] : ""},"\
-          "#{!output['converted_value'].blank? ? output['converted_value'] : ""},"\
-          "#{!prediction[:prediction_interval].blank? ? output['interval'].first : ""},"\
-          "#{!prediction[:prediction_interval].blank? ? output['interval'].last : ""},"\
-          "#{!prediction[:prediction_interval].blank? ? output['converted_interval'].first : ""},"\
-          "#{!prediction[:prediction_interval].blank? ? output['converted_interval'].last : ""},"\
-          "#{inApp},#{note.nil? ? "" : note.chomp}\n"
-      else # Classification
-
-        if !prediction[:probabilities].blank?
-          output['probabilities'] = []
-          prediction[:probabilities].each{|k,v| output['probabilities'] << v.signif(3)}
-        end
-
-        line += "#{output['model_name']},#{compound.smiles},"\
-          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info]}\","\
-          "#{output['prediction_value']},"\
-          "#{!prediction[:probabilities].blank? ? output['probabilities'].first : ""},"\
-          "#{!prediction[:probabilities].blank? ? output['probabilities'].last : ""},"\
-          "#{inApp},#{note.nil? ? "" : note}\n"
-
-      end
-      
-      output['warnings'] = prediction[:warnings] if prediction[:warnings]
-
-    else #no prediction value
-      inApp = "no"
-      if prediction[:info] =~ /\b(identical)\b/i
-        prediction[:info] = "This compound was part of the training dataset. All information "\
-          "from this compound was removed from the training data before the "\
-          "prediction to obtain unbiased results."
-      end
-      note = "\"#{prediction[:warnings].join(" ")}\""
-
-      output['warnings'] = prediction[:warnings]
-      output['info'] = prediction[:info] if prediction[:info]
-
-      if model.regression?
-        line += "#{output['model_name']},#{compound.smiles},#{prediction[:info] ? prediction[:info] : "no"},"\
-          "#{prediction[:measurements].collect{|m| m.delog10.signif(3)}.join("; ") if prediction[:info]},,,,,,,"+ [inApp,note].join(",")+"\n"
-      else
-        line += "#{output['model_name']},#{compound.smiles},"\
-          "\"#{prediction[:info] ? prediction[:info] : "no"}\",\"#{output['measurements'].join("; ") if prediction[:info] && !output['measurements'].blank?}\","\
-          "#{output['prediction_value']},"\
-          "#{!prediction[:probabilities].blank? ? output['probabilities'].first : ""},"\
-          "#{!prediction[:probabilities].blank? ? output['probabilities'].last : ""},"\
-          "#{inApp},#{note.nil? ? "" : note}\n"
-      end
-
-    end
-    csv += line
-    # output
-    csv
+  def is_mongoid?
+    self.match(/^[a-f\d]{24}$/i) ? true : false
   end
 
-  def dataset_storage
-    all = Batch.where(:source => /^tmp/)
-    out = Hash.new
-    all.reverse.each{|d| out[d.id] = [d.name, d.created_at]}
-    out
-  end  
+  def remove_task_data(pid)
+    task = Task.find_by(:pid => pid)
+    if task and !task.subTasks.blank?
+      task.subTasks.each_with_index do |task_id,idx|
+        t = Task.find task_id
+        predictionDataset = Dataset.find t.dataset_id if t.dataset_id
+        if predictionDataset && idx == 0
+          trainingDataset = Dataset.find predictionDataset.source
+          predictionDataset.delete
+          # delete training dataset unless it is one used for prediction models
+          models = Model::Validation.all
+          training_datasets = models.collect{|m| m.training_dataset.id.to_s}
+          trainingDataset.delete unless training_datasets.include?(trainingDataset.id.to_s)
+        elsif predictionDataset
+          predictionDataset.delete
+        end
+        t.delete
+      end
+    end
+    task.delete if task
+  end
 
 end

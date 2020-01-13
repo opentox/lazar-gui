@@ -6,7 +6,7 @@
   %button.close{ :type=>" button", data: { dismiss:"modal"}} &times;
   %h3
     Names and synonyms:
-  %p= @compound.svg
+  %p= embedded_svg(@compound.svg, :title=>"x")
   %p
   %b="SMILES:"
   %p= @smiles
@@ -14,6 +14,11 @@
   %b="InChI:"
   %p= @inchi
   %br
+  - cid = @compound.cid
+  - if cid
+    %b="CID:"
+    %p= cid
+    %br
   %b="Names:"
   %p{:style=>"padding-left:0.5em;"}
   - if @names !~ /^no names/i
@@ -23,6 +28,9 @@
   %hr
   %p{:style=>"padding-left:0.5em;"}
     / pubchem link
-    %a.btn.btn-primary{:href=>"http://aop.in-silico.ch/", :title=>"Link opens in new window.", :alt=>"pubchem read across", :rel=>"external"} PubChem read across 
+    - if cid
+      %a.btn.btn-primary{:href=>"http://aop.in-silico.ch/cid/#{cid}", :title=>"Link opens in new window.", :alt=>"pubchem read across", :rel=>"external"} PubChem read across 
+    - else
+      %a.btn.btn-primary{:href=>"http://aop.in-silico.ch/", :title=>"Link opens in new window.", :alt=>"pubchem read across", :rel=>"external"} PubChem read across 
     %i (experimental)
   %br

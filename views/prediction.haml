@@ -1,30 +1,23 @@
-:javascript
-  $(document).ready(function(){
-    $('[data-toggle="popover"]').popover();
-    $('.modal').on('hidden.bs.modal', function () {
-      $(this).removeData('bs.modal');
-    });
-    $('.modal').on('show.bs.modal', function(e){
-      var button = $(e.relatedTarget);
-      var modal = $(this);
-      modal.find('.modal-content').load(button.data("remote"));
-    });
-  });
 %div.card
-  %a.btn.btn-warning{:href => to('/predict')}
+  %a.btn.btn-outline-info{:href => "//#{$host_with_port}/predict"}
     %span.fa.fa-caret-left
     New Prediction
 %div.card.bg-light
   %div.card-body
-    %h3.card-title Prediction Results:
+    %h3.card-title Prediction:
     %div.table-responsive
       %table.table.table-bordered{:id=>"overview"}
         %tbody
           %tr
             %td.align-items-center{:id=>"compound"}
-              %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: to("/prediction/#{@compound.id}/details"), :id=>"link01"}}
-                = @compound.svg
+              %a.btn.btn-link{:href => "#details0", data: { toggle: "modal", remote: "//#{$host_with_port}/prediction/#{@compound.id}/details", :id=>"link01"}}
+                = embedded_svg(@compound.svg, :title=>"click for details")
               %p= @compound.smiles
+              - if @compound.cid && @compound.cid != "0"
+                %p
+                  %a{:href=>PUBCHEM_CID_URI+@compound.cid, :rel => "external"}
+                    PubChem
+                    %span.fa.fa-xs.fa-external-link
             - @model_types = {}
             - @dbhit = {}
             - @predictions.each_with_index do |prediction,i|
@@ -71,9 +64,9 @@
                     %br
                     = (type == "Regression") ? "#{prediction[:value].delog10.signif(3)} (#{unit})</br>#{@compound.mmol_to_mg(prediction[:value].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" : prediction[:value]
                     
-                    / show prediction interval or probability
+                  / show prediction interval or probability
+                  - if type == "Regression"
                     %p
-                    - if type == "Regression"
                       %b 95% Prediction interval:
                       - interval = (prediction[:prediction_interval].nil? ? nil : prediction[:prediction_interval])
                       / prediction interval popover
@@ -82,7 +75,12 @@
                       = interval.nil? ? "--" : "#{interval[1].delog10.signif(3)} - #{interval[0].delog10.signif(3)} (#{unit})"
                       %br
                       = "#{@compound.mmol_to_mg(interval[1].delog10).signif(3)} - #{@compound.mmol_to_mg(interval[0].delog10).signif(3)} #{(unit =~ /\b(mmol\/L)\b/) ? "(mg/L)" : "(mg/kg_bw/day)"}" if !interval.nil?
-                    - else
+                    %p
+                      %b Confidence:
+                      %br
+                      = prediction[:confidence]
+                  - else
+                    %p
                       %b Probability:
                       / probability popover
                       %a.btn.fa.fa-info-circle{:href=>"javascript:void(0)", :title=>"Pobability", :tabindex=>"0", data: {trigger:"focus", toggle:"popover", placement:"left", html:"true", content:"Probability that the prediction belongs to one of the given classes."}}
@@ -91,29 +89,34 @@
                         - prediction[:probabilities].each do |pp|
                           = "#{pp[0]}: #{pp[1].signif(3)}"
                           %br
-                  
+                          = "#{prediction[:probabilities].keys[1]}: #{prediction[:probabilities].values[1].signif(3)}"
+                    %p
+                      %b Confidence:
+                      %br
+                      = prediction[:confidence]
+
                   / show warnings and info
                   %p
-                    - if !prediction[:info].blank?
+                    - unless @dbhit[i] || prediction[:info].blank?
                       %b Info:
                       %br
                       %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                    - if !prediction[:warnings].blank?
+                    - unless prediction[:warnings].blank?
+                      - warning = prediction[:warnings].last
                       %b Warnings:
-                      - prediction[:warnings].uniq.each do |warning|
-                        %p=warning #.sub(/,/, ",<br>")
-                        /%p=warning.sub(/substances/, "substances<br>").sub(/prediction\:/, "prediction\:<br>")
+                      %br
+                      %p=warning#.sub(/,/, ",<br>")
                 - else
                   %br
-                  - if !prediction[:info].blank?
+                  - unless @dbhit[i] || prediction[:info].blank?
                     %b Info:
                     %br
                     %p=prediction[:info].sub(/\'.*\'/,"").sub(/,/, ",<br>")
-                  - if !prediction[:warnings].blank?
+                  - unless prediction[:warnings].blank?
+                    - warning = prediction[:warnings].last
                     %b Warnings:
-                    - prediction[:warnings].uniq.each do |warning|
-                      %br
-                      %p=warning.sub(/,/, ",<br>")
+                    %br
+                    %p=warning#.sub(/,/, ",<br>")
 
 / always show the neighbors table, message is given there  
 = haml :neighbors, :layout => false, :model_type => @model_types, :dbhit => @dbhit

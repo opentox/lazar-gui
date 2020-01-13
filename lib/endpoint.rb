@@ -1,7 +1,7 @@
 # Get a list of all endpoints
 # @param [Header] Accept one of text/uri-list,
 # @return [text/uri-list] list of all prediction models
-get "/endpoint/?" do
+get "/api/endpoint/?" do
   models = Model::Validation.all
   endpoints = models.collect{|m| m.endpoint}.uniq
   case @accept
@@ -10,14 +10,14 @@ get "/endpoint/?" do
   when "application/json"
     return endpoints.to_json
   else
-    bad_request_error "Mime type #{@accept} is not supported."
+    halt 400, "Mime type #{@accept} is not supported."
   end
 end
 
-get "/endpoint/:endpoint/?" do
+get "/api/endpoint/:endpoint/?" do
   models = Model::Validation.where(endpoint: params[:endpoint])
   list = []
-  models.each{|m| list << {m.species => uri("/model/#{m.id}")} }
-  not_found_error "Endpoint: #{params[:endpoint]} not found." if models.blank?
+  models.each{|m| list << {m.species => uri("/api/model/#{m.id}")} }
+  halt 404, "Endpoint: #{params[:endpoint]} not found." if models.blank?
   return list.to_json
 end

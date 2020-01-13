@@ -1,6 +1,6 @@
-post "/authenticate/login/?" do
-  bad_request_error "Please send formdata username." unless params[:username]
-  bad_request_error "Please send formdata password." unless params[:password]
+post "/api/authenticate/login/?" do
+  halt 400, "Please send formdata username." unless params[:username]
+  halt 400, "Please send formdata password." unless params[:password]
   if OpenTox::Authorization.authenticate(params[:username], params[:password], params[:onetimetoken])
     return {"subjectid": "#{OpenTox::RestClientWrapper.subjectid}"}.to_json
   else
@@ -8,9 +8,9 @@ post "/authenticate/login/?" do
   end
 end
 
-post "/authenticate/logout/?" do
-  bad_request_error "Please send formdata subjectid." unless params[:subjectid]
-  bad_request_error "Invalid subjectid." unless OpenTox::Authorization.is_token_valid(params[:subjectid])
+post "/api/authenticate/logout/?" do
+  halt 400, "Please send formdata subjectid." unless params[:subjectid]
+  halt 400, "Invalid subjectid." unless OpenTox::Authorization.is_token_valid(params[:subjectid])
   if OpenTox::Authorization.logout
     return "Successfully logged out. \n".to_json
   else
@@ -39,10 +39,10 @@ module OpenTox
           RestClientWrapper.refresh = res["refresh_token"]
           return true
         else
-          bad_request_error "Authentication failed #{res.inspect}"
+          halt 400, "Authentication failed #{res.inspect}"
         end
       rescue
-        bad_request_error "Authentication failed #{res.inspect}"
+        halt 400, "Authentication failed #{res.inspect}"
       end
     end
 

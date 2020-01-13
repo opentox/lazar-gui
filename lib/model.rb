@@ -1,7 +1,7 @@
 # Get a list of all prediction models
 # @param [Header] Accept one of text/uri-list,
 # @return [text/uri-list] list of all prediction models
-get "/model/?" do
+get "/api/model/?" do
   models = Model::Validation.all
   case @accept
   when "text/uri-list"
@@ -17,14 +17,14 @@ get "/model/?" do
   end
 end
 
-get "/model/:id/?" do
+get "/api/model/:id/?" do
   model = Model::Validation.find params[:id]
   not_found_error "Model with id: #{params[:id]} not found." unless model
   model["training_dataset"] = model.model.training_dataset.id.to_s
   return model.to_json
 end
 
-get "/model/:id/consensus/?" do
+get "/api/model/:id/consensus/?" do
   model = Model::Validation.find params[:id]
   not_found_error "Model with id: #{params[:id]} not found." unless model
   cvs = model.crossvalidations
@@ -41,7 +41,7 @@ get "/model/:id/consensus/?" do
   return out.to_json
 end
 
-post "/model/:id/?" do
+post "/api/model/:id/?" do
   if request.content_type == "application/x-www-form-urlencoded"
     identifier = params[:identifier].strip.gsub(/\A"|"\Z/,'')
     compound = Compound.from_smiles identifier
