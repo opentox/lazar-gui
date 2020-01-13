@@ -50,7 +50,7 @@ before do
   "swagger",
   "validation"]
   if request.path == "/" || $paths.include?(request.path.split("/")[1])
-    @accept = request.env['HTTP_ACCEPT'].split(",").first
+    @accept = request.env['HTTP_ACCEPT'] ? request.env['HTTP_ACCEPT'].split(",").first : "application/json"
     response['Content-Type'] = @accept
     auths = ["compound","dataset","endpoint","feature","model","report","substance","validation"]
     if auths.include?(request.path.split("/")[1])
