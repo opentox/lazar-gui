@@ -1,4 +1,4 @@
-ENV["BATCH_MODE"] = "false"
+ENV["BATCH_MODE"] = "true"
 ENV["LAZAR_ENV"] = "production"
 require "lazar"
 require "qsar-report"
